@@ -30,7 +30,7 @@ public class DeveloperApiRepository {
     @PutMapping("/itemType")
     public ItemType updateItemType(@RequestBody ItemType itemType){
         Optional<ItemType> tmp = itemTypeRepository.findById(itemType.getId());
-        if(tmp.isEmpty()) {
+        if(!tmp.isPresent()) {
             return null;
         }
         else {
@@ -41,7 +41,7 @@ public class DeveloperApiRepository {
     @DeleteMapping("/itemType/{id}")
     public ItemType deleteItemType(@PathVariable int id) {
         Optional<ItemType> deletedItem = itemTypeRepository.findById(id);
-        if(deletedItem.isEmpty()) {
+        if(!deletedItem.isPresent()) {
             return null;
         }
         else {
@@ -63,7 +63,7 @@ public class DeveloperApiRepository {
     @PutMapping("/item")
     public Item updateItem(@RequestBody Item item){
         Optional<Item> tmp = itemRepository.findById(item.getId());
-        if(tmp.isEmpty()) {
+        if(!tmp.isPresent()) {
             return null;
         }
         else {
@@ -74,7 +74,7 @@ public class DeveloperApiRepository {
     @DeleteMapping("/item/{id}")
     public Item deleteItem(@PathVariable int id) {
         Optional<Item> deletedItem = itemRepository.findById(id);
-        if(deletedItem.isEmpty()) {
+        if(!deletedItem.isPresent()) {
             return null;
         }
         else {
@@ -96,7 +96,7 @@ public class DeveloperApiRepository {
     @PutMapping("/history")
     public History updateHistory(@RequestBody History history){
         Optional<History> tmp = historyRepository.findById(history.getId());
-        if(tmp.isEmpty()) {
+        if(!tmp.isPresent()) {
             return null;
         }
         else {
@@ -107,7 +107,7 @@ public class DeveloperApiRepository {
     @DeleteMapping("/history/{id}")
     public History deleteHistory(@PathVariable int id) {
         Optional<History> deletedHistory = historyRepository.findById(id);
-        if(deletedHistory.isEmpty()) {
+        if(!deletedHistory.isPresent()) {
             return null;
         }
         else {

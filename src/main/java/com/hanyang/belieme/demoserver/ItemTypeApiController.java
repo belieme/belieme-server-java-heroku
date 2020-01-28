@@ -35,7 +35,7 @@ public class ItemTypeApiController {
     @PutMapping("/")
     public String updateItem(@RequestBody ItemType item){
         Optional<ItemType> itemBeforeUpdate = itemTypeRepository.findById(item.getId());
-        if(!itemBeforeUpdate.isEmpty()) {
+        if(itemBeforeUpdate.isPresent()) {
             ItemType tmp = itemBeforeUpdate.get();
             tmp.setName(item.getName());
             tmp.setEmoji(item.getEmoji());

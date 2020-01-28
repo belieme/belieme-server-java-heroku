@@ -77,7 +77,7 @@ public class HistoryApiController {
     @PutMapping("/")
     public String updateItem(@RequestBody History item){
         Optional<History> itemBeforeUpdate = historyRepository.findById(item.getId());
-        if(!itemBeforeUpdate.isEmpty()) {
+        if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
             tmp.setRequesterName(item.getRequesterName());
             if(tmp.getStatus().equals("REQUESTED")) {

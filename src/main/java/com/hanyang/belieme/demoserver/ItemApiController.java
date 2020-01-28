@@ -42,7 +42,7 @@ public class ItemApiController {
         item.setStatus("USABLE");
         item.setLastHistoryId(-1);
 
-        if(!type.isEmpty()) {
+        if(type.isPresent()) {
             ItemType newType = type.get();
             newType.setAmount(newType.getAmount() +  1);
             newType.setCount(newType.getCount() + 1);
@@ -67,7 +67,7 @@ public class ItemApiController {
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable int id) {
         Optional<Item> deletedItem = itemRepository.findById(id);
-        if(!deletedItem.isEmpty()) {
+        if(deletedItem.isPresent()) {
             ItemType type = itemTypeRepository.findById(deletedItem.get().getTypeId()).get();
             if(type != null) {
                 type.setAmount(type.getAmount() - 1);
