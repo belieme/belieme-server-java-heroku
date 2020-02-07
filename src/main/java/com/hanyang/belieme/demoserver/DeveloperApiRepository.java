@@ -17,6 +17,14 @@ public class DeveloperApiRepository {
     @Autowired
     private ItemTypeRepository itemTypeRepository;
 
+    @GetMapping("/")
+    public String getInfo() {
+        String result = "${spring.datasource.driver-class-name}" +"\n" +
+                "${spring.datasource.url}" + "\n" +
+                "${spring.datasource.sql-script-encoding}";
+        return result;
+    }
+
     @GetMapping("/itemType")
     public Iterable<ItemType> getItemTypes() {
         return itemTypeRepository.findAll();
