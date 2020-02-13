@@ -1,13 +1,8 @@
 package com.hanyang.belieme.demoserver;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.io.UnsupportedEncodingException;
 
-@Entity
 public class ItemType {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String name;
     private String emoji;
@@ -18,6 +13,14 @@ public class ItemType {
     }
 
     public ItemType(String name, String emoji, int count, int amount) {
+        this.name = name;
+        this.emoji = emoji;
+        this.count = count;
+        this.amount = amount;
+    }
+
+    public ItemType(int id, String name, String emoji, int count, int amount) {
+        this.id = id;
         this.name = name;
         this.emoji = emoji;
         this.count = count;
@@ -58,5 +61,23 @@ public class ItemType {
 
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public ItemTypeDB toItemTypeDB() {
+        byte arr[];
+        try {
+            arr = emoji.getBytes("UTF-8");
+            return new ItemTypeDB(id, name, getIntFromByteArray(arr), count, amount);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    int getIntFromByteArray(byte[] bytes) {
+        return ((bytes[0] & 0xFF) << 24) |
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8 ) |
+                ((bytes[3] & 0xFF) << 0 );
     }
 }

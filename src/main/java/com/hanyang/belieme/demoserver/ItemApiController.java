@@ -30,7 +30,7 @@ public class ItemApiController {
     public Item createItem(@RequestBody Item item) {
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
 
-        Optional<ItemType> type = itemTypeRepository.findById(item.getTypeId());
+        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.getTypeId());
 
         int max = 0;
         for(int i = 0; i < items.size(); i++) {
@@ -43,7 +43,7 @@ public class ItemApiController {
         item.setLastHistoryId(-1);
 
         if(type.isPresent()) {
-            ItemType newType = type.get();
+            ItemTypeDB newType = type.get();
             newType.setAmount(newType.getAmount() +  1);
             newType.setCount(newType.getCount() + 1);
             itemTypeRepository.save(newType);
@@ -68,7 +68,7 @@ public class ItemApiController {
     public void deleteItem(@PathVariable int id) {
         Optional<Item> deletedItem = itemRepository.findById(id);
         if(deletedItem.isPresent()) {
-            ItemType type = itemTypeRepository.findById(deletedItem.get().getTypeId()).get();
+            ItemTypeDB type = itemTypeRepository.findById(deletedItem.get().getTypeId()).get();
             if(type != null) {
                 type.setAmount(type.getAmount() - 1);
                 if(deletedItem.get().getStatus().equals("USABLE")) {

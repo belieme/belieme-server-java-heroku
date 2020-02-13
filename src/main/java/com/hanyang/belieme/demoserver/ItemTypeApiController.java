@@ -3,6 +3,8 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,29 +18,42 @@ public class ItemTypeApiController {
     private ItemRepository itemRepository;
 
     @GetMapping("/")
-    public Iterable<ItemType> getItems() {
-        return itemTypeRepository.findAll();
+    public ArrayList<ItemType> getItems() {
+        Iterable<ItemTypeDB> tmpItemTypes = itemTypeRepository.findAll();
+        ArrayList<ItemType> result = new ArrayList<ItemType>();
+        for (Iterator<ItemTypeDB> it = tmpItemTypes.iterator(); it.hasNext(); ) {
+            ItemTypeDB tmpItemType = it.next();
+            result.add(tmpItemType.toItemType());
+        }
+        return result;
+
     }
 
     @GetMapping("/{id}")
     public Optional<ItemType> getItem(@PathVariable int id) {
-        return itemTypeRepository.findById(id);
+        Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
+        if(tmpItemType.isPresent()) {
+            return Optional.of(tmpItemType.get().toItemType());
+        }
+        return Optional.empty();
     }
 
     @PostMapping("/")
     public ItemType createItem(@RequestBody ItemType item) {
         item.setCount(0);
         item.setAmount(0);
-        return itemTypeRepository.save(item);
+        ItemTypeDB tmpItemType = itemTypeRepository.save(item.toItemTypeDB());
+        return tmpItemType.toItemType();
     }
 
     @PutMapping("/")
     public String updateItem(@RequestBody ItemType item){
-        Optional<ItemType> itemBeforeUpdate = itemTypeRepository.findById(item.getId());
+        Optional<ItemTypeDB> itemBeforeUpdate = itemTypeRepository.findById(item.getId());
         if(itemBeforeUpdate.isPresent()) {
-            ItemType tmp = itemBeforeUpdate.get();
-            tmp.setName(item.getName());
-            tmp.setEmoji(item.getEmoji());
+            ItemTypeDB beforeUpdate = itemBeforeUpdate.get();
+            ItemTypeDB tmp = item.toItemTypeDB();
+            beforeUpdate.setName(tmp.getName());
+            beforeUpdate.setEmojiByte(tmp.getEmojiByte());
             itemTypeRepository.save(tmp);
             return "true";
         }

@@ -52,7 +52,7 @@ public class HistoryApiController {
             }
         }
 
-        ItemType requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
+        ItemTypeDB requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
         if(requestedItem != null && requestedItemType != null) {
             List<History> histories = historyRepository.findByTypeIdAndItemNum(item.getTypeId(), requestedItem.getNum());
             for(int i = 0; i < histories.size(); i++) {
@@ -91,7 +91,7 @@ public class HistoryApiController {
                     tmp.setStatus(item.getStatus());
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemType requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
+                    ItemTypeDB requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
 
                     if (requestedItem != null && requestedItemType != null) {
                         requestedItem.setStatus("USABLE");
@@ -113,7 +113,7 @@ public class HistoryApiController {
                     tmp.setStatus(item.getStatus());
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemType requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
+                    ItemTypeDB requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
 
                     if (requestedItem != null && requestedItemType != null) {
                         requestedItem.setStatus("USABLE");
@@ -132,7 +132,7 @@ public class HistoryApiController {
                     tmp.setStatus(item.getStatus());
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemType requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
+                    ItemTypeDB requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
 
                     if (requestedItem != null && requestedItemType != null) {
                         requestedItem.setStatus("USABLE");
