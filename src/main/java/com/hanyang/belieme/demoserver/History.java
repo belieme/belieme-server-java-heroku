@@ -21,6 +21,8 @@ public class History {
     private long returnedTimeStamp;
     private String status;
 
+    private String typeName;
+
     public History() {
     }
 
@@ -119,5 +121,13 @@ public class History {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 }

@@ -3,6 +3,8 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,17 +22,31 @@ public class HistoryApiController {
 
     @GetMapping("/")
     public Iterable<History> getItems() {
-        return historyRepository.findAll();
+        Iterable<History> list = historyRepository.findAll();
+        Iterator<History> iterator = list.iterator();
+        while(iterator.hasNext()) {
+            History history = iterator.next();
+            history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
+        }
+        return list;
     }
 
     @GetMapping("/{id}")
     public Optional<History> getItem(@PathVariable int id) {
-        return historyRepository.findById(id);
+        Optional<History> historyOptional = historyRepository.findById(id);
+        historyOptional.get().setTypeName(itemTypeRepository.findById(historyOptional.get().getTypeId()).get().getName());
+        return historyOptional;
     }
     
     @GetMapping("/byRequesterId/{requesterId}")
     public Iterable<History> getItemsByRequesterId(@PathVariable int requesterId) {
-        return historyRepository.findByRequesterId(requesterId);
+        Iterable<History> list = historyRepository.findByRequesterId(requesterId);
+        Iterator<History> iterator = list.iterator();
+        while(iterator.hasNext()) {
+            History history = iterator.next();
+            history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
+        }
+        return list;
     }
 
     @PostMapping("/")
@@ -41,6 +57,7 @@ public class HistoryApiController {
         item.setResponseTimeStamp(0);
         item.setReturnedTimeStamp(0);
         item.setStatus("REQUESTED");
+        item.setTypeName(null);
         History result = null;
 
         Item requestedItem = null;
@@ -145,6 +162,7 @@ public class HistoryApiController {
                     }
                 }
             }
+            tmp.setTypeName(null);
             historyRepository.save(tmp);
             return "true";
         }
