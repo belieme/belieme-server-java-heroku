@@ -174,6 +174,11 @@ public class HistoryApiController {
         historyRepository.deleteById(id);
     }
 
+    @DeleteMapping("/")
+    public void deleteAll() {
+        historyRepository.deleteAll();
+    }
+
     private Item getRequestedItem(History item) {
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
         Item requestedItem = null;
