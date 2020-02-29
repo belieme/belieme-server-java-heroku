@@ -57,7 +57,7 @@ public class HistoryApiController {
         item.setResponseTimeStamp(0);
         item.setReturnedTimeStamp(0);
         item.setStatus("REQUESTED");
-        item.setTypeName(null);
+        item.setTypeName("");
         History result = null;
 
         Item requestedItem = null;
@@ -162,7 +162,7 @@ public class HistoryApiController {
                     }
                 }
             }
-            tmp.setTypeName(null);
+            tmp.setTypeName("");
             historyRepository.save(tmp);
             return "true";
         }
@@ -172,11 +172,6 @@ public class HistoryApiController {
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable int id) {
         historyRepository.deleteById(id);
-    }
-
-    @DeleteMapping("/")
-    public void deleteAll() {
-        historyRepository.deleteAll();
     }
 
     private Item getRequestedItem(History item) {
