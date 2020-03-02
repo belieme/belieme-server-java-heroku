@@ -75,9 +75,20 @@ public class ItemType {
     }
 
     int getIntFromByteArray(byte[] bytes) {
-        return ((bytes[0] & 0xFF) << 24) |
-                ((bytes[1] & 0xFF) << 16) |
-                ((bytes[2] & 0xFF) << 8 ) |
-                ((bytes[3] & 0xFF) << 0 );
+        if(bytes.length >= 4) {
+            return ((bytes[0] & 0xFF) << 24) |
+                    ((bytes[1] & 0xFF) << 16) |
+                    ((bytes[2] & 0xFF) << 8 ) |
+                    ((bytes[3] & 0xFF) << 0 );
+        }
+        else {
+            int result = 0;
+            int shiftLength = 24;
+            for(int i = 0; i < bytes.length; i++) {
+                result |= ((bytes[i] & 0xFF) << shiftLength);
+                shiftLength -= 8;
+            }
+            return result;
+        }
     }
 }

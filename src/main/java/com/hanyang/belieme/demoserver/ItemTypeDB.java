@@ -75,10 +75,22 @@ public class ItemTypeDB {
     }
 
     byte[] getByteArrayFromInt(int value) {
-        return new byte[] {
-                (byte)(value >> 24),
-                (byte)(value >> 16),
-                (byte)(value >> 8),
-                (byte)value };
+        int byteLength = 4;
+        int shiftLength = 24;
+        for(int i = 0; i < 4; i++) {
+            if(((byte)(value >> shiftLength)) == 0) {
+                byteLength = i;
+                break;
+            }
+            shiftLength -= 8;
+        }
+
+        byte[] result = new byte[byteLength];
+        shiftLength = 24;
+        for(int i = 0; i < byteLength; i++) {
+            result[i] = (byte)(value >> shiftLength);
+            shiftLength -= 8;
+        }
+        return result;
     }
 }
