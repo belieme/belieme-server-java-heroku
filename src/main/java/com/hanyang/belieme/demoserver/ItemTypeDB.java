@@ -1,9 +1,6 @@
 package com.hanyang.belieme.demoserver;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 
 @Entity
@@ -12,25 +9,19 @@ public class ItemTypeDB {
     private int id;
     private String name;
     private int emojiByte;
-    private int count;
-    private int amount;
 
     public ItemTypeDB() {
     }
 
-    public ItemTypeDB(int id, String name, int emojiByte, int count, int amount) {
+    public ItemTypeDB(int id, String name, int emojiByte) {
         this.id = id;
         this.name = name;
         this.emojiByte = emojiByte;
-        this.count = count;
-        this.amount = amount;
     }
 
-    public ItemTypeDB(String name, int emojiByte, int count, int amount) {
+    public ItemTypeDB(String name, int emojiByte) {
         this.name = name;
         this.emojiByte = emojiByte;
-        this.count = count;
-        this.amount = amount;
     }
 
     public int getId() {
@@ -53,28 +44,13 @@ public class ItemTypeDB {
         this.emojiByte = emojiByte;
     }
 
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
 
     public ItemType toItemType() {
         byte[] arr = getByteArrayFromInt(emojiByte);
-        return new ItemType(id, name, new String(arr, StandardCharsets.UTF_8), count, amount);
+        return new ItemType(id, name, new String(arr, StandardCharsets.UTF_8), 0, 0);
     }
 
-    byte[] getByteArrayFromInt(int value) {
+    public byte[] getByteArrayFromInt(int value) {
         int byteLength = 4;
         int shiftLength = 24;
         for(int i = 0; i < 4; i++) {

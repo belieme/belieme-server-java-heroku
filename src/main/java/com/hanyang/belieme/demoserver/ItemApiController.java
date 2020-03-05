@@ -3,6 +3,7 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,14 +16,29 @@ public class ItemApiController {
     @Autowired
     private ItemTypeRepository itemTypeRepository;
 
+    @Autowired
+    private HistoryRepository historyRepository;
+
     @GetMapping("/")
     public Iterable<Item> getItems() {
-        return itemRepository.findAll();
+        Iterable<Item> items = itemRepository.findAll();
+        Iterator<Item> iterator = items.iterator();
+        while(iterator.hasNext()) {
+            Item item = iterator.next();
+            addInfo(item);
+        }
+        return items;
     }
 
     @GetMapping("/byTypeId/{typeId}")
     public Iterable<Item> getItemsByTypeName(@PathVariable int typeId) {
-        return itemRepository.findByTypeId(typeId);
+        Iterable<Item> items = itemRepository.findByTypeId(typeId);
+        Iterator<Item> iterator = items.iterator();
+        while(iterator.hasNext()) {
+            Item item = iterator.next();
+            addInfo(item);
+        }
+        return items;
     }
 
 
@@ -39,15 +55,12 @@ public class ItemApiController {
             }
         }
         item.setNum(max+1);
-        item.setStatus("USABLE");
         item.setLastHistoryId(-1);
 
         if(type.isPresent()) {
-            ItemTypeDB newType = type.get();
-            newType.setAmount(newType.getAmount() +  1);
-            newType.setCount(newType.getCount() + 1);
-            itemTypeRepository.save(newType);
-            return itemRepository.save(item);
+            Item result = itemRepository.save(item);
+            addInfo(result);
+            return result;
         }
         return null;
     }
@@ -66,17 +79,32 @@ public class ItemApiController {
 
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable int id) {
-        Optional<Item> deletedItem = itemRepository.findById(id);
-        if(deletedItem.isPresent()) {
-            ItemTypeDB type = itemTypeRepository.findById(deletedItem.get().getTypeId()).get();
-            if(type != null) {
-                type.setAmount(type.getAmount() - 1);
-                if(deletedItem.get().getStatus().equals("USABLE")) {
-                    type.setCount(type.getCount() - 1);
-                }
-                itemTypeRepository.save(type);
+        itemRepository.deleteById(id);
+    }
+
+    private void addInfo(Item item) {
+        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
+        if(lastHistory.isPresent()) {
+            String lastHistoryStatus = lastHistory.get().getStatus();
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
+                item.usableStatus();
+            }
+            else {
+                item.unusableStatus();
             }
         }
-        itemRepository.deleteById(id);
+        else {
+            item.usableStatus();
+        }
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
+
+        if(itemType.isPresent()) {
+            item.setTypeName(itemType.get().getName());
+            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
+        }
+        else {
+            item.setTypeName("");
+            item.setTypeEmoji("");
+        }
     }
 }

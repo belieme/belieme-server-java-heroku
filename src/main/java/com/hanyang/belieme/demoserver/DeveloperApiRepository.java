@@ -123,4 +123,12 @@ public class DeveloperApiRepository {
             return deletedHistory.get();
         }
     }
+
+    @DeleteMapping("/deleteAll")
+    public String deleteAll() {
+        historyRepository.deleteAll();
+        itemRepository.deleteAll();
+        itemTypeRepository.deleteAll();
+        return "OK";
+    }
 }

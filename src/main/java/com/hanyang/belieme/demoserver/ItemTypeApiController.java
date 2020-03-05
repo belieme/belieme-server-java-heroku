@@ -17,6 +17,9 @@ public class ItemTypeApiController {
     @Autowired
     private ItemRepository itemRepository;
 
+    @Autowired
+    private HistoryRepository historyRepository;
+
     @GetMapping("/")
     public ArrayList<ItemType> getItems() {
         Iterable<ItemTypeDB> tmpItemTypes = itemTypeRepository.findAll();
@@ -24,6 +27,20 @@ public class ItemTypeApiController {
         for (Iterator<ItemTypeDB> it = tmpItemTypes.iterator(); it.hasNext(); ) {
             ItemTypeDB tmpItemType = it.next();
             result.add(tmpItemType.toItemType());
+        }
+        for (int i = 0; i < result.size(); i++) {
+            ItemType itemType = result.get(i);
+            itemType.resetCount();
+            itemType.resetAmount();
+            List<Item> itemList = itemRepository.findByTypeId(itemType.getId());
+            for(int j = 0; j < itemList.size(); j++) {
+                Item item = itemList.get(j);
+                addInfo(item);
+                if(item.getStatus().equals("USABLE")) {
+                    itemType.increaseCount();
+                }
+                itemType.increaseAmount();
+            }
         }
         return result;
 
@@ -33,15 +50,29 @@ public class ItemTypeApiController {
     public Optional<ItemType> getItem(@PathVariable int id) {
         Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
         if(tmpItemType.isPresent()) {
-            return Optional.of(tmpItemType.get().toItemType());
+            ItemType itemType = tmpItemType.get().toItemType();
+
+            itemType.resetCount();
+            itemType.resetAmount();
+            List<Item> itemList = itemRepository.findByTypeId(itemType.getId());
+            for(int i = 0; i < itemList.size(); i++) {
+                Item item = itemList.get(i);
+                addInfo(item);
+                if(item.getStatus().equals("USABLE")) {
+                    itemType.increaseCount();
+                }
+                itemType.increaseAmount();
+            }
+
+            return Optional.of(itemType);
         }
         return Optional.empty();
     }
 
     @PostMapping("/")
     public ItemType createItem(@RequestBody ItemType item) {
-        item.setCount(0);
-        item.setAmount(0);
+        item.resetCount();
+        item.resetAmount();
         ItemTypeDB tmpItemType = itemTypeRepository.save(item.toItemTypeDB());
         return tmpItemType.toItemType();
     }
@@ -67,6 +98,32 @@ public class ItemTypeApiController {
         List<Item> itemList = itemRepository.findByTypeId(id);
         for(int i = 0; i < itemList.size(); i++) {
             itemRepository.deleteById(itemList.get(i).getId());
+        }
+    }
+
+    private void addInfo(Item item) {
+        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
+        if(lastHistory.isPresent()) {
+            String lastHistoryStatus = lastHistory.get().getStatus();
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
+                item.usableStatus();
+            }
+            else {
+                item.unusableStatus();
+            }
+        }
+        else {
+            item.usableStatus();
+        }
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
+
+        if(itemType.isPresent()) {
+            item.setTypeName(itemType.get().getName());
+            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
+        }
+        else {
+            item.setTypeName("");
+            item.setTypeEmoji("");
         }
     }
 }

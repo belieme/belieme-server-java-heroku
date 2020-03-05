@@ -1,11 +1,14 @@
 package com.hanyang.belieme.demoserver;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Optional;
 
 public class ItemType {
     private int id;
     private String name;
     private String emoji;
+
     private int count;
     private int amount;
 
@@ -51,23 +54,31 @@ public class ItemType {
         return count;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void resetCount() {
+        this.count = 0;
+    }
+
+    public void increaseCount() {
+        this.count++;
     }
 
     public int getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void resetAmount() {
+        this.amount = 0;
+    }
+
+    public void increaseAmount() {
+        this.amount++;
     }
 
     public ItemTypeDB toItemTypeDB() {
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ItemTypeDB(id, name, getIntFromByteArray(arr), count, amount);
+            return new ItemTypeDB(id, name, getIntFromByteArray(arr));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

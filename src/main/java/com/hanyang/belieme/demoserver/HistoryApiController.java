@@ -27,6 +27,7 @@ public class HistoryApiController {
         while(iterator.hasNext()) {
             History history = iterator.next();
             history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
+            history.setTypeEmoji(itemTypeRepository.findById(history.getTypeId()).get().toItemType().getEmoji());
         }
         return list;
     }
@@ -35,6 +36,7 @@ public class HistoryApiController {
     public Optional<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
         historyOptional.get().setTypeName(itemTypeRepository.findById(historyOptional.get().getTypeId()).get().getName());
+        historyOptional.get().setTypeEmoji(itemTypeRepository.findById(historyOptional.get().getTypeId()).get().toItemType().getEmoji());
         return historyOptional;
     }
     
@@ -45,6 +47,7 @@ public class HistoryApiController {
         while(iterator.hasNext()) {
             History history = iterator.next();
             history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
+            history.setTypeEmoji(itemTypeRepository.findById(history.getTypeId()).get().toItemType().getEmoji());
         }
         return list;
     }
@@ -53,24 +56,25 @@ public class HistoryApiController {
     public History createItem(@RequestBody History item) {
         item.setManagerId(0);
         item.setManagerName("");
-        item.setRequestTimeStamp(System.currentTimeMillis() / 1000);
-        item.setResponseTimeStamp(0);
-        item.setReturnedTimeStamp(0);
-        item.setStatus("REQUESTED");
-        item.setTypeName("");
+        item.setRequestTimeStampNow();
+        item.setResponseTimeStampZero();
+        item.setReturnedTimeStampZero();
+        item.setCanceledTimeStampZero();
+        item.setTypeName(itemTypeRepository.findById(item.getTypeId()).get().getName());
+        item.setTypeEmoji(itemTypeRepository.findById(item.getTypeId()).get().toItemType().getEmoji());
         History result = null;
 
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
         for(int i = 0; i < items.size(); i++) {
+            addInfo(items.get(i));
             if (items.get(i).getStatus().equals("USABLE")) {
                 requestedItem = items.get(i);
                 break;
             }
         }
 
-        ItemTypeDB requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
-        if(requestedItem != null && requestedItemType != null) {
+        if(requestedItem != null) {
             List<History> histories = historyRepository.findByTypeIdAndItemNum(item.getTypeId(), requestedItem.getNum());
             for(int i = 0; i < histories.size(); i++) {
                 switch (histories.get(i).getStatus()) {
@@ -83,10 +87,7 @@ public class HistoryApiController {
             item.setItemNum(requestedItem.getNum());
             result = historyRepository.save(item);
             requestedItem.setLastHistoryId(result.getId());
-            requestedItem.setStatus("UNUSABLE");
             itemRepository.save(requestedItem);
-            requestedItemType.setCount(requestedItemType.getCount() - 1);
-            itemTypeRepository.save(requestedItemType);
         }
         return result;
     }
@@ -101,20 +102,14 @@ public class HistoryApiController {
                 if (item.getStatus().equals("USING")) {
                     tmp.setManagerId(item.getManagerId());
                     tmp.setManagerName(item.getManagerName());
-                    tmp.setResponseTimeStamp(System.currentTimeMillis() / 1000);
-                    tmp.setStatus(item.getStatus());
+                    tmp.setResponseTimeStampNow();
                 } else if (item.getStatus().equals("EXPIRED")) {
-                    tmp.setResponseTimeStamp(System.currentTimeMillis() / 1000);
-                    tmp.setStatus(item.getStatus());
+                    tmp.setResponseTimeStampNow();
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemTypeDB requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
 
-                    if (requestedItem != null && requestedItemType != null) {
-                        requestedItem.setStatus("USABLE");
+                    if (requestedItem != null) {
                         itemRepository.save(requestedItem);
-                        requestedItemType.setCount(requestedItemType.getCount() + 1);
-                        itemTypeRepository.save(requestedItemType);
                     }
                     else {
                         return "false";
@@ -123,20 +118,14 @@ public class HistoryApiController {
             }
             else if(tmp.getStatus().equals("USING")) {
                 if(item.getStatus().equals("DELAYED")) {
-                    tmp.setStatus(item.getStatus());
                 }
                 else if(item.getStatus().equals("RETURNED")) {
-                    tmp.setReturnedTimeStamp(System.currentTimeMillis() / 1000);
-                    tmp.setStatus(item.getStatus());
+                    tmp.setReturnedTimeStampNow();
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemTypeDB requestedItemType = itemTypeRepository.findById(tmp.getTypeId()).get();
 
-                    if (requestedItem != null && requestedItemType != null) {
-                        requestedItem.setStatus("USABLE");
+                    if (requestedItem != null) {
                         itemRepository.save(requestedItem);
-                        requestedItemType.setCount(requestedItemType.getCount() + 1);
-                        itemTypeRepository.save(requestedItemType);
                     }
                     else {
                         return "false";
@@ -145,17 +134,12 @@ public class HistoryApiController {
             }
             else if(tmp.getStatus().equals("DELAYED")) {
                 if(item.getStatus().equals("RETURNED")) {
-                    tmp.setReturnedTimeStamp(System.currentTimeMillis() / 1000);
-                    tmp.setStatus(item.getStatus());
+                    tmp.setReturnedTimeStampNow();
 
                     Item requestedItem = getRequestedItem(tmp);
-                    ItemTypeDB requestedItemType = itemTypeRepository.findById(item.getTypeId()).get();
 
-                    if (requestedItem != null && requestedItemType != null) {
-                        requestedItem.setStatus("USABLE");
+                    if (requestedItem != null) {
                         itemRepository.save(requestedItem);
-                        requestedItemType.setCount(requestedItemType.getCount() + 1);
-                        itemTypeRepository.save(requestedItemType);
                     }
                     else {
                         return "false";
@@ -185,5 +169,31 @@ public class HistoryApiController {
             }
         }
         return requestedItem;
+    }
+
+    private void addInfo(Item item) {
+        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
+        if(lastHistory.isPresent()) {
+            String lastHistoryStatus = lastHistory.get().getStatus();
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
+                item.usableStatus();
+            }
+            else {
+                item.unusableStatus();
+            }
+        }
+        else {
+            item.usableStatus();
+        }
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
+
+        if(itemType.isPresent()) {
+            item.setTypeName(itemType.get().getName());
+            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
+        }
+        else {
+            item.setTypeName("");
+            item.setTypeEmoji("");
+        }
     }
 }
