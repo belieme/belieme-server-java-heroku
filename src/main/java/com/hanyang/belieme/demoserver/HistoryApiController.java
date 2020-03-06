@@ -99,6 +99,7 @@ public class HistoryApiController {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("REQUESTED")) {
                 tmp.setCanceledTimeStampNow();
+                historyRepository.save(tmp);
                 return "true";
             }
         }
@@ -114,6 +115,7 @@ public class HistoryApiController {
                 tmp.setResponseTimeStampNow();
                 tmp.setManagerId(history.getManagerId());
                 tmp.setManagerName(history.getManagerName());
+                historyRepository.save(tmp);
                 return "true";
             }
         }
@@ -127,6 +129,7 @@ public class HistoryApiController {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
                 tmp.setReturnedTimeStampNow();
+                historyRepository.save(tmp);
                 return "true";
             }
         }
