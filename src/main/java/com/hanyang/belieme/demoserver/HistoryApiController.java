@@ -92,83 +92,45 @@ public class HistoryApiController {
         return result;
     }
 
-    @PutMapping("/")
-    public String updateItem(@RequestBody History item){
-        Optional<History> itemBeforeUpdate = historyRepository.findById(item.getId());
+    @PutMapping("/cancel/{id}")
+    public String cancelItem(@PathVariable int id) {
+        Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
-            tmp.setRequesterName(item.getRequesterName());
             if(tmp.getStatus().equals("REQUESTED")) {
-                if (item.getStatus().equals("USING")) {
-                    tmp.setManagerId(item.getManagerId());
-                    tmp.setManagerName(item.getManagerName());
-                    tmp.setResponseTimeStampNow();
-                } else if (item.getStatus().equals("EXPIRED")) {
-                    tmp.setResponseTimeStampNow();
-
-                    Item requestedItem = getRequestedItem(tmp);
-
-                    if (requestedItem != null) {
-                        itemRepository.save(requestedItem);
-                    }
-                    else {
-                        return "false";
-                    }
-                }
+                tmp.setCanceledTimeStampNow();
+                return "true";
             }
-            else if(tmp.getStatus().equals("USING")) {
-                if(item.getStatus().equals("DELAYED")) {
-                }
-                else if(item.getStatus().equals("RETURNED")) {
-                    tmp.setReturnedTimeStampNow();
-
-                    Item requestedItem = getRequestedItem(tmp);
-
-                    if (requestedItem != null) {
-                        itemRepository.save(requestedItem);
-                    }
-                    else {
-                        return "false";
-                    }
-                }
-            }
-            else if(tmp.getStatus().equals("DELAYED")) {
-                if(item.getStatus().equals("RETURNED")) {
-                    tmp.setReturnedTimeStampNow();
-
-                    Item requestedItem = getRequestedItem(tmp);
-
-                    if (requestedItem != null) {
-                        itemRepository.save(requestedItem);
-                    }
-                    else {
-                        return "false";
-                    }
-                }
-            }
-            tmp.setTypeName("");
-            historyRepository.save(tmp);
-            return "true";
         }
         return "false";
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable int id) {
-        historyRepository.deleteById(id);
-    }
-
-    private Item getRequestedItem(History item) {
-        List<Item> items = itemRepository.findByTypeId(item.getTypeId());
-        Item requestedItem = null;
-
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getNum() == item.getItemNum()) {
-                requestedItem = items.get(i);
-                break;
+    @PutMapping("/response/{id}")
+    public String responseItem(@PathVariable int id, @RequestBody History history) {
+        Optional<History> itemBeforeUpdate = historyRepository.findById(id);
+        if(itemBeforeUpdate.isPresent()) {
+            History tmp = itemBeforeUpdate.get();
+            if(tmp.getStatus().equals("REQUESTED")) {
+                tmp.setResponseTimeStampNow();
+                tmp.setManagerId(history.getManagerId());
+                tmp.setManagerName(history.getManagerName());
+                return "true";
             }
         }
-        return requestedItem;
+        return "false";
+    }
+
+    @PutMapping("/return/{id}")
+    public String returnItem(@PathVariable int id) {
+        Optional<History> itemBeforeUpdate = historyRepository.findById(id);
+        if(itemBeforeUpdate.isPresent()) {
+            History tmp = itemBeforeUpdate.get();
+            if(tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
+                tmp.setReturnedTimeStampNow();
+                return "true";
+            }
+        }
+        return "false";
     }
 
     private void addInfo(Item item) {
