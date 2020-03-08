@@ -3,6 +3,7 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.Optional;
 
 @RestController
@@ -19,9 +20,8 @@ public class DeveloperApiRepository {
 
     @GetMapping("/")
     public String getInfo() {
-        String result = "${spring.datasource.driver-class-name}" +"\n" +
-                "${spring.datasource.url}" + "\n" +
-                "${spring.datasource.sql-script-encoding}";
+        String result = "timeStamp : " + System.currentTimeMillis()/1000 + "\n" +
+                "Date : " + (new Date(System.currentTimeMillis())) + "\n";
         return result;
     }
 

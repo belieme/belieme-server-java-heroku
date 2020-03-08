@@ -190,9 +190,9 @@ public class History {
         return requestTimeStamp + 60;
     }
 
-    public long dueTime() {
+    public long dueTime() { //TODO 바꿔야 함
         Calendar tmp = Calendar.getInstance();
-        tmp.setTime(new Date(responseTimeStamp));
+        tmp.setTime(new Date(responseTimeStamp*1000));
         tmp.add(Calendar.DATE, 7);
         if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
             tmp.add(Calendar.DATE, 1);
