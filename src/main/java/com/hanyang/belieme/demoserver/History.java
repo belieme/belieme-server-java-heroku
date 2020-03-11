@@ -187,25 +187,27 @@ public class History {
     }
 
     public long expiredTime() {
-        return requestTimeStamp + 60;
+        return requestTimeStamp + 15;
     }
 
     public long dueTime() { //TODO 바꿔야 함
-        Calendar tmp = Calendar.getInstance();
-        tmp.setTime(new Date(responseTimeStamp*1000));
-        tmp.add(Calendar.DATE, 7);
-        if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
-            tmp.add(Calendar.DATE, 1);
-        }
-        tmp.set(Calendar.HOUR_OF_DAY, 17);
-        tmp.set(Calendar.MINUTE, 59);
-        tmp.set(Calendar.SECOND, 59);
-        if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            tmp.add(Calendar.DATE, 2);
-        }
-        else if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            tmp.add(Calendar.DATE, 1);
-        }
-        return tmp.getTime().getTime()/1000;
+        return responseTimeStamp + 30;
+
+//        Calendar tmp = Calendar.getInstance();
+//        tmp.setTime(new Date(responseTimeStamp*1000));
+//        tmp.add(Calendar.DATE, 7);
+//        if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
+//            tmp.add(Calendar.DATE, 1);
+//        }
+//        tmp.set(Calendar.HOUR_OF_DAY, 17);
+//        tmp.set(Calendar.MINUTE, 59);
+//        tmp.set(Calendar.SECOND, 59);
+//        if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+//            tmp.add(Calendar.DATE, 2);
+//        }
+//        else if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+//            tmp.add(Calendar.DATE, 1);
+//        }
+//        return tmp.getTime().getTime()/1000;
     }
 }
