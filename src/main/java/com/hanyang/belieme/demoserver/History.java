@@ -19,7 +19,7 @@ public class History {
     private long requestTimeStamp;
     private long responseTimeStamp;
     private long returnTimeStamp;
-    private long canceledTimeStamp;
+    private long cancelTimeStamp;
 
 
     @Transient
@@ -80,8 +80,8 @@ public class History {
         return returnTimeStamp;
     }
 
-    public long getCanceledTimeStamp() {
-        return canceledTimeStamp;
+    public long getCancelTimeStamp() {
+        return cancelTimeStamp;
     }
 
     public String getTypeName() {
@@ -136,8 +136,8 @@ public class History {
         this.returnTimeStamp = 0;
     }
 
-    public void setCanceledTimeStampZero() {
-        this.canceledTimeStamp = 0;
+    public void setCancelTimeStampZero() {
+        this.cancelTimeStamp = 0;
     }
 
     public void setRequestTimeStampNow() {
@@ -152,8 +152,8 @@ public class History {
         this.returnTimeStamp = System.currentTimeMillis()/1000;
     }
 
-    public void setCanceledTimeStampNow() {
-        this.canceledTimeStamp = System.currentTimeMillis()/1000;
+    public void setCancelTimeStampNow() {
+        this.cancelTimeStamp = System.currentTimeMillis()/1000;
     }
 
     public String getStatus() {
@@ -161,7 +161,7 @@ public class History {
             if(returnTimeStamp != 0) {
                 return "RETURNED";
             }
-            else if(canceledTimeStamp != 0) {
+            else if(cancelTimeStamp != 0) {
                 return "EXPIRED";
             }
             else if(responseTimeStamp != 0) {

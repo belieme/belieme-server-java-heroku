@@ -59,7 +59,7 @@ public class HistoryApiController {
         item.setRequestTimeStampNow();
         item.setResponseTimeStampZero();
         item.setReturnTimeStampZero();
-        item.setCanceledTimeStampZero();
+        item.setCancelTimeStampZero();
 
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
@@ -88,7 +88,7 @@ public class HistoryApiController {
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("REQUESTED")) {
-                tmp.setCanceledTimeStampNow();
+                tmp.setCancelTimeStampNow();
                 historyRepository.save(tmp);
                 return "true";
             }
