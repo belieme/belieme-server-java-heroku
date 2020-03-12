@@ -47,7 +47,7 @@ public class ItemTypeDB {
 
     public ItemType toItemType() {
         byte[] arr = getByteArrayFromInt(emojiByte);
-        return new ItemType(id, name, new String(arr, StandardCharsets.UTF_8), 0, 0);
+        return new ItemType(id, name, new String(arr, StandardCharsets.UTF_8));
     }
 
     public byte[] getByteArrayFromInt(int value) {

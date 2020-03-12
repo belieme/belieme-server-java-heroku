@@ -3,7 +3,6 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +25,7 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
-            history.setTypeEmoji(itemTypeRepository.findById(history.getTypeId()).get().toItemType().getEmoji());
+            history.addInfo(itemTypeRepository);
         }
         return list;
     }
@@ -35,8 +33,9 @@ public class HistoryApiController {
     @GetMapping("/{id}")
     public Optional<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
-        historyOptional.get().setTypeName(itemTypeRepository.findById(historyOptional.get().getTypeId()).get().getName());
-        historyOptional.get().setTypeEmoji(itemTypeRepository.findById(historyOptional.get().getTypeId()).get().toItemType().getEmoji());
+        if(historyOptional.isPresent()) {
+            historyOptional.get().addInfo(itemTypeRepository);
+        }
         return historyOptional;
     }
     
@@ -46,46 +45,37 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.setTypeName(itemTypeRepository.findById(history.getTypeId()).get().getName());
-            history.setTypeEmoji(itemTypeRepository.findById(history.getTypeId()).get().toItemType().getEmoji());
+            history.addInfo(itemTypeRepository);
         }
         return list;
     }
 
     @PostMapping("/")
     public History createItem(@RequestBody History item) {
-        item.setManagerId(0);
-        item.setManagerName("");
+        item.setResponseManagerId(0);
+        item.setResponseManagerName("");
+        item.setReturnManagerId(0);
+        item.setReturnManagerName("");
         item.setRequestTimeStampNow();
         item.setResponseTimeStampZero();
-        item.setReturnedTimeStampZero();
+        item.setReturnTimeStampZero();
         item.setCanceledTimeStampZero();
-        item.setTypeName(itemTypeRepository.findById(item.getTypeId()).get().getName());
-        item.setTypeEmoji(itemTypeRepository.findById(item.getTypeId()).get().toItemType().getEmoji());
-        History result = null;
 
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
         for(int i = 0; i < items.size(); i++) {
-            addInfo(items.get(i));
+            items.get(i).addInfo(itemTypeRepository, historyRepository);
             if (items.get(i).getStatus().equals("USABLE")) {
                 requestedItem = items.get(i);
                 break;
             }
         }
 
+        History result = null;
         if(requestedItem != null) {
-            List<History> histories = historyRepository.findByTypeIdAndItemNum(item.getTypeId(), requestedItem.getNum());
-            for(int i = 0; i < histories.size(); i++) {
-                switch (histories.get(i).getStatus()) {
-                    case "REQUESTED" :
-                    case "USING" :
-                    case "DELAYED" :
-                        return null;
-                }
-            }
             item.setItemNum(requestedItem.getNum());
             result = historyRepository.save(item);
+            result.addInfo(itemTypeRepository);
             requestedItem.setLastHistoryId(result.getId());
             itemRepository.save(requestedItem);
         }
@@ -113,8 +103,8 @@ public class HistoryApiController {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("REQUESTED")) {
                 tmp.setResponseTimeStampNow();
-                tmp.setManagerId(history.getManagerId());
-                tmp.setManagerName(history.getManagerName());
+                tmp.setResponseManagerId(history.getResponseManagerId());
+                tmp.setResponseManagerName(history.getResponseManagerName());
                 historyRepository.save(tmp);
                 return "true";
             }
@@ -123,42 +113,18 @@ public class HistoryApiController {
     }
 
     @PutMapping("/return/{id}")
-    public String returnItem(@PathVariable int id) {
+    public String returnItem(@PathVariable int id, @RequestBody History history) {
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
-                tmp.setReturnedTimeStampNow();
+                tmp.setReturnTimeStampNow();
+                tmp.setReturnManagerId(history.getReturnManagerId());
+                tmp.setReturnManagerName(history.getReturnManagerName());
                 historyRepository.save(tmp);
                 return "true";
             }
         }
         return "false";
-    }
-
-    private void addInfo(Item item) {
-        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
-        if(lastHistory.isPresent()) {
-            String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
-                item.usableStatus();
-            }
-            else {
-                item.unusableStatus();
-            }
-        }
-        else {
-            item.usableStatus();
-        }
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
-
-        if(itemType.isPresent()) {
-            item.setTypeName(itemType.get().getName());
-            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
-        }
-        else {
-            item.setTypeName("");
-            item.setTypeEmoji("");
-        }
     }
 }

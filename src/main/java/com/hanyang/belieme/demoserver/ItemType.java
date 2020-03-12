@@ -2,32 +2,28 @@ package com.hanyang.belieme.demoserver;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 
 public class ItemType {
     private int id;
     private String name;
     private String emoji;
 
-    private int count;
-    private int amount;
+    int amount;
+    int count;
+    String status;
 
     public ItemType() {
     }
 
-    public ItemType(String name, String emoji, int count, int amount) {
+    public ItemType(String name, String emoji) {
         this.name = name;
         this.emoji = emoji;
-        this.count = count;
-        this.amount = amount;
     }
 
-    public ItemType(int id, String name, String emoji, int count, int amount) {
+    public ItemType(int id, String name, String emoji) {
         this.id = id;
         this.name = name;
         this.emoji = emoji;
-        this.count = count;
-        this.amount = amount;
     }
 
     public int getId() {
@@ -38,40 +34,56 @@ public class ItemType {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getEmoji() {
         return emoji;
-    }
-
-    public void setEmoji(String emoji) {
-        this.emoji = emoji;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void resetCount() {
-        this.count = 0;
-    }
-
-    public void increaseCount() {
-        this.count++;
     }
 
     public int getAmount() {
         return amount;
     }
 
-    public void resetAmount() {
-        this.amount = 0;
+    public int getCount() {
+        return count;
     }
 
-    public void increaseAmount() {
-        this.amount++;
+    public String getStatus() {
+        return status;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmoji(String emoji) {
+        this.emoji = emoji;
+    }
+
+    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
+        amount = 0;
+        count = 0;
+        List<Item> items = itemRepository.findByTypeId(id);
+        for(int i = 0; i < items.size(); i++) {
+            items.get(i).addInfo(itemTypeRepository, historyRepository);
+            if(items.get(i).getStatus().equals("UNUSABLE")) {
+                amount++;
+            }
+            else if(items.get(i).getStatus().equals("USABLE")) {
+                amount++;
+                count++;
+            }
+        }
+        if(amount == 0) {
+            status = "INACTIVE";
+        }
+        else if(count == 0) {
+            status = "UNUSABLE";
+        }
+        else if(amount >= count) {
+            status = "USABLE";
+        }
+        else {
+            status = "ERROR";
+        }
     }
 
     public ItemTypeDB toItemTypeDB() {

@@ -25,7 +25,7 @@ public class ItemApiController {
         Iterator<Item> iterator = items.iterator();
         while(iterator.hasNext()) {
             Item item = iterator.next();
-            addInfo(item);
+            item.addInfo(itemTypeRepository, historyRepository);
         }
         return items;
     }
@@ -36,7 +36,7 @@ public class ItemApiController {
         Iterator<Item> iterator = items.iterator();
         while(iterator.hasNext()) {
             Item item = iterator.next();
-            addInfo(item);
+            item.addInfo(itemTypeRepository, historyRepository);
         }
         return items;
     }
@@ -59,7 +59,7 @@ public class ItemApiController {
 
         if(type.isPresent()) {
             Item result = itemRepository.save(item);
-            addInfo(result);
+            result.addInfo(itemTypeRepository, historyRepository);
             return result;
         }
         return null;
@@ -77,34 +77,27 @@ public class ItemApiController {
 //        return "false";
 //    }
 
-    @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable int id) {
-        itemRepository.deleteById(id);
+    @PutMapping("/deactivate/{id}")
+    public String deactivateItem(@PathVariable int id) {
+        Optional<Item> itemOptional = itemRepository.findById(id);
+        if(itemOptional.isPresent()) {
+            Item item = itemOptional.get();
+            item.deactivate();
+            itemRepository.save(item);
+            return "true";
+        }
+        return "false";
     }
 
-    private void addInfo(Item item) {
-        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
-        if(lastHistory.isPresent()) {
-            String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
-                item.usableStatus();
-            }
-            else {
-                item.unusableStatus();
-            }
+    @PutMapping("/activate/{id}")
+    public String activateItem(@PathVariable int id) {
+        Optional<Item> itemOptional = itemRepository.findById(id);
+        if(itemOptional.isPresent()) {
+            Item item = itemOptional.get();
+            item.activate();
+            itemRepository.save(item);
+            return "true";
         }
-        else {
-            item.usableStatus();
-        }
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
-
-        if(itemType.isPresent()) {
-            item.setTypeName(itemType.get().getName());
-            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
-        }
-        else {
-            item.setTypeName("");
-            item.setTypeEmoji("");
-        }
+        return "false";
     }
 }

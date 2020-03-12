@@ -14,6 +14,8 @@ public class Item {
     private int num;
     private int lastHistoryId;
 
+    private boolean inactive;
+
     @Transient
     private String status;
 
@@ -26,10 +28,11 @@ public class Item {
     public Item() {
     }
 
-    public Item(int typeId, int num, int lastHistoryId) {
+    public Item(int typeId, int num) {
         this.typeId = typeId;
         this.num = num;
-        this.lastHistoryId = lastHistoryId;
+        this.lastHistoryId = -1;
+        this.inactive = false;
     }
 
     public int getId() {
@@ -60,6 +63,10 @@ public class Item {
         return typeEmoji;
     }
 
+    public boolean isInactive() {
+        return inactive;
+    }
+
     public void setTypeId(int typeId) {
         this.typeId = typeId;
     }
@@ -80,11 +87,41 @@ public class Item {
         this.typeEmoji = typeEmoji;
     }
 
-    public void usableStatus() {
-        status = "USABLE";
+    public void deactivate() {
+        inactive = true;
     }
 
-    public void unusableStatus() {
-        status = "UNUSABLE";
+    public void activate() {
+        inactive = false;
+    }
+
+    //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
+    public void addInfo(ItemTypeRepository itemTypeRepository, HistoryRepository historyRepository) {
+        Optional<History> lastHistory = historyRepository.findById(getLastHistoryId());
+        if(isInactive()) {
+           status = "INACTIVE";
+        }
+        else if(lastHistory.isPresent()) {
+            String lastHistoryStatus = lastHistory.get().getStatus();
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
+                status = "USABLE";
+            }
+            else {
+                status = "UNUSABLE";
+            }
+        }
+        else {
+            status = "USABLE";
+        }
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
+
+        if(itemType.isPresent()) {
+            setTypeName(itemType.get().getName());
+            setTypeEmoji(itemType.get().toItemType().getEmoji());
+        }
+        else {
+            setTypeName("");
+            setTypeEmoji("");
+        }
     }
 }

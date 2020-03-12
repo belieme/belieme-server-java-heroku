@@ -24,23 +24,11 @@ public class ItemTypeApiController {
     public ArrayList<ItemType> getItems() {
         Iterable<ItemTypeDB> tmpItemTypes = itemTypeRepository.findAll();
         ArrayList<ItemType> result = new ArrayList<ItemType>();
+        int i = 0;
         for (Iterator<ItemTypeDB> it = tmpItemTypes.iterator(); it.hasNext(); ) {
-            ItemTypeDB tmpItemType = it.next();
-            result.add(tmpItemType.toItemType());
-        }
-        for (int i = 0; i < result.size(); i++) {
-            ItemType itemType = result.get(i);
-            itemType.resetCount();
-            itemType.resetAmount();
-            List<Item> itemList = itemRepository.findByTypeId(itemType.getId());
-            for(int j = 0; j < itemList.size(); j++) {
-                Item item = itemList.get(j);
-                addInfo(item);
-                if(item.getStatus().equals("USABLE")) {
-                    itemType.increaseCount();
-                }
-                itemType.increaseAmount();
-            }
+            ItemType tmpItemType = it.next().toItemType();
+            tmpItemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
+            result.add(tmpItemType);
         }
         return result;
 
@@ -51,19 +39,7 @@ public class ItemTypeApiController {
         Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
         if(tmpItemType.isPresent()) {
             ItemType itemType = tmpItemType.get().toItemType();
-
-            itemType.resetCount();
-            itemType.resetAmount();
-            List<Item> itemList = itemRepository.findByTypeId(itemType.getId());
-            for(int i = 0; i < itemList.size(); i++) {
-                Item item = itemList.get(i);
-                addInfo(item);
-                if(item.getStatus().equals("USABLE")) {
-                    itemType.increaseCount();
-                }
-                itemType.increaseAmount();
-            }
-
+            itemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
             return Optional.of(itemType);
         }
         return Optional.empty();
@@ -71,10 +47,15 @@ public class ItemTypeApiController {
 
     @PostMapping("/")
     public ItemType createItem(@RequestBody ItemType item) {
-        item.resetCount();
-        item.resetAmount();
+        System.out.println(item.amount);
         ItemTypeDB tmpItemType = itemTypeRepository.save(item.toItemTypeDB());
-        return tmpItemType.toItemType();
+        for(int i = 0; i < item.getAmount(); i++) {
+            Item newItem = new Item(tmpItemType.getId(), i + 1);
+            itemRepository.save(newItem);
+        }
+        ItemType output = tmpItemType.toItemType();
+        output.addInfo(itemTypeRepository, itemRepository, historyRepository);
+        return output;
     }
 
     @PutMapping("/")
@@ -91,39 +72,12 @@ public class ItemTypeApiController {
         return "false";
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable int id) {
-        itemTypeRepository.deleteById(id);
-
+    @PutMapping("/deactivate/{id}")
+    public void deactivateItem(@PathVariable int id) {
         List<Item> itemList = itemRepository.findByTypeId(id);
         for(int i = 0; i < itemList.size(); i++) {
-            itemRepository.deleteById(itemList.get(i).getId());
-        }
-    }
-
-    private void addInfo(Item item) {
-        Optional<History> lastHistory = historyRepository.findById(item.getLastHistoryId());
-        if(lastHistory.isPresent()) {
-            String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
-                item.usableStatus();
-            }
-            else {
-                item.unusableStatus();
-            }
-        }
-        else {
-            item.usableStatus();
-        }
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(item.getTypeId());
-
-        if(itemType.isPresent()) {
-            item.setTypeName(itemType.get().getName());
-            item.setTypeEmoji(itemType.get().toItemType().getEmoji());
-        }
-        else {
-            item.setTypeName("");
-            item.setTypeEmoji("");
+            itemList.get(i).deactivate();
+            itemRepository.save(itemList.get(i));
         }
     }
 }

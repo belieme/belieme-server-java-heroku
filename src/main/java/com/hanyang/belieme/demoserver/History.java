@@ -1,8 +1,7 @@
 package com.hanyang.belieme.demoserver;
 
 import javax.persistence.*;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Optional;
 
 @Entity
 public class History {
@@ -13,12 +12,15 @@ public class History {
     private int itemNum;
     private int requesterId;
     private String requesterName;
-    private int managerId;
-    private String managerName;
+    private int responseManagerId;
+    private String responseManagerName;
+    private int returnManagerId;
+    private String returnManagerName;
     private long requestTimeStamp;
     private long responseTimeStamp;
-    private long returnedTimeStamp;
+    private long returnTimeStamp;
     private long canceledTimeStamp;
+
 
     @Transient
     private String typeName;
@@ -29,18 +31,6 @@ public class History {
     public History() {
     }
 
-    public History(int typeId, int itemNum, int requesterId, String requesterName, int managerId, String managerName, long requestTimeStamp, long responseTimeStamp, long returnedTimeStamp, long canceledTimeStamp) {
-        this.typeId = typeId;
-        this.itemNum = itemNum;
-        this.requesterId = requesterId;
-        this.requesterName = requesterName;
-        this.managerId = managerId;
-        this.managerName = managerName;
-        this.requestTimeStamp = requestTimeStamp;
-        this.responseTimeStamp = responseTimeStamp;
-        this.returnedTimeStamp = returnedTimeStamp;
-        this.canceledTimeStamp = canceledTimeStamp;
-    }
 
     public int getId() {
         return id;
@@ -62,12 +52,20 @@ public class History {
         return requesterName;
     }
 
-    public int getManagerId() {
-        return managerId;
+    public int getResponseManagerId() {
+        return responseManagerId;
     }
 
-    public String getManagerName() {
-        return managerName;
+    public String getResponseManagerName() {
+        return responseManagerName;
+    }
+
+    public int getReturnManagerId() {
+        return returnManagerId;
+    }
+
+    public String getReturnManagerName() {
+        return returnManagerName;
     }
 
     public long getRequestTimeStamp() {
@@ -78,8 +76,8 @@ public class History {
         return responseTimeStamp;
     }
 
-    public long getReturnedTimeStamp() {
-        return returnedTimeStamp;
+    public long getReturnTimeStamp() {
+        return returnTimeStamp;
     }
 
     public long getCanceledTimeStamp() {
@@ -110,12 +108,20 @@ public class History {
         this.requesterName = requesterName;
     }
 
-    public void setManagerId(int managerId) {
-        this.managerId = managerId;
+    public void setResponseManagerId(int responseManagerId) {
+        this.responseManagerId = responseManagerId;
     }
 
-    public void setManagerName(String managerName) {
-        this.managerName = managerName;
+    public void setResponseManagerName(String responseManagerName) {
+        this.responseManagerName = responseManagerName;
+    }
+
+    public void setReturnManagerId(int returnManagerId) {
+        this.returnManagerId = returnManagerId;
+    }
+
+    public void setReturnManagerName(String returnManagerName) {
+        this.returnManagerName = returnManagerName;
     }
 
     public void setRequestTimeStampZero() {
@@ -126,8 +132,8 @@ public class History {
         this.responseTimeStamp = 0;
     }
 
-    public void setReturnedTimeStampZero() {
-        this.returnedTimeStamp = 0;
+    public void setReturnTimeStampZero() {
+        this.returnTimeStamp = 0;
     }
 
     public void setCanceledTimeStampZero() {
@@ -142,25 +148,17 @@ public class History {
         this.responseTimeStamp = System.currentTimeMillis()/1000;
     }
 
-    public void setReturnedTimeStampNow() {
-        this.returnedTimeStamp = System.currentTimeMillis()/1000;
+    public void setReturnTimeStampNow() {
+        this.returnTimeStamp = System.currentTimeMillis()/1000;
     }
 
     public void setCanceledTimeStampNow() {
         this.canceledTimeStamp = System.currentTimeMillis()/1000;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public void setTypeEmoji(String typeEmoji) {
-        this.typeEmoji = typeEmoji;
-    }
-
     public String getStatus() {
         if(requestTimeStamp != 0) {
-            if(returnedTimeStamp != 0) {
+            if(returnTimeStamp != 0) {
                 return "RETURNED";
             }
             else if(canceledTimeStamp != 0) {
@@ -183,6 +181,14 @@ public class History {
         }
         else {
             return "ERROR";
+        }
+    }
+
+    public void addInfo(ItemTypeRepository itemTypeRepository) {
+        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
+        if(itemTypeDB.isPresent()) {
+            typeName = itemTypeRepository.findById(typeId).get().getName();
+            typeEmoji = itemTypeRepository.findById(typeId).get().toItemType().getEmoji();
         }
     }
 
