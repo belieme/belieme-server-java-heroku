@@ -14,6 +14,9 @@ public class Item {
     private int num;
     private int lastHistoryId;
 
+    @Transient
+    private History lastHistory;
+
     private boolean inactive;
 
     @Transient
@@ -63,6 +66,50 @@ public class Item {
         return typeEmoji;
     }
 
+    public int getRequesterId() {
+        return (lastHistory != null) ? lastHistory.getRequesterId() : -1;
+    }
+
+    public String getRequesterName() {
+        return (lastHistory != null) ? lastHistory.getRequesterName() : null;
+    }
+
+    public int getResponseManagerId() {
+        return (lastHistory != null) ? lastHistory.getResponseManagerId() : -1;
+    }
+
+    public String getResponseManagerName() {
+        return (lastHistory != null) ? lastHistory.getResponseManagerName() : null;
+    }
+
+    public int getReturnManagerId() {
+        return (lastHistory != null) ? lastHistory.getReturnManagerId() : -1;
+    }
+
+    public String getReturnManagerName() {
+        return (lastHistory != null) ? lastHistory.getReturnManagerName() : null;
+    }
+
+    public long getRequestTimeStamp() {
+        return (lastHistory != null) ? lastHistory.getRequestTimeStamp() : 0;
+    }
+
+    public long getResponseTimeStamp() {
+        return (lastHistory != null) ? lastHistory.getResponseTimeStamp() : 0;
+    }
+
+    public long getReturnTimeStamp() {
+        return (lastHistory != null) ? lastHistory.getReturnTimeStamp() : 0;
+    }
+
+    public long getCancelTimeStamp() {
+        return (lastHistory != null) ? lastHistory.getCancelTimeStamp() : 0;
+    }
+
+    public String getLastHistoryStatus() {
+        return (lastHistory != null) ? lastHistory.getStatus() : "ERROR";
+    }
+
     public boolean isInactive() {
         return inactive;
     }
@@ -109,6 +156,7 @@ public class Item {
             else {
                 status = "UNUSABLE";
             }
+            this.lastHistory = lastHistory.get();
         }
         else {
             status = "USABLE";

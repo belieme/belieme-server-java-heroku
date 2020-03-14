@@ -65,18 +65,6 @@ public class ItemApiController {
         return null;
     }
 
-//    @PutMapping("/")
-//    public String updateItem(@RequestBody Item item){
-//        Optional<Item> itemBeforeUpdate = itemRepository.findById(item.getId());
-//        if(!itemBeforeUpdate.isEmpty()) {
-//            Item tmp = itemBeforeUpdate.get();
-//            tmp.setLastHistoryId(item.getLastHistoryId());
-//            itemRepository.save(tmp);
-//            return "true";
-//        }
-//        return "false";
-//    }
-
     @PutMapping("/deactivate/{id}")
     public String deactivateItem(@PathVariable int id) {
         Optional<Item> itemOptional = itemRepository.findById(id);
