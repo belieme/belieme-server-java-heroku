@@ -41,6 +41,16 @@ public class ItemApiController {
         return items;
     }
 
+    @GetMapping("/{id}")
+    public Optional<Item> getItem(@PathVariable int id) {
+        Optional<Item> itemOptional = itemRepository.findById(id);
+        if(itemOptional.isPresent()) {
+            Item item = itemOptional.get();
+            item.addInfo(itemTypeRepository, historyRepository);
+        }
+        return itemOptional;
+    }
+
 
     @PostMapping("/")
     public Item createItem(@RequestBody Item item) {
