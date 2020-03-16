@@ -145,10 +145,7 @@ public class Item {
     //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
     public void addInfo(ItemTypeRepository itemTypeRepository, HistoryRepository historyRepository) {
         Optional<History> lastHistory = historyRepository.findById(getLastHistoryId());
-        if(isInactive()) {
-           status = "INACTIVE";
-        }
-        else if(lastHistory.isPresent()) {
+        if(lastHistory.isPresent()) {
             String lastHistoryStatus = lastHistory.get().getStatus();
             if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
                 status = "USABLE";
@@ -161,6 +158,11 @@ public class Item {
         else {
             status = "USABLE";
         }
+        if(isInactive())
+        {
+            status = "INACTIVE";
+        }
+
         Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
 
         if(itemType.isPresent()) {
