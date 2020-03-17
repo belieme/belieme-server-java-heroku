@@ -1,6 +1,7 @@
 package com.hanyang.belieme.demoserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
@@ -51,7 +52,7 @@ public class HistoryApiController {
     }
 
     @PostMapping("/")
-    public History createItem(@RequestBody History item) {
+    public Pair<Integer, Optional<History>> createItem(@RequestBody History item) {
         item.setResponseManagerId(0);
         item.setResponseManagerName("");
         item.setReturnManagerId(0);
@@ -60,6 +61,22 @@ public class HistoryApiController {
         item.setResponseTimeStampZero();
         item.setReturnTimeStampZero();
         item.setCancelTimeStampZero();
+
+        List<History> historyList = historyRepository.findByRequesterId(item.getRequesterId());
+        int currentHistoryCount = 0;
+        for(int i = 0; i < historyList.size(); i++) {
+            historyList.get(i).addInfo(itemTypeRepository);
+            History tmp = historyList.get(i);
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
+                if(tmp.getTypeId() == item.getTypeId()) {
+                    return Pair.of(History.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, Optional.empty());
+                }
+                currentHistoryCount++;
+            }
+        }
+        if(currentHistoryCount >= 3) {
+            return Pair.of(History.OVER_THREE_CURRENT_HISTORY_EXCEPTION, Optional.empty());
+        }
 
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
@@ -71,15 +88,18 @@ public class HistoryApiController {
             }
         }
 
-        History result = null;
+        History result;
         if(requestedItem != null) {
             item.setItemNum(requestedItem.getNum());
             result = historyRepository.save(item);
             result.addInfo(itemTypeRepository);
             requestedItem.setLastHistoryId(result.getId());
             itemRepository.save(requestedItem);
+            return Pair.of(History.OK, Optional.of(result));
         }
-        return result;
+        else {
+            return Pair.of(History.ITEM_NOT_AVAILABLE_EXCEPTION, Optional.empty());
+        }
     }
 
     @PutMapping("/cancel/{id}")

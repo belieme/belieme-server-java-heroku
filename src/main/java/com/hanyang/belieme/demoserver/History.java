@@ -1,10 +1,24 @@
 package com.hanyang.belieme.demoserver;
 
 import javax.persistence.*;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 
 @Entity
 public class History {
+    @Transient
+    public static final int OK = 0;
+
+    @Transient
+    public static final int OVER_THREE_CURRENT_HISTORY_EXCEPTION = 1;
+
+    @Transient
+    public static final int HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION = 2;
+
+    @Transient
+    public static final int ITEM_NOT_AVAILABLE_EXCEPTION = 3;
+
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
@@ -21,7 +35,6 @@ public class History {
     private long returnTimeStamp;
     private long cancelTimeStamp;
 
-
     @Transient
     private String typeName;
 
@@ -30,7 +43,6 @@ public class History {
 
     public History() {
     }
-
 
     public int getId() {
         return id;
@@ -193,27 +205,28 @@ public class History {
     }
 
     public long expiredTime() {
-        return requestTimeStamp + 15;
+//        return requestTimeStamp + 15;
+        return requestTimeStamp + 15*60;
     }
 
     public long dueTime() { //TODO 바꿔야 함
-        return responseTimeStamp + 30;
+//        return responseTimeStamp + 30;
 
-//        Calendar tmp = Calendar.getInstance();
-//        tmp.setTime(new Date(responseTimeStamp*1000));
-//        tmp.add(Calendar.DATE, 7);
-//        if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
-//            tmp.add(Calendar.DATE, 1);
-//        }
-//        tmp.set(Calendar.HOUR_OF_DAY, 17);
-//        tmp.set(Calendar.MINUTE, 59);
-//        tmp.set(Calendar.SECOND, 59);
-//        if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-//            tmp.add(Calendar.DATE, 2);
-//        }
-//        else if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-//            tmp.add(Calendar.DATE, 1);
-//        }
-//        return tmp.getTime().getTime()/1000;
+        Calendar tmp = Calendar.getInstance();
+        tmp.setTime(new Date(responseTimeStamp*1000));
+        tmp.add(Calendar.DATE, 7);
+        if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
+            tmp.add(Calendar.DATE, 1);
+        }
+        tmp.set(Calendar.HOUR_OF_DAY, 17);
+        tmp.set(Calendar.MINUTE, 59);
+        tmp.set(Calendar.SECOND, 59);
+        if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            tmp.add(Calendar.DATE, 2);
+        }
+        else if(tmp.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            tmp.add(Calendar.DATE, 1);
+        }
+        return tmp.getTime().getTime()/1000;
     }
 }

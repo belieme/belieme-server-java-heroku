@@ -47,7 +47,6 @@ public class ItemTypeApiController {
 
     @PostMapping("/")
     public ItemType createItem(@RequestBody ItemType item) {
-        System.out.println(item.amount);
         ItemTypeDB tmpItemType = itemTypeRepository.save(item.toItemTypeDB());
         for(int i = 0; i < item.getAmount(); i++) {
             Item newItem = new Item(tmpItemType.getId(), i + 1);
