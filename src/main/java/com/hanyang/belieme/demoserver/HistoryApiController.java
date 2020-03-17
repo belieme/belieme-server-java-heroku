@@ -1,7 +1,6 @@
 package com.hanyang.belieme.demoserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
@@ -21,38 +20,42 @@ public class HistoryApiController {
     private ItemTypeRepository itemTypeRepository;
 
     @GetMapping("/")
-    public Iterable<History> getItems() {
+    public ResponseWrapper<Iterable<History>> getItems() {
         Iterable<History> list = historyRepository.findAll();
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
             history.addInfo(itemTypeRepository);
         }
-        return list;
+        return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
 
     @GetMapping("/{id}")
-    public Optional<History> getItem(@PathVariable int id) {
+    public ResponseWrapper<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
         if(historyOptional.isPresent()) {
             historyOptional.get().addInfo(itemTypeRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, historyOptional.get());
         }
-        return historyOptional;
+        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
     
     @GetMapping("/byRequesterId/{requesterId}")
-    public Iterable<History> getItemsByRequesterId(@PathVariable int requesterId) {
+    public ResponseWrapper<Iterable<History>> getItemsByRequesterId(@PathVariable int requesterId) {
         Iterable<History> list = historyRepository.findByRequesterId(requesterId);
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
             history.addInfo(itemTypeRepository);
         }
-        return list;
+        return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
 
     @PostMapping("/")
-    public Pair<Integer, Optional<History>> createItem(@RequestBody History item) {
+    public ResponseWrapper<History> createItem(@RequestBody History item) {
+        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.getTypeId() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
         item.setResponseManagerId(0);
         item.setResponseManagerName("");
         item.setReturnManagerId(0);
@@ -69,13 +72,13 @@ public class HistoryApiController {
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
                 if(tmp.getTypeId() == item.getTypeId()) {
-                    return Pair.of(History.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, Optional.empty());
+                    return new ResponseWrapper<>(ResponseHeader.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, null);
                 }
                 currentHistoryCount++;
             }
         }
         if(currentHistoryCount >= 3) {
-            return Pair.of(History.OVER_THREE_CURRENT_HISTORY_EXCEPTION, Optional.empty());
+            return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_HISTORY_EXCEPTION, null);
         }
 
         Item requestedItem = null;
@@ -88,36 +91,43 @@ public class HistoryApiController {
             }
         }
 
-        History result;
         if(requestedItem != null) {
             item.setItemNum(requestedItem.getNum());
-            result = historyRepository.save(item);
+            History result = historyRepository.save(item);
             result.addInfo(itemTypeRepository);
             requestedItem.setLastHistoryId(result.getId());
             itemRepository.save(requestedItem);
-            return Pair.of(History.OK, Optional.of(result));
+            return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
         else {
-            return Pair.of(History.ITEM_NOT_AVAILABLE_EXCEPTION, Optional.empty());
+            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
         }
     }
 
     @PutMapping("/cancel/{id}")
-    public String cancelItem(@PathVariable int id) {
+    public ResponseWrapper<History> cancelItem(@PathVariable int id) {
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("REQUESTED")) {
                 tmp.setCancelTimeStampNow();
-                historyRepository.save(tmp);
-                return "true";
+                History result = historyRepository.save(tmp);
+                return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_HISTORY_STATUS_EXCEPTION, null);
             }
         }
-        return "false";
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
     }
 
     @PutMapping("/response/{id}")
-    public String responseItem(@PathVariable int id, @RequestBody History history) {
+    public ResponseWrapper<History> responseItem(@PathVariable int id, @RequestBody History history) {
+        if(history.getResponseManagerId() == 0 || history.getResponseManagerName() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
@@ -125,15 +135,23 @@ public class HistoryApiController {
                 tmp.setResponseTimeStampNow();
                 tmp.setResponseManagerId(history.getResponseManagerId());
                 tmp.setResponseManagerName(history.getResponseManagerName());
-                historyRepository.save(tmp);
-                return "true";
+                History result = historyRepository.save(tmp);
+                return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_HISTORY_STATUS_EXCEPTION, null);
             }
         }
-        return "false";
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
     }
 
     @PutMapping("/return/{id}")
-    public String returnItem(@PathVariable int id, @RequestBody History history) {
+    public ResponseWrapper<History> returnItem(@PathVariable int id, @RequestBody History history) {
+        if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
@@ -141,10 +159,15 @@ public class HistoryApiController {
                 tmp.setReturnTimeStampNow();
                 tmp.setReturnManagerId(history.getReturnManagerId());
                 tmp.setReturnManagerName(history.getReturnManagerName());
-                historyRepository.save(tmp);
-                return "true";
+                History result = historyRepository.save(tmp);
+                return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_HISTORY_STATUS_EXCEPTION, null);
             }
         }
-        return "false";
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
     }
 }

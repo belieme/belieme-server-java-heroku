@@ -7,18 +7,6 @@ import java.util.Optional;
 
 @Entity
 public class History {
-    @Transient
-    public static final int OK = 0;
-
-    @Transient
-    public static final int OVER_THREE_CURRENT_HISTORY_EXCEPTION = 1;
-
-    @Transient
-    public static final int HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION = 2;
-
-    @Transient
-    public static final int ITEM_NOT_AVAILABLE_EXCEPTION = 3;
-
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
