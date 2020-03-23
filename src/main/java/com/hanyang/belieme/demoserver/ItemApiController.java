@@ -99,6 +99,7 @@ public class ItemApiController {
             Item item = itemOptional.get();
             item.deactivate();
             Item result = itemRepository.save(item);
+            result.addInfo(itemTypeRepository,historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
         else {
@@ -113,6 +114,7 @@ public class ItemApiController {
             Item item = itemOptional.get();
             item.activate();
             Item result = itemRepository.save(item);
+            result.addInfo(itemTypeRepository,historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
