@@ -125,7 +125,8 @@ public class HistoryApiController {
                 Iterable<History> result = historyRepository.findByRequesterId(tmp.getRequesterId());
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
-                    iterator.next().addInfo(itemTypeRepository);
+                    History historyTmp = iterator.next();
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -154,7 +155,8 @@ public class HistoryApiController {
                 Iterable<History> result = historyRepository.findAll();
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
-                    iterator.next().addInfo(itemTypeRepository);
+                    History historyTmp = iterator.next();
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -183,7 +185,8 @@ public class HistoryApiController {
                 Iterable<History> result = historyRepository.findAll();
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
-                    iterator.next().addInfo(itemTypeRepository);
+                    History historyTmp = iterator.next();
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
