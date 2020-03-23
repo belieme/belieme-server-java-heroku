@@ -123,6 +123,10 @@ public class HistoryApiController {
                 tmp.setCancelTimeStampNow();
                 historyRepository.save(tmp);
                 Iterable<History> result = historyRepository.findByRequesterId(tmp.getRequesterId());
+                Iterator<History> iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    iterator.next().addInfo(itemTypeRepository);
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
             else {
@@ -148,6 +152,10 @@ public class HistoryApiController {
                 tmp.setResponseManagerName(history.getResponseManagerName());
                 historyRepository.save(tmp);
                 Iterable<History> result = historyRepository.findAll();
+                Iterator<History> iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    iterator.next().addInfo(itemTypeRepository);
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
             else {
@@ -173,6 +181,10 @@ public class HistoryApiController {
                 tmp.setReturnManagerName(history.getReturnManagerName());
                 historyRepository.save(tmp);
                 Iterable<History> result = historyRepository.findAll();
+                Iterator<History> iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    iterator.next().addInfo(itemTypeRepository);
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
             else {
