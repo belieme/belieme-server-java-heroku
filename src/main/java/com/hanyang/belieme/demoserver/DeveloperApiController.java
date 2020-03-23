@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(path="/developer")//git ignore
-public class DeveloperApiRepository {
+public class DeveloperApiController {
     @Autowired
     private HistoryRepository historyRepository;
 

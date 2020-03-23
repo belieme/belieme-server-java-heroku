@@ -3,6 +3,7 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -55,25 +56,35 @@ public class ItemApiController {
 
 
     @PostMapping("/")
-    public ResponseWrapper<Item> createItem(@RequestBody Item item) {
+    public ResponseWrapper<Iterable<Item>> createItem(@RequestBody Item item) {
         if(item.getTypeId() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        List<Item> items = itemRepository.findByTypeId(item.getTypeId());
+        Iterator<Item> iterator;
+
+        Iterable<Item> items = itemRepository.findByTypeId(item.getTypeId());
+        iterator = items.iterator();
+
         Optional<ItemTypeDB> type = itemTypeRepository.findById(item.getTypeId());
 
         int max = 0;
-        for(int i = 0; i < items.size(); i++) {
-            if(max < items.get(i).getNum()) {
-                max = items.get(i).getNum();
+        while(iterator.hasNext()) {
+            Item tmp = iterator.next();
+            if(max < tmp.getNum()) {
+                max = tmp.getNum();
             }
         }
         item.setNum(max+1);
         item.setLastHistoryId(-1);
 
         if(type.isPresent()) {
-            Item result = itemRepository.save(item);
-            result.addInfo(itemTypeRepository, historyRepository);
+            itemRepository.save(item);
+            Iterable<Item> result = itemRepository.findByTypeId(item.getTypeId());
+            iterator = result.iterator();
+
+            while(iterator.hasNext()) {
+                iterator.next().addInfo(itemTypeRepository, historyRepository);
+            }
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
         else {
