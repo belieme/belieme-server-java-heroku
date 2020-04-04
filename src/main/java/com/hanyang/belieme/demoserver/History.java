@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Entity
 public class History {
@@ -193,17 +194,16 @@ public class History {
     }
 
     public long expiredTime() {
-//        return requestTimeStamp + 15;
         return requestTimeStamp + 15*60;
     }
 
-    public long dueTime() { //TODO 바꿔야 함
-//        return responseTimeStamp + 30;
-
+    public long dueTime() {
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
         Calendar tmp = Calendar.getInstance();
         tmp.setTime(new Date(responseTimeStamp*1000));
+        tmp.setTimeZone(timeZone);
         tmp.add(Calendar.DATE, 7);
-        if(tmp.get(Calendar.HOUR_OF_DAY) > 17 ) {
+        if(tmp.get(Calendar.HOUR_OF_DAY) > 18 ) {
             tmp.add(Calendar.DATE, 1);
         }
         tmp.set(Calendar.HOUR_OF_DAY, 17);
