@@ -45,7 +45,7 @@ public class ItemTypeApiController {
     }
 
     @PostMapping("/")
-    public ResponseWrapper<ItemType> createItem(@RequestBody ItemType item) {
+    public ResponseWrapper<Iterable<ItemType>> createItem(@RequestBody ItemType item) {
         if(item.getName() == null || item.getEmoji() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -54,13 +54,20 @@ public class ItemTypeApiController {
             Item newItem = new Item(tmpItemType.getId(), i + 1);
             itemRepository.save(newItem);
         }
-        ItemType output = tmpItemType.toItemType();
-        output.addInfo(itemTypeRepository, itemRepository, historyRepository);
-        return new ResponseWrapper<>(ResponseHeader.OK, output);
+        Iterable<ItemTypeDB> resultItemTypeDB = itemTypeRepository.findAll();
+        Iterator<ItemTypeDB> iterator = resultItemTypeDB.iterator();
+
+        ArrayList<ItemType> result = new ArrayList<>();
+        while(iterator.hasNext()) {
+            ItemType output = iterator.next().toItemType();
+            output.addInfo(itemTypeRepository, itemRepository, historyRepository);
+            result.add(output);
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, result);
     }
 
     @PutMapping("/")
-    public ResponseWrapper<ItemType> updateItem(@RequestBody ItemType item){
+    public ResponseWrapper<ArrayList<ItemType>> updateItem(@RequestBody ItemType item){
         if(item.getId() == 0 || item.getName() == null || item.getEmoji() == null) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -70,7 +77,17 @@ public class ItemTypeApiController {
             ItemTypeDB tmp = item.toItemTypeDB();
             beforeUpdate.setName(tmp.getName());
             beforeUpdate.setEmojiByte(tmp.getEmojiByte());
-            ItemType result = itemTypeRepository.save(tmp).toItemType();
+            itemTypeRepository.save(tmp).toItemType();
+
+            Iterable<ItemTypeDB> resultItemTypeDB = itemTypeRepository.findAll();
+            Iterator<ItemTypeDB> iterator = resultItemTypeDB.iterator();
+
+            ArrayList<ItemType> result = new ArrayList<>();
+            while(iterator.hasNext()) {
+                ItemType output = iterator.next().toItemType();
+                output.addInfo(itemTypeRepository, itemRepository, historyRepository);
+                result.add(output);
+            }
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null); // 여기가 not found가 맞는 것인가
