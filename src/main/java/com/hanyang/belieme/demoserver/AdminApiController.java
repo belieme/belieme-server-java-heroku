@@ -19,11 +19,11 @@ public class AdminApiController {
 
     @PostMapping("/")
     public ResponseWrapper<Iterable<Admin>> postNewAdmin(@RequestBody Admin admin) {
-        if(admin.getPermission().equals("admin")) {
+        if(admin.getPermission().equals("ADMIN")) {
             admin.permissionSetAdmin();
-        } else if(admin.getPermission().equals("master")) {
+        } else if(admin.getPermission().equals("MASTER")) {
             admin.permissionSetMaster();
-        } else if(admin.getPermission().equals("developer")) {
+        } else if(admin.getPermission().equals("DEVELOPER")) {
             admin.permissionSetDeveloper();
         } else {
             return new ResponseWrapper<>(ResponseHeader.WRONG_ADMIN_PERMISSION_EXCEPTION, null);

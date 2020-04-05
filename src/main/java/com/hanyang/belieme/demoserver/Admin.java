@@ -7,13 +7,13 @@ import javax.persistence.Id;
 @Entity
 public class Admin {
     @Id
-    @Column(name = "student_id")
+    @Column(name = "student_id", nullable = false)
     private int studentId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "permission")
+    @Column(name = "permission", nullable = false)
     private String permission;
 
     public int getStudentId() {
@@ -33,14 +33,14 @@ public class Admin {
     }
 
     public void permissionSetAdmin() {
-        permission = "admin";
+        permission = "ADMIN";
     }
 
     public void permissionSetMaster() {
-        permission = "master";
+        permission = "MASTER";
     }
 
     public void permissionSetDeveloper() {
-        permission = "developer";
+        permission = "DEVELOPER";
     }
 }
