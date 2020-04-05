@@ -69,7 +69,7 @@ public class AdminApiController {
         }
     }
 
-    @DeleteMapping("{studentId}")
+    @DeleteMapping("/{studentId}")
     public ResponseWrapper<Iterable<Admin>> deleteAdmin(@PathVariable int studentId) {
         adminRepository.deleteById(studentId);
         return new ResponseWrapper<>(ResponseHeader.OK, adminRepository.findAll());
