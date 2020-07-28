@@ -3,7 +3,8 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface ItemRepository extends CrudRepository<Item, Integer> {
-    List<Item> findByTypeId(int typeId);
+public interface ItemRepository extends CrudRepository<Item, UUID> {
+    List<Item> findByTypeId(UUID typeId);
 }

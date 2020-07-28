@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path="/developer")//git ignore
@@ -47,7 +48,7 @@ public class DeveloperApiController {
     }
 
     @DeleteMapping("/itemType/{id}")
-    public ItemTypeDB deleteItemType(@PathVariable int id) {
+    public ItemTypeDB deleteItemType(@PathVariable UUID id) {
         Optional<ItemTypeDB> deletedItem = itemTypeRepository.findById(id);
         if(!deletedItem.isPresent()) {
             return null;
@@ -80,7 +81,7 @@ public class DeveloperApiController {
     }
 
     @DeleteMapping("/item/{id}")
-    public Item deleteItem(@PathVariable int id) {
+    public Item deleteItem(@PathVariable UUID id) {
         Optional<Item> deletedItem = itemRepository.findById(id);
         if(!deletedItem.isPresent()) {
             return null;
@@ -113,7 +114,7 @@ public class DeveloperApiController {
     }
 
     @DeleteMapping("/history/{id}")
-    public History deleteHistory(@PathVariable int id) {
+    public History deleteHistory(@PathVariable UUID id) {
         Optional<History> deletedHistory = historyRepository.findById(id);
         if(!deletedHistory.isPresent()) {
             return null;

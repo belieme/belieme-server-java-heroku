@@ -2,9 +2,10 @@ package com.hanyang.belieme.demoserver;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.UUID;
 
 public class ItemType {
-    private int id;
+    private UUID id;
     private String name;
     private String emoji;
 
@@ -20,13 +21,13 @@ public class ItemType {
         this.emoji = emoji;
     }
 
-    public ItemType(int id, String name, String emoji) {
+    public ItemType(UUID id, String name, String emoji) {
         this.id = id;
         this.name = name;
         this.emoji = emoji;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 

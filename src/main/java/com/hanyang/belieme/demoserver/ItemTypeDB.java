@@ -1,19 +1,24 @@
 package com.hanyang.belieme.demoserver;
 
 import javax.persistence.*;
+
+import org.hibernate.annotations.Type;
+
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @Entity
 public class ItemTypeDB {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @Type(type = "uuid-char") @Column(length = 36)
+    private UUID id;
     private String name;
     private int emojiByte;
 
     public ItemTypeDB() {
     }
 
-    public ItemTypeDB(int id, String name, int emojiByte) {
+    public ItemTypeDB(UUID id, String name, int emojiByte) {
         this.id = id;
         this.name = name;
         this.emojiByte = emojiByte;
@@ -24,7 +29,7 @@ public class ItemTypeDB {
         this.emojiByte = emojiByte;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 

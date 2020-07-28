@@ -1,18 +1,24 @@
 package com.hanyang.belieme.demoserver;
 
+import org.hibernate.annotations.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.ObjectIdGenerators.UUIDGenerator;
+
 import java.util.Optional;
+import java.util.UUID;
 
 @Entity
 public class Item {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-    private int typeId;
+    @Type(type = "uuid-char") @Column(length = 36)
+    private UUID id;
+    private UUID typeId;
     private int num;
-    private int lastHistoryId;
+    private UUID lastHistoryId;
 
     @Transient
     private History lastHistory;
@@ -31,18 +37,18 @@ public class Item {
     public Item() {
     }
 
-    public Item(int typeId, int num) {
+    public Item(UUID typeId, int num) {
         this.typeId = typeId;
         this.num = num;
-        this.lastHistoryId = -1;
+        this.lastHistoryId = null;
         this.inactive = false;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public int getTypeId() {
+    public UUID getTypeId() {
         return typeId;
     }
 
@@ -50,7 +56,7 @@ public class Item {
         return num;
     }
 
-    public int getLastHistoryId() {
+    public UUID getLastHistoryId() {
         return lastHistoryId;
     }
 
@@ -114,7 +120,7 @@ public class Item {
         return inactive;
     }
 
-    public void setTypeId(int typeId) {
+    public void setTypeId(UUID typeId) {
         this.typeId = typeId;
     }
 
@@ -122,7 +128,7 @@ public class Item {
         this.num = num;
     }
 
-    public void setLastHistoryId(int lastHistoryId) {
+    public void setLastHistoryId(UUID lastHistoryId) {
         this.lastHistoryId = lastHistoryId;
     }
 
