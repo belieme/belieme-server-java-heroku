@@ -16,7 +16,7 @@ public class DeveloperApiController {
     private ItemRepository itemRepository;
 
     @Autowired
-    private ThingsRepository thingsRepository;
+    private ItemTypeRepository itemTypeRepository;
 
     @GetMapping("/")
     public String getInfo() {
@@ -25,35 +25,35 @@ public class DeveloperApiController {
         return result;
     }
 
-    @GetMapping("/things")
-    public Iterable<ThingsDB> getThingss() {
-        return thingsRepository.findAll();
+    @GetMapping("/itemType")
+    public Iterable<ItemTypeDB> getItemTypes() {
+        return itemTypeRepository.findAll();
     }
 
-    @PostMapping("/things")
-    public ThingsDB createThings(@RequestBody ThingsDB things) {
-        return thingsRepository.save(things);
+    @PostMapping("/itemType")
+    public ItemTypeDB createItemType(@RequestBody ItemTypeDB itemType) {
+        return itemTypeRepository.save(itemType);
     }
 
-    @PutMapping("/things")
-    public ThingsDB updateThings(@RequestBody ThingsDB things){
-        Optional<ThingsDB> tmp = thingsRepository.findById(things.getId());
+    @PutMapping("/itemType")
+    public ItemTypeDB updateItemType(@RequestBody ItemTypeDB itemType){
+        Optional<ItemTypeDB> tmp = itemTypeRepository.findById(itemType.getId());
         if(!tmp.isPresent()) {
             return null;
         }
         else {
-            return thingsRepository.save(things);
+            return itemTypeRepository.save(itemType);
         }
     }
 
-    @DeleteMapping("/things/{id}")
-    public ThingsDB deleteThings(@PathVariable int id) {
-        Optional<ThingsDB> deletedItem = thingsRepository.findById(id);
+    @DeleteMapping("/itemType/{id}")
+    public ItemTypeDB deleteItemType(@PathVariable int id) {
+        Optional<ItemTypeDB> deletedItem = itemTypeRepository.findById(id);
         if(!deletedItem.isPresent()) {
             return null;
         }
         else {
-            thingsRepository.deleteById(id);
+            itemTypeRepository.deleteById(id);
             return deletedItem.get();
         }
     }
@@ -128,7 +128,7 @@ public class DeveloperApiController {
     public String deleteAll() {
         historyRepository.deleteAll();
         itemRepository.deleteAll();
-        thingsRepository.deleteAll();
+        itemTypeRepository.deleteAll();
         return "OK";
     }
 }

@@ -185,11 +185,11 @@ public class History {
         }
     }
 
-    public void addInfo(ThingsRepository thingsRepository) {
-        Optional<ThingsDB> thingsDB = thingsRepository.findById(typeId);
-        if(thingsDB.isPresent()) {
-            typeName = thingsRepository.findById(typeId).get().getName();
-            typeEmoji = thingsRepository.findById(typeId).get().toThings().getEmoji();
+    public void addInfo(ItemTypeRepository itemTypeRepository) {
+        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
+        if(itemTypeDB.isPresent()) {
+            typeName = itemTypeRepository.findById(typeId).get().getName();
+            typeEmoji = itemTypeRepository.findById(typeId).get().toItemType().getEmoji();
         }
     }
 

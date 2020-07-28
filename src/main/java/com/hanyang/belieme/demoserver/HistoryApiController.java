@@ -19,7 +19,7 @@ public class HistoryApiController {
     private ItemRepository itemRepository;
 
     @Autowired
-    private ThingsRepository thingsRepository;
+    private ItemTypeRepository itemTypeRepository;
 
     @GetMapping("/")
     public ResponseWrapper<Iterable<History>> getItems() {
@@ -27,7 +27,7 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.addInfo(thingsRepository);
+            history.addInfo(itemTypeRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
@@ -36,7 +36,7 @@ public class HistoryApiController {
     public ResponseWrapper<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
         if(historyOptional.isPresent()) {
-            historyOptional.get().addInfo(thingsRepository);
+            historyOptional.get().addInfo(itemTypeRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, historyOptional.get());
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -48,7 +48,7 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.addInfo(thingsRepository);
+            history.addInfo(itemTypeRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
@@ -70,7 +70,7 @@ public class HistoryApiController {
         List<History> historyList = historyRepository.findByRequesterId(item.getRequesterId());
         int currentHistoryCount = 0;
         for(int i = 0; i < historyList.size(); i++) {
-            historyList.get(i).addInfo(thingsRepository);
+            historyList.get(i).addInfo(itemTypeRepository);
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
                 if(tmp.getTypeId() == item.getTypeId()) {
@@ -86,7 +86,7 @@ public class HistoryApiController {
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.getTypeId());
         for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(thingsRepository, historyRepository);
+            items.get(i).addInfo(itemTypeRepository, historyRepository);
             if (items.get(i).getStatus().equals("USABLE")) {
                 requestedItem = items.get(i);
                 break;
@@ -96,18 +96,18 @@ public class HistoryApiController {
         if(requestedItem != null) {
             item.setItemNum(requestedItem.getNum());
             History historyResult = historyRepository.save(item);
-            historyResult.addInfo(thingsRepository);
+            historyResult.addInfo(itemTypeRepository);
             requestedItem.setLastHistoryId(historyResult.getId());
             itemRepository.save(requestedItem);
-            ArrayList<Things> thingsListResult = new ArrayList<>();
-            Iterable<ThingsDB> thingsDB = thingsRepository.findAll();
-            Iterator<ThingsDB> iterator = thingsDB.iterator();
+            ArrayList<ItemType> itemTypeListResult = new ArrayList<>();
+            Iterable<ItemTypeDB> itemTypeDB = itemTypeRepository.findAll();
+            Iterator<ItemTypeDB> iterator = itemTypeDB.iterator();
             while(iterator.hasNext()) {
-                Things tmpThings = iterator.next().toThings();
-                tmpThings.addInfo(thingsRepository, itemRepository, historyRepository);
-                thingsListResult.add(tmpThings);
+                ItemType tmpItemType = iterator.next().toItemType();
+                tmpItemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
+                itemTypeListResult.add(tmpItemType);
             }
-            return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(historyResult, thingsListResult));
+            return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(historyResult, itemTypeListResult));
         }
         else {
             return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
@@ -126,7 +126,7 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(thingsRepository);
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -156,7 +156,7 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(thingsRepository);
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -186,7 +186,7 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(thingsRepository);
+                    historyTmp.addInfo(itemTypeRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -201,19 +201,19 @@ public class HistoryApiController {
 
     public class PostMappingResponse {
         History history;
-        ArrayList<Things> thingsList;
+        ArrayList<ItemType> itemTypeList;
 
-        public PostMappingResponse(History history, ArrayList<Things> thingsList) {
+        public PostMappingResponse(History history, ArrayList<ItemType> itemTypeList) {
             this.history = history;
-            this.thingsList = thingsList;
+            this.itemTypeList = itemTypeList;
         }
 
         public History getHistory() {
             return history;
         }
 
-        public ArrayList<Things> getThingsList() {
-            return thingsList;
+        public ArrayList<ItemType> getItemTypeList() {
+            return itemTypeList;
         }
     }
 }
