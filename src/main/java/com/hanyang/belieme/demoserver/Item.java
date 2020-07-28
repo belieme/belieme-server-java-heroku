@@ -143,7 +143,7 @@ public class Item {
     }
 
     //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
-    public void addInfo(ItemTypeRepository itemTypeRepository, HistoryRepository historyRepository) {
+    public void addInfo(ThingsRepository thingsRepository, HistoryRepository historyRepository) {
         Optional<History> lastHistory = historyRepository.findById(getLastHistoryId());
         if(lastHistory.isPresent()) {
             String lastHistoryStatus = lastHistory.get().getStatus();
@@ -163,11 +163,11 @@ public class Item {
             status = "INACTIVE";
         }
 
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
+        Optional<ThingsDB> things = thingsRepository.findById(getTypeId());
 
-        if(itemType.isPresent()) {
-            setTypeName(itemType.get().getName());
-            setTypeEmoji(itemType.get().toItemType().getEmoji());
+        if(things.isPresent()) {
+            setTypeName(things.get().getName());
+            setTypeEmoji(things.get().toThings().getEmoji());
         }
         else {
             setTypeName("");

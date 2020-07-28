@@ -4,22 +4,22 @@ import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 
 @Entity
-public class ItemTypeDB {
+public class ThingsDB {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String name;
     private int emojiByte;
 
-    public ItemTypeDB() {
+    public ThingsDB() {
     }
 
-    public ItemTypeDB(int id, String name, int emojiByte) {
+    public ThingsDB(int id, String name, int emojiByte) {
         this.id = id;
         this.name = name;
         this.emojiByte = emojiByte;
     }
 
-    public ItemTypeDB(String name, int emojiByte) {
+    public ThingsDB(String name, int emojiByte) {
         this.name = name;
         this.emojiByte = emojiByte;
     }
@@ -45,9 +45,9 @@ public class ItemTypeDB {
     }
 
 
-    public ItemType toItemType() {
+    public Things toThings() {
         byte[] arr = getByteArrayFromInt(emojiByte);
-        return new ItemType(id, name, new String(arr, StandardCharsets.UTF_8));
+        return new Things(id, name, new String(arr, StandardCharsets.UTF_8));
     }
 
     public byte[] getByteArrayFromInt(int value) {

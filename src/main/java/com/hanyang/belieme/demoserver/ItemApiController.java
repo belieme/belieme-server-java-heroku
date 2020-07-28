@@ -15,7 +15,7 @@ public class ItemApiController {
     private ItemRepository itemRepository;
 
     @Autowired
-    private ItemTypeRepository itemTypeRepository;
+    private ThingsRepository thingsRepository;
 
     @Autowired
     private HistoryRepository historyRepository;
@@ -26,7 +26,7 @@ public class ItemApiController {
         Iterator<Item> iterator = items.iterator();
         while(iterator.hasNext()) {
             Item item = iterator.next();
-            item.addInfo(itemTypeRepository, historyRepository);
+            item.addInfo(thingsRepository, historyRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, items);
     }
@@ -37,7 +37,7 @@ public class ItemApiController {
         Iterator<Item> iterator = items.iterator();
         while(iterator.hasNext()) {
             Item item = iterator.next();
-            item.addInfo(itemTypeRepository, historyRepository);
+            item.addInfo(thingsRepository, historyRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, items);
     }
@@ -47,7 +47,7 @@ public class ItemApiController {
         Optional<Item> itemOptional = itemRepository.findById(id);
         if(itemOptional.isPresent()) {
             Item item = itemOptional.get();
-            item.addInfo(itemTypeRepository, historyRepository);
+            item.addInfo(thingsRepository, historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, item);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -65,7 +65,7 @@ public class ItemApiController {
         Iterable<Item> items = itemRepository.findByTypeId(item.getTypeId());
         iterator = items.iterator();
 
-        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.getTypeId());
+        Optional<ThingsDB> type = thingsRepository.findById(item.getTypeId());
 
         int max = 0;
         while(iterator.hasNext()) {
@@ -83,7 +83,7 @@ public class ItemApiController {
             iterator = result.iterator();
 
             while(iterator.hasNext()) {
-                iterator.next().addInfo(itemTypeRepository, historyRepository);
+                iterator.next().addInfo(thingsRepository, historyRepository);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
@@ -99,7 +99,7 @@ public class ItemApiController {
             Item item = itemOptional.get();
             item.deactivate();
             Item result = itemRepository.save(item);
-            result.addInfo(itemTypeRepository,historyRepository);
+            result.addInfo(thingsRepository,historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         }
         else {
@@ -114,7 +114,7 @@ public class ItemApiController {
             Item item = itemOptional.get();
             item.activate();
             Item result = itemRepository.save(item);
-            result.addInfo(itemTypeRepository,historyRepository);
+            result.addInfo(thingsRepository,historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, result);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);

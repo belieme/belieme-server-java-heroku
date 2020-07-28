@@ -3,7 +3,7 @@ package com.hanyang.belieme.demoserver;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-public class ItemType {
+public class Things {
     private int id;
     private String name;
     private String emoji;
@@ -12,15 +12,15 @@ public class ItemType {
     int count;
     String status;
 
-    public ItemType() {
+    public Things() {
     }
 
-    public ItemType(String name, String emoji) {
+    public Things(String name, String emoji) {
         this.name = name;
         this.emoji = emoji;
     }
 
-    public ItemType(int id, String name, String emoji) {
+    public Things(int id, String name, String emoji) {
         this.id = id;
         this.name = name;
         this.emoji = emoji;
@@ -58,12 +58,12 @@ public class ItemType {
         this.emoji = emoji;
     }
 
-    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
+    public void addInfo(ThingsRepository ThingsRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
         amount = 0;
         count = 0;
         List<Item> items = itemRepository.findByTypeId(id);
         for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(itemTypeRepository, historyRepository);
+            items.get(i).addInfo(ThingsRepository, historyRepository);
             if(items.get(i).getStatus().equals("UNUSABLE")) {
                 amount++;
             }
@@ -86,11 +86,11 @@ public class ItemType {
         }
     }
 
-    public ItemTypeDB toItemTypeDB() {
+    public ThingsDB toThingsDB() {
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ItemTypeDB(id, name, getIntFromByteArray(arr));
+            return new ThingsDB(id, name, getIntFromByteArray(arr));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
