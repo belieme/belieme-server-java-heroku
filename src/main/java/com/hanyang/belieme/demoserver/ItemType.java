@@ -57,6 +57,14 @@ public class ItemType {
     public void setEmoji(String emoji) {
         this.emoji = emoji;
     }
+    
+    public String toString() {
+        return "{" +
+                "\"id\": \"" + id + "\"" +
+                "\"name\": \"" + name + "\"" +
+                "\"emoji\": \"" + emoji + "\"" +
+                "}";
+    }
 
     public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
         amount = 0;
