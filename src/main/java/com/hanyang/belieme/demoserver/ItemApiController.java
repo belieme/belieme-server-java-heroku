@@ -55,7 +55,7 @@ public class ItemApiController {
 
     @PostMapping("/")
     public ResponseWrapper<Iterable<Item>> createItem(@RequestBody Item item) {
-        if(item.typeId == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+        if(item.typeIdGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         Iterator<Item> iterator;
