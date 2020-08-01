@@ -24,10 +24,12 @@ public class Item {
     private String status;
 
     @Transient
-    private String typeName;
+    private ItemType itemType;
+    // @Transient
+    // private String typeName;
 
-    @Transient
-    private String typeEmoji;
+    // @Transient
+    // private String typeEmoji;
 
     public Item() {
     }
@@ -59,13 +61,17 @@ public class Item {
         return status;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public ItemType getItemType() {
+        return itemType;
     }
+    
+    // public String getTypeName() {
+    //     return typeName;
+    // }
 
-    public String getTypeEmoji() {
-        return typeEmoji;
-    }
+    // public String getTypeEmoji() {
+    //     return typeEmoji;
+    // }
 
     public int getRequesterId() {
         return (lastHistory != null) ? lastHistory.getRequesterId() : -1;
