@@ -11,9 +11,9 @@ public class Item {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    public int typeId;
+    private int typeId;
     private int num;
-    public int lastHistoryId;
+    private int lastHistoryId;
 
     private boolean inactive;
 
@@ -86,6 +86,14 @@ public class Item {
 
     public void activate() {
         inactive = false;
+    }
+    
+    public int typeIdGetter() {
+        return typeId;
+    }
+    
+    public int lastHistoryIdGetter() {
+        return lastHistoryId;
     }
 
     //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )

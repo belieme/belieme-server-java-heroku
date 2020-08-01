@@ -60,10 +60,10 @@ public class ItemApiController {
         }
         Iterator<Item> iterator;
 
-        Iterable<Item> items = itemRepository.findByTypeId(item.typeId);
+        Iterable<Item> items = itemRepository.findByTypeId(item.typeIdGetter());
         iterator = items.iterator();
 
-        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.typeId);
+        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.typeIdGetter());
 
         int max = 0;
         while(iterator.hasNext()) {
@@ -77,7 +77,7 @@ public class ItemApiController {
 
         if(type.isPresent()) {
             itemRepository.save(item);
-            Iterable<Item> result = itemRepository.findByTypeId(item.typeId);
+            Iterable<Item> result = itemRepository.findByTypeId(item.typeIdGetter());
             iterator = result.iterator();
 
             while(iterator.hasNext()) {
