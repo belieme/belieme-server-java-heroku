@@ -3,6 +3,7 @@ package com.hanyang.belieme.demoserver;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
+
 import java.util.Optional;
 
 @Entity
@@ -24,7 +25,7 @@ public class Item {
     private String status;
 
     @Transient
-    private ItemType itemType;
+    private ItemType.ItemTypeInItem itemTypeInItem;
     // @Transient
     // private String typeName;
 
@@ -61,8 +62,8 @@ public class Item {
         return status;
     }
 
-    public ItemType getItemType() {
-        return itemType;
+    public ItemType.ItemTypeInItem getItemType() {
+        return itemTypeInItem;
     }
             
     // public String getTypeName() {
@@ -133,8 +134,8 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setItemType(ItemType itemType) { 
-        this.itemType = itemType;
+    public void setItemType(ItemType.ItemTypeInItem itemTypeinInItem) { 
+        this.itemTypeInItem = itemTypeinInItem;
     }
     // public void setTypeName(String typeName) {
     //     this.typeName = typeName;
@@ -176,12 +177,12 @@ public class Item {
         Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
 
         if(itemType.isPresent()) {
-            setItemType(itemType.get().toItemType());
+            setItemType(itemType.get().toItemType().toItemTypeInItem());
             // setTypeName(itemType.get().getName());
             // setTypeEmoji(itemType.get().toItemType().getEmoji());
         }
         else {
-            setItemType(new ItemType("",""));
+            setItemType(new ItemType("","").toItemTypeInItem());
             // setTypeName("");
             // setTypeEmoji("");
         }
