@@ -64,7 +64,7 @@ public class Item {
     public ItemType getItemType() {
         return itemType;
     }
-    
+            
     // public String getTypeName() {
     //     return typeName;
     // }
@@ -133,13 +133,13 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
+    // public void setTypeName(String typeName) {
+    //     this.typeName = typeName;
+    // }
 
-    public void setTypeEmoji(String typeEmoji) {
-        this.typeEmoji = typeEmoji;
-    }
+    // public void setTypeEmoji(String typeEmoji) {
+    //     this.typeEmoji = typeEmoji;
+    // }
 
     public void deactivate() {
         inactive = true;
