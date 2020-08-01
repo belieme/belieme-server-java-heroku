@@ -15,22 +15,16 @@ public class Item {
     private int num;
     private int lastHistoryId;
 
-
-    @Transient
-    private History lastHistory;
-
     private boolean inactive;
 
     @Transient
     private String status;
 
     @Transient
-    private ItemType.ItemTypeInItem itemTypeInItem;
-    // @Transient
-    // private String typeName;
-
-    // @Transient
-    // private String typeEmoji;
+    private ItemTypeInItem itemType;
+    
+    @Transient
+    private HistoryNestedToItem lastHistory;
 
     public Item() {
     }
@@ -46,76 +40,20 @@ public class Item {
         return id;
     }
 
-    public int getTypeId() {
-        return typeId;
-    }
-
     public int getNum() {
         return num;
-    }
-
-    public int getLastHistoryId() {
-        return lastHistoryId;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public ItemType.ItemTypeInItem getItemType() {
-        return itemTypeInItem;
+    public ItemTypeInItem getItemType() {
+        return itemType;
     }
-            
-    // public String getTypeName() {
-    //     return typeName;
-    // }
-
-    // public String getTypeEmoji() {
-    //     return typeEmoji;
-    // }
-
-    public int getRequesterId() {
-        return (lastHistory != null) ? lastHistory.getRequesterId() : -1;
-    }
-
-    public String getRequesterName() {
-        return (lastHistory != null) ? lastHistory.getRequesterName() : null;
-    }
-
-    public int getResponseManagerId() {
-        return (lastHistory != null) ? lastHistory.getResponseManagerId() : -1;
-    }
-
-    public String getResponseManagerName() {
-        return (lastHistory != null) ? lastHistory.getResponseManagerName() : null;
-    }
-
-    public int getReturnManagerId() {
-        return (lastHistory != null) ? lastHistory.getReturnManagerId() : -1;
-    }
-
-    public String getReturnManagerName() {
-        return (lastHistory != null) ? lastHistory.getReturnManagerName() : null;
-    }
-
-    public long getRequestTimeStamp() {
-        return (lastHistory != null) ? lastHistory.getRequestTimeStamp() : 0;
-    }
-
-    public long getResponseTimeStamp() {
-        return (lastHistory != null) ? lastHistory.getResponseTimeStamp() : 0;
-    }
-
-    public long getReturnTimeStamp() {
-        return (lastHistory != null) ? lastHistory.getReturnTimeStamp() : 0;
-    }
-
-    public long getCancelTimeStamp() {
-        return (lastHistory != null) ? lastHistory.getCancelTimeStamp() : 0;
-    }
-
-    public String getLastHistoryStatus() {
-        return (lastHistory != null) ? lastHistory.getStatus() : "ERROR";
+    
+    public HistoryNestedToItem getLastHistory() {
+        return lastHistory;
     }
 
     public boolean isInactive() {
@@ -134,16 +72,13 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setItemType(ItemType.ItemTypeInItem itemTypeinInItem) { 
-        this.itemTypeInItem = itemTypeinInItem;
+    public void setItemType(ItemTypeInItem itemTypeinInItem) { 
+        this.itemType = itemTypeinInItem;
     }
-    // public void setTypeName(String typeName) {
-    //     this.typeName = typeName;
-    // }
-
-    // public void setTypeEmoji(String typeEmoji) {
-    //     this.typeEmoji = typeEmoji;
-    // }
+    
+    public void setLastHistory(HistoryNestedToItem historyNestedToItem) {
+        this.lastHistory = historyNestedToItem;
+    }
 
     public void deactivate() {
         inactive = true;
@@ -155,7 +90,7 @@ public class Item {
 
     //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
     public void addInfo(ItemTypeRepository itemTypeRepository, HistoryRepository historyRepository) {
-        Optional<History> lastHistory = historyRepository.findById(getLastHistoryId());
+        Optional<History> lastHistory = historyRepository.findById(lastHistoryId);
         if(lastHistory.isPresent()) {
             String lastHistoryStatus = lastHistory.get().getStatus();
             if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
@@ -164,7 +99,7 @@ public class Item {
             else {
                 status = "UNUSABLE";
             }
-            this.lastHistory = lastHistory.get();
+            setLastHistory(new HistoryNestedToItem(lastHistory.get()));
         }
         else {
             status = "USABLE";
@@ -174,17 +109,8 @@ public class Item {
             status = "INACTIVE";
         }
 
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeId);
 
-        if(itemType.isPresent()) {
-            setItemType(itemType.get().toItemType().toItemTypeInItem());
-            // setTypeName(itemType.get().getName());
-            // setTypeEmoji(itemType.get().toItemType().getEmoji());
-        }
-        else {
-            setItemType(new ItemType("","").toItemTypeInItem());
-            // setTypeName("");
-            // setTypeEmoji("");
-        }
+        setItemType(new ItemTypeInItem(itemType.get()));
     }
 }

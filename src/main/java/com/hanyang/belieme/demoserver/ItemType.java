@@ -15,12 +15,6 @@ public class ItemType {
     public ItemType() {
     }
 
-    public ItemType(String name, String emoji) {
-        this.id = -1;// 0? or -1?
-        this.name = name;
-        this.emoji = emoji;
-    }
-
     public ItemType(int id, String name, String emoji) {
         this.id = id;
         this.name = name;
@@ -57,34 +51,6 @@ public class ItemType {
 
     public void setEmoji(String emoji) {
         this.emoji = emoji;
-    }
-    
-    public class ItemTypeInItem {
-        private int id;
-        private String name;
-        private String emoji;
-        
-        public ItemTypeInItem(int id, String name, String emoji) {
-            this.id = id;
-            this.name = new String(name);
-            this.emoji = new String(emoji);
-        }
-        
-        public int getId(){
-            return id;
-        }
-        
-        public String getName() {
-            return name;
-        }
-        
-        public String emoji() {
-            return emoji;
-        }
-    }
-    
-    public ItemTypeInItem toItemTypeInItem() {
-        return new ItemTypeInItem(id, name, emoji);
     }
 
     public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {

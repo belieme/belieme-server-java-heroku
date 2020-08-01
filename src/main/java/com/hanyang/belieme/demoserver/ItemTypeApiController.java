@@ -24,7 +24,6 @@ public class ItemTypeApiController {
     public ResponseWrapper<Iterable<ItemType>> getItems() {
         Iterable<ItemTypeDB> tmpItemTypes = itemTypeRepository.findAll();
         ArrayList<ItemType> result = new ArrayList<>();
-        int i = 0;
         for (Iterator<ItemTypeDB> it = tmpItemTypes.iterator(); it.hasNext(); ) {
             ItemType tmpItemType = it.next().toItemType();
             tmpItemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
