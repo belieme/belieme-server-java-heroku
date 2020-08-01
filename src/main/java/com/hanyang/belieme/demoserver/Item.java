@@ -16,8 +16,13 @@ public class Item {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     @Type(type = "uuid-char") @Column(length = 36)
     private UUID id;
+    
+    @Type(type = "uuid-char") @Column(length = 36)
     private UUID typeId;
+    
     private int num;
+    
+    @Type(type = "uuid-char") @Column(length = 36)
     private UUID lastHistoryId;
 
     @Transient
