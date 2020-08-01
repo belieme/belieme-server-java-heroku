@@ -1,5 +1,6 @@
 package com.hanyang.belieme.demoserver;
 
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +59,12 @@ public class DeveloperApiController {
             return deletedItem.get();
         }
     }
+    
+    @DeleteMapping("/itemType/deleteAll")
+    public String deleteAllItemType() {
+        itemTypeRepository.deleteAll();
+        return "deleted all itemType";
+    }
 
     @GetMapping("/item")
     public Iterable<Item> getItems() {
@@ -91,6 +98,12 @@ public class DeveloperApiController {
             return deletedItem.get();
         }
     }
+    
+    @DeleteMapping("/item/deleteAll")
+    public String deleteAllItem() {
+        itemRepository.deleteAll();
+        return "deleted all item";
+    }
 
     @GetMapping("/history")
     public Iterable<History> getHistories() {
@@ -123,6 +136,12 @@ public class DeveloperApiController {
             historyRepository.deleteById(id);
             return deletedHistory.get();
         }
+    }
+    
+    @DeleteMapping("/history/deleteAll")
+    public String deleteAllHistory() {
+        historyRepository.deleteAll();
+        return "deleted all histories";
     }
 
     @DeleteMapping("/deleteAll")
