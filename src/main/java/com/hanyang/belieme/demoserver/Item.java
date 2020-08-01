@@ -133,6 +133,9 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
+    public void setItemType(ItemType itemType) { 
+        this.itemType = itemType;
+    }
     // public void setTypeName(String typeName) {
     //     this.typeName = typeName;
     // }
@@ -173,12 +176,14 @@ public class Item {
         Optional<ItemTypeDB> itemType = itemTypeRepository.findById(getTypeId());
 
         if(itemType.isPresent()) {
-            setTypeName(itemType.get().getName());
-            setTypeEmoji(itemType.get().toItemType().getEmoji());
+            setItemType(itemType.get().toItemType());
+            // setTypeName(itemType.get().getName());
+            // setTypeEmoji(itemType.get().toItemType().getEmoji());
         }
         else {
-            setTypeName("");
-            setTypeEmoji("");
+            setItemType(new ItemType("",""));
+            // setTypeName("");
+            // setTypeEmoji("");
         }
     }
 }
