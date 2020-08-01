@@ -55,15 +55,15 @@ public class ItemApiController {
 
     @PostMapping("/")
     public ResponseWrapper<Iterable<Item>> createItem(@RequestBody Item item) {
-        if(item.getTypeId() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+        if(item.typeId == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         Iterator<Item> iterator;
 
-        Iterable<Item> items = itemRepository.findByTypeId(item.getTypeId());
+        Iterable<Item> items = itemRepository.findByTypeId(item.typeId);
         iterator = items.iterator();
 
-        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.getTypeId());
+        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.typeId);
 
         int max = 0;
         while(iterator.hasNext()) {
@@ -77,7 +77,7 @@ public class ItemApiController {
 
         if(type.isPresent()) {
             itemRepository.save(item);
-            Iterable<Item> result = itemRepository.findByTypeId(item.getTypeId());
+            Iterable<Item> result = itemRepository.findByTypeId(item.typeId);
             iterator = result.iterator();
 
             while(iterator.hasNext()) {
