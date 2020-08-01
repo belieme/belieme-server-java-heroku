@@ -11,9 +11,9 @@ public class Item {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int typeId;
+    public int typeId;
     private int num;
-    private int lastHistoryId;
+    public int lastHistoryId;
 
     private boolean inactive;
 
