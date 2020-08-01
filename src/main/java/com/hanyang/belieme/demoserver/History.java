@@ -1,22 +1,17 @@
 package com.hanyang.belieme.demoserver;
 
 import javax.persistence.*;
-
-import org.hibernate.annotations.Type;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
-import java.util.UUID;
 
 @Entity
 public class History {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    @Type( type = "uuid-char") @Column( length = 36 )
-    private UUID id;
+    private int id;
 
-    private UUID typeId;
+    private int typeId;
     private int itemNum;
     private int requesterId;
     private String requesterName;
@@ -38,11 +33,11 @@ public class History {
     public History() {
     }
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public UUID getTypeId() {
+    public int getTypeId() {
         return typeId;
     }
 
@@ -98,7 +93,7 @@ public class History {
         return typeEmoji;
     }
 
-    public void setTypeId(UUID typeId) {
+    public void setTypeId(int typeId) {
         this.typeId = typeId;
     }
 

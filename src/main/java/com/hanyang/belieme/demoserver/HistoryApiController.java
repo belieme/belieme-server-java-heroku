@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(path="/history")
@@ -34,7 +33,7 @@ public class HistoryApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<History> getItem(@PathVariable UUID id) {
+    public ResponseWrapper<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
         if(historyOptional.isPresent()) {
             historyOptional.get().addInfo(itemTypeRepository);
@@ -56,7 +55,7 @@ public class HistoryApiController {
 
     @PostMapping("/")
     public ResponseWrapper<PostMappingResponse> createItem(@RequestBody History item) {
-        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.getTypeId() == null) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.getTypeId() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         item.setResponseManagerId(0);
@@ -116,7 +115,7 @@ public class HistoryApiController {
     }
 
     @PutMapping("/cancel/{id}")
-    public ResponseWrapper<Iterable<History>> cancelItem(@PathVariable UUID id) {
+    public ResponseWrapper<Iterable<History>> cancelItem(@PathVariable int id) {
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
@@ -141,7 +140,7 @@ public class HistoryApiController {
     }
 
     @PutMapping("/response/{id}")
-    public ResponseWrapper<Iterable<History>> responseItem(@PathVariable UUID id, @RequestBody History history) {
+    public ResponseWrapper<Iterable<History>> responseItem(@PathVariable int id, @RequestBody History history) {
         if(history.getResponseManagerId() == 0 || history.getResponseManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -171,7 +170,7 @@ public class HistoryApiController {
     }
 
     @PutMapping("/return/{id}")
-    public ResponseWrapper<Iterable<History>> returnItem(@PathVariable UUID id, @RequestBody History history) {
+    public ResponseWrapper<Iterable<History>> returnItem(@PathVariable int id, @RequestBody History history) {
         if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
