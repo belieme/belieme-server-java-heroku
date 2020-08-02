@@ -51,6 +51,10 @@ public class ItemTypeWithItems {
     public String getStatus() {
         return status;
     }
+    
+    public List<ItemNestedToItemType> getItems() {
+        return items;
+    }
 
     public void setName(String name) {
         this.name = name;
