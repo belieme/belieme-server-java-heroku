@@ -33,10 +33,10 @@ public class ItemTypeApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<ItemType> getItem(@PathVariable int id) {
+    public ResponseWrapper<ItemTypeWithItems> getItem(@PathVariable int id) {
         Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
         if(tmpItemType.isPresent()) {
-            ItemType itemType = tmpItemType.get().toItemType();
+            ItemTypeWithItems itemType = new ItemTypeWithItems(tmpItemType.get());
             itemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, itemType);
         }

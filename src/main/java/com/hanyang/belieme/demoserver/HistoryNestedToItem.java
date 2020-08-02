@@ -45,6 +45,21 @@ public class HistoryNestedToItem {
             cancelTimeStamp = 0;
         }
     }
+    
+    public HistoryNestedToItem(HistoryNestedToItem historyNestedToItem) {
+        id = historyNestedToItem.id;
+        requesterId = historyNestedToItem.requesterId;
+        requesterName = new String(historyNestedToItem.requesterName);
+        responseManagerId = historyNestedToItem.responseManagerId;
+        responseManagerName = new String(historyNestedToItem.responseManagerName);
+        returnManagerId = historyNestedToItem.returnManagerId;
+        returnManagerName = new String(historyNestedToItem.returnManagerName);
+        requestTimeStamp = historyNestedToItem.requestTimeStamp;
+        responseTimeStamp = historyNestedToItem.responseTimeStamp;
+        returnTimeStamp = historyNestedToItem.returnTimeStamp;
+        cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
+        
+    }
 
     public int getId() {
         return id;

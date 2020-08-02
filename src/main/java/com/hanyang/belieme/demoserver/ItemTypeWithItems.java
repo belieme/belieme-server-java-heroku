@@ -1,26 +1,31 @@
 package com.hanyang.belieme.demoserver;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ItemType {
+public class ItemTypeWithItems {
     private int id;
     private String name;
     private String emoji;
+    private List<ItemNestedToItemType> items;
 
     private int amount;
     private int count;
     private String status;
 
-    public ItemType() {
-    }
-
-    public ItemType(int id, String name, String emoji) {
-        this.id = id;
-        this.name = name;
-        this.emoji = emoji;
+    public ItemTypeWithItems(ItemTypeDB itemType) {
+        if(itemType != null) {
+            this.id = itemType.getId();
+            this.name = new String(itemType.getName());
+            this.emoji = new String(itemType.getByteArrayFromInt(itemType.getEmojiByte()), StandardCharsets.UTF_8);
+        } else {
+            this.id = -1;
+            this.name = "";
+            this.emoji = "";
+        }
     }
 
     public int getId() {
@@ -58,13 +63,15 @@ public class ItemType {
     public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
         amount = 0;
         count = 0;
-        List<Item> items = itemRepository.findByTypeId(id);
-        for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(itemTypeRepository, historyRepository);
-            if(items.get(i).getStatus().equals("UNUSABLE")) {
+        List<Item> tmpItems = itemRepository.findByTypeId(id);
+        items = new ArrayList<ItemNestedToItemType>();
+        for(int i = 0; i < tmpItems.size(); i++) {
+            tmpItems.get(i).addInfo(itemTypeRepository, historyRepository);
+            items.add(new ItemNestedToItemType(tmpItems.get(i)));
+            if(tmpItems.get(i).getStatus().equals("UNUSABLE")) {
                 amount++;
             }
-            else if(items.get(i).getStatus().equals("USABLE")) {
+            else if(tmpItems.get(i).getStatus().equals("USABLE")) {
                 amount++;
                 count++;
             }
