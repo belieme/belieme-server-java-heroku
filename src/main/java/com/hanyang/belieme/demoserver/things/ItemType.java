@@ -1,8 +1,10 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.things;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
+
+import com.hanyang.belieme.demoserver.items.*;
+import com.hanyang.belieme.demoserver.events.*;
 
 
 public class ItemType {

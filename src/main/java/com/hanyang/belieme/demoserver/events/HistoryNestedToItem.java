@@ -1,18 +1,13 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.events;
 
-import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 import java.util.TimeZone;
 
-@Entity
-public class History {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+
+public class HistoryNestedToItem {
     private int id;
 
-    private int typeId;
-    private int itemNum;
     private int requesterId;
     private String requesterName;
     private int responseManagerId;
@@ -24,32 +19,57 @@ public class History {
     private long returnTimeStamp;
     private long cancelTimeStamp;
     
-    @Transient
-    private ItemNestedToHistory item;
-
-    public History() {
+    public HistoryNestedToItem(History history) {
+        if(history != null) {
+            id = history.getId();
+            requesterId = history.getRequesterId();
+            requesterName = new String(history.getRequesterName());
+            responseManagerId = history.getResponseManagerId();
+            responseManagerName = new String(history.getResponseManagerName());
+            returnManagerId = history.getReturnManagerId();
+            returnManagerName = new String(history.getReturnManagerName());
+            requestTimeStamp = history.getRequestTimeStamp();
+            responseTimeStamp = history.getResponseTimeStamp();
+            returnTimeStamp = history.getReturnTimeStamp();
+            cancelTimeStamp = history.getCancelTimeStamp();
+        } else {
+            id = -1;
+            requesterId = -1;
+            requesterName = "";
+            responseManagerId = -1;
+            responseManagerName = "";
+            returnManagerId = -1;
+            returnManagerName = "";
+            requestTimeStamp = 0;
+            responseTimeStamp = 0;
+            returnTimeStamp = 0;
+            cancelTimeStamp = 0;
+        }
     }
     
-    public int typeIdGetter() {
-        return typeId;
-    }
-
-    public int itemNumGetter() {
-        return itemNum;
+    public HistoryNestedToItem(HistoryNestedToItem historyNestedToItem) {
+        id = historyNestedToItem.id;
+        requesterId = historyNestedToItem.requesterId;
+        requesterName = new String(historyNestedToItem.requesterName);
+        responseManagerId = historyNestedToItem.responseManagerId;
+        responseManagerName = new String(historyNestedToItem.responseManagerName);
+        returnManagerId = historyNestedToItem.returnManagerId;
+        returnManagerName = new String(historyNestedToItem.returnManagerName);
+        requestTimeStamp = historyNestedToItem.requestTimeStamp;
+        responseTimeStamp = historyNestedToItem.responseTimeStamp;
+        returnTimeStamp = historyNestedToItem.returnTimeStamp;
+        cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
+        
     }
 
     public int getId() {
         return id;
     }
     
-    public ItemNestedToHistory getItem() {
-        return item;
-    }
-
     public int getRequesterId() {
         return requesterId;
     }
-
+    
     public String getRequesterName() {
         return requesterName;
     }
@@ -79,79 +99,11 @@ public class History {
     }
 
     public long getReturnTimeStamp() {
-        return returnTimeStamp;
+        return requestTimeStamp;
     }
 
     public long getCancelTimeStamp() {
         return cancelTimeStamp;
-    }
-
-    public void setTypeId(int typeId) {
-        this.typeId = typeId;
-    }
-
-    public void setItemNum(int itemNum) {
-        this.itemNum = itemNum;
-    }
-    
-    public void setItem(int num, ItemTypeDB itemType) {
-        this.item = new ItemNestedToHistory(num, itemType);
-    }
-
-    public void setRequesterId(int requesterId) {
-        this.requesterId = requesterId;
-    }
-
-    public void setRequesterName(String requesterName) {
-        this.requesterName = requesterName;
-    }
-
-    public void setResponseManagerId(int responseManagerId) {
-        this.responseManagerId = responseManagerId;
-    }
-
-    public void setResponseManagerName(String responseManagerName) {
-        this.responseManagerName = responseManagerName;
-    }
-
-    public void setReturnManagerId(int returnManagerId) {
-        this.returnManagerId = returnManagerId;
-    }
-
-    public void setReturnManagerName(String returnManagerName) {
-        this.returnManagerName = returnManagerName;
-    }
-
-    public void setRequestTimeStampZero() {
-        this.requestTimeStamp = 0;
-    }
-
-    public void setResponseTimeStampZero() {
-        this.responseTimeStamp = 0;
-    }
-
-    public void setReturnTimeStampZero() {
-        this.returnTimeStamp = 0;
-    }
-
-    public void setCancelTimeStampZero() {
-        this.cancelTimeStamp = 0;
-    }
-
-    public void setRequestTimeStampNow() {
-        this.requestTimeStamp = System.currentTimeMillis()/1000;
-    }
-
-    public void setResponseTimeStampNow() {
-        this.responseTimeStamp = System.currentTimeMillis()/1000;
-    }
-
-    public void setReturnTimeStampNow() {
-        this.returnTimeStamp = System.currentTimeMillis()/1000;
-    }
-
-    public void setCancelTimeStampNow() {
-        this.cancelTimeStamp = System.currentTimeMillis()/1000;
     }
 
     public String getStatus() {
@@ -181,12 +133,7 @@ public class History {
             return "ERROR";
         }
     }
-
-    public void addInfo(ItemTypeRepository itemTypeRepository) {
-        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
-        setItem(itemNum, itemTypeDB.get());
-    }
-
+    
     public long expiredTime() {
         return requestTimeStamp + 15*60;
     }

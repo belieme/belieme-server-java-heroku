@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.users;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

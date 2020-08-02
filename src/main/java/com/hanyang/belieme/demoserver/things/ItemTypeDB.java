@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.things;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;

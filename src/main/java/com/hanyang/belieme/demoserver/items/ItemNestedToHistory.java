@@ -1,4 +1,6 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.items;
+
+import com.hanyang.belieme.demoserver.things.*;
 
 public class ItemNestedToHistory {
     private int num;

@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.common;
 
 public class ResponseWrapper<T> {
     private ResponseHeader header;

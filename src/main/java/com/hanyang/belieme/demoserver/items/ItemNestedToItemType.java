@@ -1,4 +1,6 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.items;
+
+import com.hanyang.belieme.demoserver.events.*;
 
 public class ItemNestedToItemType {
     private int num;
@@ -24,4 +26,4 @@ public class ItemNestedToItemType {
     public String getStatus() {
         return status;
     }
-}
+}    

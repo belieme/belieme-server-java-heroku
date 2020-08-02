@@ -1,10 +1,15 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.items;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
 import java.util.Optional;
+
+import com.hanyang.belieme.demoserver.things.*;
+import com.hanyang.belieme.demoserver.events.*;
+import com.hanyang.belieme.demoserver.common.*;
+
 
 @RestController
 @RequestMapping(path="/item")

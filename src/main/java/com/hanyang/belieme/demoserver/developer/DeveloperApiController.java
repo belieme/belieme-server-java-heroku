@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.developer;
 
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Optional;
+
+import com.hanyang.belieme.demoserver.things.*;
+import com.hanyang.belieme.demoserver.items.*;
+import com.hanyang.belieme.demoserver.events.*;
 
 @RestController
 @RequestMapping(path="/developer")//git ignore

@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.common;
 
 public class ResponseHeader {
     public static final ResponseHeader OK = new ResponseHeader(0, "OK.");

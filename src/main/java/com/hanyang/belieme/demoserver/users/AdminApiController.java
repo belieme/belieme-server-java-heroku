@@ -1,10 +1,12 @@
-package com.hanyang.belieme.demoserver;
+package com.hanyang.belieme.demoserver.users;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-;
 import java.util.Optional;
+
+import com.hanyang.belieme.demoserver.common.*;
+
 
 @RestController
 @RequestMapping(path="/admin")
