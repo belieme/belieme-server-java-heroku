@@ -72,12 +72,20 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setItemType(ItemTypeDB itemType) { 
-        this.itemType = new ItemTypeNestedToItem(itemType);
+    public void setItemType(ItemTypeDB itemType) {
+        if(itemType == null) {
+            this.itemType = null;
+        } else {
+            this.itemType = new ItemTypeNestedToItem(itemType);
+        }
     }
     
     public void setLastHistory(History history) {
-        this.lastHistory = new HistoryNestedToItem(history);
+        if(history == null) {
+            this.lastHistory = null;
+        } else {
+            this.lastHistory = new HistoryNestedToItem(history);
+        }
     }
 
     public void deactivate() {

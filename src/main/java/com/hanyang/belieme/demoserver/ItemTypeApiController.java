@@ -32,7 +32,7 @@ public class ItemTypeApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, result);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/")
     public ResponseWrapper<ItemTypeWithItems> getItem(@PathVariable int id) {
         Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
         if(tmpItemType.isPresent()) {
@@ -92,7 +92,7 @@ public class ItemTypeApiController {
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null); // 여기가 not found가 맞는 것인가
     }
 
-    @PutMapping("/deactivate/{id}")
+    @PutMapping("/deactivate/{id}/")
     public ResponseWrapper<Void> deactivateItem(@PathVariable int id) {
         if(itemTypeRepository.findById(id).isPresent()) {
             List<Item> itemList = itemRepository.findByTypeId(id);
