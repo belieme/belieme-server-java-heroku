@@ -2,12 +2,12 @@ package com.hanyang.belieme.demoserver;
 
 import java.nio.charset.StandardCharsets;
 
-public class ItemTypeInItem {
+public class ItemTypeNestedToItem {
     private int id;
     private String name;
     private String emoji;
         
-    public ItemTypeInItem(ItemTypeDB itemType) {
+    public ItemTypeNestedToItem(ItemTypeDB itemType) {
         if(itemType != null) {
             this.id = itemType.getId();
             this.name = new String(itemType.getName());

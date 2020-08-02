@@ -21,7 +21,7 @@ public class Item {
     private String status;
 
     @Transient
-    private ItemTypeInItem itemType;
+    private ItemTypeNestedToItem itemType;
     
     @Transient
     private HistoryNestedToItem lastHistory;
@@ -48,7 +48,7 @@ public class Item {
         return status;
     }
 
-    public ItemTypeInItem getItemType() {
+    public ItemTypeNestedToItem getItemType() {
         return itemType;
     }
     
@@ -72,12 +72,12 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setItemType(ItemTypeInItem itemTypeinInItem) { 
-        this.itemType = itemTypeinInItem;
+    public void setItemType(ItemTypeDB itemType) { 
+        this.itemType = new ItemTypeNestedToItem(itemType);
     }
     
-    public void setLastHistory(HistoryNestedToItem historyNestedToItem) {
-        this.lastHistory = historyNestedToItem;
+    public void setLastHistory(History history) {
+        this.lastHistory = new HistoryNestedToItem(history);
     }
 
     public void deactivate() {
@@ -107,10 +107,11 @@ public class Item {
             else {
                 status = "UNUSABLE";
             }
-            setLastHistory(new HistoryNestedToItem(lastHistory.get()));
+            setLastHistory(lastHistory.get());
         }
         else {
             status = "USABLE";
+            setLastHistory(null);
         }
         if(isInactive())
         {
@@ -119,6 +120,6 @@ public class Item {
 
         Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeId);
 
-        setItemType(new ItemTypeInItem(itemType.get()));
+        setItemType(itemType.get());
     }
 }
