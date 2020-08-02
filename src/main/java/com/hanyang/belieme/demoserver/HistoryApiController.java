@@ -54,7 +54,7 @@ public class HistoryApiController {
 
     @PostMapping("/")
     public ResponseWrapper<PostMappingResponse> createItem(@RequestBody History item) {
-        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.getTypeId() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.typeIdGetter() == -1) { // id가 -1으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         item.setResponseManagerId(0);
@@ -72,7 +72,7 @@ public class HistoryApiController {
             historyList.get(i).addInfo(itemTypeRepository);
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
-                if(tmp.getTypeId() == item.getTypeId()) {
+                if(tmp.typeIdGetter() == item.typeIdGetter()) {
                     return new ResponseWrapper<>(ResponseHeader.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, null);
                 }
                 currentHistoryCount++;
@@ -83,7 +83,7 @@ public class HistoryApiController {
         }
 
         Item requestedItem = null;
-        List<Item> items = itemRepository.findByTypeId(item.getTypeId());
+        List<Item> items = itemRepository.findByTypeId(item.typeIdGetter());
         for(int i = 0; i < items.size(); i++) {
             items.get(i).addInfo(itemTypeRepository, historyRepository);
             if (items.get(i).getStatus().equals("USABLE")) {

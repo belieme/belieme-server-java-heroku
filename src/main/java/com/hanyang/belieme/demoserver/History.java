@@ -23,26 +23,26 @@ public class History {
     private long responseTimeStamp;
     private long returnTimeStamp;
     private long cancelTimeStamp;
-
-    @Transient
-    private String typeName;
-
-    @Transient
-    private String typeEmoji;
+    
+    private ItemNestedToHistory item;
 
     public History() {
+    }
+    
+    public int typeIdGetter() {
+        return typeId;
+    }
+
+    public int itemNumGetter() {
+        return itemNum;
     }
 
     public int getId() {
         return id;
     }
-
-    public int getTypeId() {
-        return typeId;
-    }
-
-    public int getItemNum() {
-        return itemNum;
+    
+    public ItemNestedToHistory getItem() {
+        return item;
     }
 
     public int getRequesterId() {
@@ -85,20 +85,16 @@ public class History {
         return cancelTimeStamp;
     }
 
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public String getTypeEmoji() {
-        return typeEmoji;
-    }
-
     public void setTypeId(int typeId) {
         this.typeId = typeId;
     }
 
     public void setItemNum(int itemNum) {
         this.itemNum = itemNum;
+    }
+    
+    public void setItem(int num, ItemTypeDB itemType) {
+        this.item = new ItemNestedToHistory(num, itemType);
     }
 
     public void setRequesterId(int requesterId) {
@@ -187,10 +183,7 @@ public class History {
 
     public void addInfo(ItemTypeRepository itemTypeRepository) {
         Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
-        if(itemTypeDB.isPresent()) {
-            typeName = itemTypeRepository.findById(typeId).get().getName();
-            typeEmoji = itemTypeRepository.findById(typeId).get().toItemType().getEmoji();
-        }
+        setItem(itemNum, itemTypeDB.get());
     }
 
     public long expiredTime() {
