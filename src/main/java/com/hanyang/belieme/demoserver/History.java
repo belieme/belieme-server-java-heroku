@@ -24,6 +24,7 @@ public class History {
     private long returnTimeStamp;
     private long cancelTimeStamp;
     
+    @Transient
     private ItemNestedToHistory item;
 
     public History() {
