@@ -1,13 +1,11 @@
-package com.hanyang.belieme.demoserver.items;
-
-import org.springframework.beans.factory.annotation.Autowired;
+package com.hanyang.belieme.demoserver.item;
 
 import javax.persistence.*;
 
 import java.util.Optional;
 
-import com.hanyang.belieme.demoserver.things.*;
-import com.hanyang.belieme.demoserver.events.*;
+import com.hanyang.belieme.demoserver.thing.*;
+import com.hanyang.belieme.demoserver.event.*;
 
 
 @Entity

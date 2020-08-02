@@ -1,12 +1,12 @@
-package com.hanyang.belieme.demoserver.things;
+package com.hanyang.belieme.demoserver.thing;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hanyang.belieme.demoserver.items.*;
-import com.hanyang.belieme.demoserver.events.*;
+import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.event.*;
 
 public class ItemTypeWithItems {
     private int id;

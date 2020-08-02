@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver.events;
+package com.hanyang.belieme.demoserver.event;
 
 import org.springframework.data.repository.CrudRepository;
 

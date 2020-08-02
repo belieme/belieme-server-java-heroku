@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver.events;
+package com.hanyang.belieme.demoserver.event;
 
 import javax.persistence.*;
 import java.util.Calendar;
@@ -6,11 +6,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
 
-import com.hanyang.belieme.demoserver.things.*;
-import com.hanyang.belieme.demoserver.items.*;
-import com.hanyang.belieme.demoserver.events.*;
-import com.hanyang.belieme.demoserver.users.*;
-import com.hanyang.belieme.demoserver.common.*;
+import com.hanyang.belieme.demoserver.thing.*;
+import com.hanyang.belieme.demoserver.item.*;
 
 
 @Entity

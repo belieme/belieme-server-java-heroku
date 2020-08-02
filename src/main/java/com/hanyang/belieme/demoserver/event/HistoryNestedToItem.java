@@ -1,9 +1,8 @@
-package com.hanyang.belieme.demoserver.events;
+package com.hanyang.belieme.demoserver.event;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 
 public class HistoryNestedToItem {
     private int id;

@@ -1,6 +1,6 @@
-package com.hanyang.belieme.demoserver.items;
+package com.hanyang.belieme.demoserver.item;
 
-import com.hanyang.belieme.demoserver.events.*;
+import com.hanyang.belieme.demoserver.event.*;
 
 public class ItemNestedToItemType {
     private int num;

@@ -1,4 +1,4 @@
-package com.hanyang.belieme.demoserver.items;
+package com.hanyang.belieme.demoserver.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Iterator;
 import java.util.Optional;
 
-import com.hanyang.belieme.demoserver.things.*;
-import com.hanyang.belieme.demoserver.events.*;
+import com.hanyang.belieme.demoserver.thing.*;
+import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.common.*;
 
 
