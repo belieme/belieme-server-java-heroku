@@ -57,36 +57,47 @@ public class HistoryApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
 
-    @PostMapping("/")
-    public ResponseWrapper<PostMappingResponse> createItem(@RequestBody History item) {
-        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.typeIdGetter() == -1) { // id가 -1으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    @PostMapping("/request/")
+    public ResponseWrapper<PostMappingResponse> createRequestHistory(@RequestBody History item) {
+        if(item.getRequesterId() == 0 || item.getRequesterName() == null || item.typeIdGetter() == 0) { // id가 -1으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         item.setResponseManagerId(0);
         item.setResponseManagerName("");
         item.setReturnManagerId(0);
         item.setReturnManagerName("");
+        item.setLostManagerId(0);
+        item.setLostManagerName("");
         item.setRequestTimeStampNow();
         item.setResponseTimeStampZero();
         item.setReturnTimeStampZero();
         item.setCancelTimeStampZero();
+        item.setLostTimeStampZero();
 
-        List<History> historyList = historyRepository.findByRequesterId(item.getRequesterId());
+        List<History> historyList = historyRepository.findByTypeIdAndItemNum(item.typeIdGetter(), item.itemNumGetter()); 
+        for(int i = 0; i < historyList.size(); i++) {
+            historyList.get(i).addInfo(itemTypeRepository);
+            History tmp = historyList.get(i);
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
+                if(tmp.typeIdGetter() == item.typeIdGetter()) {
+                    return new ResponseWrapper<>(ResponseHeader.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, null);
+                }
+            }
+        }
+        
+        historyList = historyRepository.findByRequesterId(item.getRequesterId());
         int currentHistoryCount = 0;
         for(int i = 0; i < historyList.size(); i++) {
             historyList.get(i).addInfo(itemTypeRepository);
             History tmp = historyList.get(i);
-            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
-                if(tmp.typeIdGetter() == item.typeIdGetter()) {
-                    return new ResponseWrapper<>(ResponseHeader.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, null);
-                }
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentHistoryCount++;
             }
         }
         if(currentHistoryCount >= 3) {
             return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_HISTORY_EXCEPTION, null);
-        }
-
+        } 
+            
         Item requestedItem = null;
         List<Item> items = itemRepository.findByTypeId(item.typeIdGetter());
         for(int i = 0; i < items.size(); i++) {
@@ -115,6 +126,62 @@ public class HistoryApiController {
         }
         else {
             return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+        }
+    }
+    
+    @PostMapping("/lost/")
+    public ResponseWrapper<PostMappingResponse> createLostHistory(@RequestBody History item) {
+        if(item.getLostManagerId() == 0 || item.getLostManagerName() == null || item.typeIdGetter() == 0 || item.itemNumGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        item.setRequesterId(0);
+        item.setRequesterName("");
+        item.setResponseManagerId(0);
+        item.setResponseManagerName("");
+        item.setReturnManagerId(0);
+        item.setReturnManagerName("");
+        item.setRequestTimeStampZero();
+        item.setResponseTimeStampZero();
+        item.setReturnTimeStampZero();
+        item.setCancelTimeStampZero();
+        item.setLostTimeStampNow();
+
+        List<History> historyList = historyRepository.findByTypeIdAndItemNum(item.typeIdGetter(), item.itemNumGetter()); 
+        for(int i = 0; i < historyList.size(); i++) {
+            historyList.get(i).addInfo(itemTypeRepository);
+            History tmp = historyList.get(i);
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
+                if(tmp.typeIdGetter() == item.typeIdGetter()) {
+                    return new ResponseWrapper<>(ResponseHeader.HISTORY_FOR_SAME_ITEM_TYPE_EXCEPTION, null);
+                }
+            }
+        }
+        
+        Item requestedItem = itemRepository.findById(new ItemPK(item.typeIdGetter(), item.itemNumGetter())).get();
+        
+        if(requestedItem != null) {
+            requestedItem.addInfo(itemTypeRepository, historyRepository);
+            if(requestedItem.getStatus().equals("USABLE")) {
+                History historyResult = historyRepository.save(item);
+                historyResult.addInfo(itemTypeRepository);
+                requestedItem.setLastHistoryId(historyResult.getId());
+                itemRepository.save(requestedItem);
+                ArrayList<ItemType> itemTypeListResult = new ArrayList<>();
+                Iterable<ItemTypeDB> itemTypeDB = itemTypeRepository.findAll();
+                Iterator<ItemTypeDB> iterator = itemTypeDB.iterator();
+                while(iterator.hasNext()) {
+                    ItemType tmpItemType = iterator.next().toItemType();
+                    tmpItemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
+                    itemTypeListResult.add(tmpItemType);
+                }
+                return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(historyResult, itemTypeListResult));
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+            }
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
     }
 
@@ -175,6 +242,36 @@ public class HistoryApiController {
 
     @PutMapping("/return/{id}")
     public ResponseWrapper<Iterable<History>> returnItem(@PathVariable int id, @RequestBody History history) {
+        if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        Optional<History> itemBeforeUpdate = historyRepository.findById(id);
+        if(itemBeforeUpdate.isPresent()) {
+            History tmp = itemBeforeUpdate.get();
+            if(tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
+                tmp.setReturnTimeStampNow();
+                tmp.setReturnManagerId(history.getReturnManagerId());
+                tmp.setReturnManagerName(history.getReturnManagerName());
+                historyRepository.save(tmp);
+                Iterable<History> result = historyRepository.findAll();
+                Iterator<History> iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    History historyTmp = iterator.next();
+                    historyTmp.addInfo(itemTypeRepository);
+                }
+                return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_HISTORY_STATUS_EXCEPTION, null);
+            }
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+    }
+    
+    @PutMapping("/lost/{id}")
+    public ResponseWrapper<Iterable<History>> lostItem(@PathVariable int id, @RequestBody History history) {
         if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }

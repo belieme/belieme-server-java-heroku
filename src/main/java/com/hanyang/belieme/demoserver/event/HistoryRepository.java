@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface HistoryRepository extends CrudRepository <History, Integer> {
     List<History> findByRequesterId(int requesterId);
-    List<History> findByTypeIdAndItemNum(int typeId, int itemId);
+    List<History> findByTypeIdAndItemNum(int typeId, int itemNum);
 }

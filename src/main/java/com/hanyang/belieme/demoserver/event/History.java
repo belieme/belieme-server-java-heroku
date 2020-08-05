@@ -23,10 +23,14 @@ public class History {
     private String responseManagerName;
     private int returnManagerId;
     private String returnManagerName;
+    private int lostManagerId;
+    private String lostManagerName;
+    
     private long requestTimeStamp;
     private long responseTimeStamp;
     private long returnTimeStamp;
     private long cancelTimeStamp;
+    private long lostTimeStamp;
     
     @Transient
     private ItemNestedToHistory item;
@@ -73,6 +77,14 @@ public class History {
     public String getReturnManagerName() {
         return returnManagerName;
     }
+    
+    public int getLostManagerId() {
+        return lostManagerId;
+    }
+
+    public String getLostManagerName() {
+        return lostManagerName;
+    }
 
     public long getRequestTimeStamp() {
         return requestTimeStamp;
@@ -88,6 +100,10 @@ public class History {
 
     public long getCancelTimeStamp() {
         return cancelTimeStamp;
+    }
+    
+    public long getLostTimeStamp() {
+        return lostTimeStamp;
     }
 
     public void setTypeId(int typeId) {
@@ -125,6 +141,14 @@ public class History {
     public void setReturnManagerName(String returnManagerName) {
         this.returnManagerName = returnManagerName;
     }
+    
+    public void setLostManagerId(int lostManagerId) {
+        this.lostManagerId = lostManagerId;
+    }
+
+    public void setLostManagerName(String lostManagerName) {
+        this.lostManagerName = lostManagerName;
+    }
 
     public void setRequestTimeStampZero() {
         this.requestTimeStamp = 0;
@@ -140,6 +164,10 @@ public class History {
 
     public void setCancelTimeStampZero() {
         this.cancelTimeStamp = 0;
+    }
+    
+    public void setLostTimeStampZero() {
+        this.lostTimeStamp = 0;
     }
 
     public void setRequestTimeStampNow() {
@@ -157,17 +185,27 @@ public class History {
     public void setCancelTimeStampNow() {
         this.cancelTimeStamp = System.currentTimeMillis()/1000;
     }
+    
+    public void setLostTimeStampNow() {
+        this.lostTimeStamp = System.currentTimeMillis()/1000;
+    }
 
     public String getStatus() {
         if(requestTimeStamp != 0) {
             if(returnTimeStamp != 0) {
+                if(lostTimeStamp != 0) {
+                    return "FOUNDANDRETURNED";
+                }
                 return "RETURNED";
             }
             else if(cancelTimeStamp != 0) {
                 return "EXPIRED";
             }
             else if(responseTimeStamp != 0) {
-                if(dueTime() > System.currentTimeMillis()/1000) {
+                if(lostTimeStamp != 0) {
+                    return "LOST";
+                }
+                else if(dueTime() > System.currentTimeMillis()/1000) {
                     return "USING";
                 }
                 else {
@@ -182,6 +220,13 @@ public class History {
             }
         }
         else {
+            if(lostTimeStamp != 0) {
+                if(returnTimeStamp != 0) {
+                    return "FOUND";
+                } else {
+                    return "LOST";
+                }
+            }
             return "ERROR";
         }
     }

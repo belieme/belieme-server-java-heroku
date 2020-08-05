@@ -34,7 +34,7 @@ public class ItemApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, items);
     }
 
-    @GetMapping("/byTypeId/{typeId}")
+    @GetMapping("/byTypeId/{typeId}/")
     public ResponseWrapper<Iterable<Item>> getItemsByTypeName(@PathVariable int typeId) {
         Iterable<Item> items = itemRepository.findByTypeId(typeId);
         Iterator<Item> iterator = items.iterator();
@@ -45,9 +45,9 @@ public class ItemApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, items);
     }
 
-    @GetMapping("/{id}")
-    public ResponseWrapper<Item> getItem(@PathVariable int id) {
-        Optional<Item> itemOptional = itemRepository.findById(id);
+    @GetMapping("/{typeId}/{itemNum}/")
+    public ResponseWrapper<Item> getItem(@PathVariable int typeId, @PathVariable int itemNum) {
+        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
         if(itemOptional.isPresent()) {
             Item item = itemOptional.get();
             item.addInfo(itemTypeRepository, historyRepository);
@@ -95,9 +95,9 @@ public class ItemApiController {
         }
     }
 
-    @PutMapping("/deactivate/{id}")
-    public ResponseWrapper<Item> deactivateItem(@PathVariable int id) {
-        Optional<Item> itemOptional = itemRepository.findById(id);
+    @PutMapping("/deactivate/{typeId}/{itemNum}/")
+    public ResponseWrapper<Item> deactivateItem(@PathVariable int typeId, @PathVariable int itemNum) {
+        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
         if(itemOptional.isPresent()) {
             Item item = itemOptional.get();
             item.deactivate();
@@ -110,9 +110,9 @@ public class ItemApiController {
         }
     }
 
-    @PutMapping("/activate/{id}")
-    public ResponseWrapper<Item> activateItem(@PathVariable int id) {
-        Optional<Item> itemOptional = itemRepository.findById(id);
+    @PutMapping("/activate/{typeId}/{itemNum}/")
+    public ResponseWrapper<Item> activateItem(@PathVariable int typeId, @PathVariable int itemNum) {
+        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
         if (itemOptional.isPresent()) {
             Item item = itemOptional.get();
             item.activate();

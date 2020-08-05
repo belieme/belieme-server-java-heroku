@@ -11,12 +11,10 @@ import com.hanyang.belieme.demoserver.event.*;
 @Entity
 public class Item {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-    private int typeId;
-    private int num;
+    @EmbeddedId
+    private ItemPK pk;
+    
     private int lastHistoryId;
-
     private boolean inactive;
 
     @Transient
@@ -32,18 +30,13 @@ public class Item {
     }
 
     public Item(int typeId, int num) {
-        this.typeId = typeId;
-        this.num = num;
+        pk = new ItemPK(typeId,num);
         this.lastHistoryId = -1;
         this.inactive = false;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public int getNum() {
-        return num;
+        return pk.getNum();
     }
 
     public String getStatus() {
@@ -63,11 +56,11 @@ public class Item {
     }
 
     public void setTypeId(int typeId) {
-        this.typeId = typeId;
+        this.pk.setTypeId(typeId);
     }
 
     public void setNum(int num) {
-        this.num = num;
+        this.pk.setNum(num);
     }
 
     public void setLastHistoryId(int lastHistoryId) {
@@ -99,7 +92,7 @@ public class Item {
     }
     
     public int typeIdGetter() {
-        return typeId;
+        return pk.getTypeId();
     }
     
     public int lastHistoryIdGetter() {
@@ -128,7 +121,7 @@ public class Item {
             status = "INACTIVE";
         }
 
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeId);
+        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeIdGetter());
 
         setItemType(itemType.get());
     }
