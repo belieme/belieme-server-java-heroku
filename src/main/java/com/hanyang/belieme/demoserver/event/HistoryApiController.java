@@ -276,16 +276,16 @@ public class HistoryApiController {
     
     @PutMapping("/lost/{id}")
     public ResponseWrapper<Iterable<History>> lostItem(@PathVariable int id, @RequestBody History history) {
-        if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
+        if(history.getLostManagerId() == 0 || history.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         Optional<History> itemBeforeUpdate = historyRepository.findById(id);
         if(itemBeforeUpdate.isPresent()) {
             History tmp = itemBeforeUpdate.get();
             if(tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
-                tmp.setReturnTimeStampNow();
-                tmp.setReturnManagerId(history.getReturnManagerId());
-                tmp.setReturnManagerName(history.getReturnManagerName());
+                tmp.setLostTimeStampNow();
+                tmp.setLostManagerId(history.getLostManagerId());
+                tmp.setLostManagerName(history.getLostManagerName());
                 historyRepository.save(tmp);
                 Iterable<History> result = historyRepository.findAll();
                 Iterator<History> iterator = result.iterator();
