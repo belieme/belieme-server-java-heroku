@@ -303,6 +303,36 @@ public class HistoryApiController {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
     }
+    
+    @PutMapping("/found/{id}")
+    public ResponseWrapper<Iterable<History>> foundItem(@PathVariable int id, @RequestBody History history) {
+        if(history.getReturnManagerId() == 0 || history.getReturnManagerName() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        Optional<History> itemBeforeUpdate = historyRepository.findById(id);
+        if(itemBeforeUpdate.isPresent()) {
+            History tmp = itemBeforeUpdate.get();
+            if(tmp.getStatus().equals("LOST")) {
+                tmp.setReturnTimeStampNow();
+                tmp.setReturnManagerId(history.getReturnManagerId());
+                tmp.setReturnManagerName(history.getReturnManagerName());
+                historyRepository.save(tmp);
+                Iterable<History> result = historyRepository.findAll();
+                Iterator<History> iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    History historyTmp = iterator.next();
+                    historyTmp.addInfo(itemTypeRepository);
+                }
+                return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
+            }
+            else {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_HISTORY_STATUS_EXCEPTION, null);
+            }
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+    }
 
     public class PostMappingResponse {
         History history;

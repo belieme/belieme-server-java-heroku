@@ -32,7 +32,7 @@ public class HistoryNestedToItem {
             returnManagerId = history.getReturnManagerId();
             returnManagerName = new String(history.getReturnManagerName());
             lostManagerId = history.getLostManagerId();
-            if(history.getLostManagerName() == null) {
+            if(history.getLostManagerName() == null) { // new String(null) can make runtime error...
                 lostManagerName = new String("");
             } else {
                 lostManagerName = new String(history.getLostManagerName());   
