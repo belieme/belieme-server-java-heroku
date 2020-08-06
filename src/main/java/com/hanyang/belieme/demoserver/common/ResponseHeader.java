@@ -9,6 +9,7 @@ public class ResponseHeader {
     public static final ResponseHeader ITEM_NOT_AVAILABLE_EXCEPTION = new ResponseHeader(5, "There is no available item.");
     public static final ResponseHeader WRONG_HISTORY_STATUS_EXCEPTION = new ResponseHeader(6, "Status of history is wrong.");
     public static final ResponseHeader WRONG_ADMIN_PERMISSION_EXCEPTION = new ResponseHeader(7, "Permission of admin is wrong.");
+    public static final ResponseHeader WRONG_IN_DATABASE_EXCEPTION = new ResponseHeader(8, "There is something wrong in database.");
 
     private int code;
     private String message;

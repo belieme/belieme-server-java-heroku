@@ -96,18 +96,19 @@ public class ItemTypeApiController {
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null); // 여기가 not found가 맞는 것인가
     }
 
-    @PutMapping("/deactivate/{id}/")
-    public ResponseWrapper<Void> deactivateItem(@PathVariable int id) {
-        if(itemTypeRepository.findById(id).isPresent()) {
-            List<Item> itemList = itemRepository.findByTypeId(id);
-            for (int i = 0; i < itemList.size(); i++) {
-                itemList.get(i).deactivate();
-                itemRepository.save(itemList.get(i));
-            }
-            return new ResponseWrapper<>(ResponseHeader.OK, null);
-        }
-        else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-    }
+    // deactivate ItemType을 만들긴 해야할 거 같지만 생각좀 해봐야 할 듯
+    // @PutMapping("/deactivate/{id}/")
+    // public ResponseWrapper<Void> deactivateItem(@PathVariable int id) {
+    //     if(itemTypeRepository.findById(id).isPresent()) {
+    //         List<Item> itemList = itemRepository.findByTypeId(id);
+    //         for (int i = 0; i < itemList.size(); i++) {
+    //             itemList.get(i).deactivate();
+    //             itemRepository.save(itemList.get(i));
+    //         }
+    //         return new ResponseWrapper<>(ResponseHeader.OK, null);
+    //     }
+    //     else {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     }
+    // }
 }

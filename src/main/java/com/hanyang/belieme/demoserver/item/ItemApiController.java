@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
@@ -47,13 +48,15 @@ public class ItemApiController {
 
     @GetMapping("/{typeId}/{itemNum}/")
     public ResponseWrapper<Item> getItem(@PathVariable int typeId, @PathVariable int itemNum) {
-        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
-        if(itemOptional.isPresent()) {
-            Item item = itemOptional.get();
+        List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);
+        if(itemList.size() == 1) {
+            Item item = itemList.get(0);
             item.addInfo(itemTypeRepository, historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, item);
-        } else {
+        } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
     }
 
@@ -95,32 +98,39 @@ public class ItemApiController {
         }
     }
 
-    @PutMapping("/deactivate/{typeId}/{itemNum}/")
-    public ResponseWrapper<Item> deactivateItem(@PathVariable int typeId, @PathVariable int itemNum) {
-        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
-        if(itemOptional.isPresent()) {
-            Item item = itemOptional.get();
-            item.deactivate();
-            Item result = itemRepository.save(item);
-            result.addInfo(itemTypeRepository,historyRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, result);
-        }
-        else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-    }
+    // @PutMapping("/deactivate/{typeId}/{itemNum}/")
+    // public ResponseWrapper<Item> deactivateItem(@PathVariable int typeId, @PathVariable int itemNum) {
+    //     List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);;
+    //     if(itemList.size() == 1) {
+    //         Item item = itemList.get(0);
+    //         item.deactivate();
+    //         Item result = itemRepository.save(item);
+    //         result.addInfo(itemTypeRepository,historyRepository);
+    //         return new ResponseWrapper<>(ResponseHeader.OK, result);
+    //     }
+    //     else if(itemList.size() == 0) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     }
+    //     else {
+    //        return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
+    // }
 
-    @PutMapping("/activate/{typeId}/{itemNum}/")
-    public ResponseWrapper<Item> activateItem(@PathVariable int typeId, @PathVariable int itemNum) {
-        Optional<Item> itemOptional = itemRepository.findById(new ItemPK(typeId, itemNum));
-        if (itemOptional.isPresent()) {
-            Item item = itemOptional.get();
-            item.activate();
-            Item result = itemRepository.save(item);
-            result.addInfo(itemTypeRepository,historyRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, result);
-        } else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-    }
+    // @PutMapping("/activate/{typeId}/{itemNum}/")
+    // public ResponseWrapper<Item> activateItem(@PathVariable int typeId, @PathVariable int itemNum) {
+    //     List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);;
+    //     if(itemList.size() == 1) {
+    //         Item item = itemList.get(0);
+    //         item.activate();
+    //         Item result = itemRepository.save(item);
+    //         result.addInfo(itemTypeRepository,historyRepository);
+    //         return new ResponseWrapper<>(ResponseHeader.OK, result);
+    //     }
+    //     else if(itemList.size() == 0) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     }
+    //     else {
+    //        return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
+    // }
 }

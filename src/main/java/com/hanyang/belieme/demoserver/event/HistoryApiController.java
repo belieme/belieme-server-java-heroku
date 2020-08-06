@@ -157,9 +157,10 @@ public class HistoryApiController {
             }
         }
         
-        Item requestedItem = itemRepository.findById(new ItemPK(item.typeIdGetter(), item.itemNumGetter())).get();
+        List<Item> requestedItemList = itemRepository.findByTypeIdAndNum(item.typeIdGetter(), item.itemNumGetter());
         
-        if(requestedItem != null) {
+        if(requestedItemList.size() == 1) {
+            Item requestedItem = requestedItemList.get(0);
             requestedItem.addInfo(itemTypeRepository, historyRepository);
             if(requestedItem.getStatus().equals("USABLE")) {
                 History historyResult = historyRepository.save(item);
@@ -180,8 +181,11 @@ public class HistoryApiController {
                 return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
             }
         }
-        else {
+        else if(requestedItemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
     }
 

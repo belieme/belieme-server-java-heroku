@@ -10,12 +10,12 @@ import com.hanyang.belieme.demoserver.event.*;
 
 @Entity
 public class Item {
-
-    @EmbeddedId
-    private ItemPK pk;
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    private int typeId;
+    private int num;
     
     private int lastHistoryId;
-    private boolean inactive;
 
     @Transient
     private String status;
@@ -30,13 +30,17 @@ public class Item {
     }
 
     public Item(int typeId, int num) {
-        pk = new ItemPK(typeId,num);
+        this.typeId = typeId;
+        this.num = num;
         this.lastHistoryId = -1;
-        this.inactive = false;
+    }
+    
+    public int getId() {
+        return id;
     }
 
     public int getNum() {
-        return pk.getNum();
+        return num;
     }
 
     public String getStatus() {
@@ -51,16 +55,12 @@ public class Item {
         return lastHistory;
     }
 
-    public boolean isInactive() {
-        return inactive;
-    }
-
     public void setTypeId(int typeId) {
-        this.pk.setTypeId(typeId);
+        this.typeId = typeId;
     }
 
     public void setNum(int num) {
-        this.pk.setNum(num);
+        this.num = num;
     }
 
     public void setLastHistoryId(int lastHistoryId) {
@@ -82,17 +82,9 @@ public class Item {
             this.lastHistory = new HistoryNestedToItem(history);
         }
     }
-
-    public void deactivate() {
-        inactive = true;
-    }
-
-    public void activate() {
-        inactive = false;
-    }
     
     public int typeIdGetter() {
-        return pk.getTypeId();
+        return typeId;
     }
     
     public int lastHistoryIdGetter() {
@@ -104,10 +96,12 @@ public class Item {
         Optional<History> lastHistory = historyRepository.findById(lastHistoryId);
         if(lastHistory.isPresent()) {
             String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")) {
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")) {
                 status = "USABLE";
             }
-            else {
+            else if (lastHistoryStatus.equals("LOST")){
+                status = "INACTIVATE";
+            } else {
                 status = "UNUSABLE";
             }
             setLastHistory(lastHistory.get());
@@ -116,13 +110,8 @@ public class Item {
             status = "USABLE";
             setLastHistory(null);
         }
-        if(isInactive())
-        {
-            status = "INACTIVE";
-        }
 
         Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeIdGetter());
-
         setItemType(itemType.get());
     }
 }

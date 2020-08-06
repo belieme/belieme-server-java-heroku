@@ -71,7 +71,7 @@ public class ItemType {
                 count++;
             }
         }
-        if(amount == 0) {
+        if(amount == 0) { // 여기도 생각할 여지가 필요할 듯
             status = "INACTIVE";
         }
         else if(count == 0) {

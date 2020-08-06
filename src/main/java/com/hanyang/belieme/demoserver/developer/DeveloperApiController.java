@@ -78,9 +78,9 @@ public class DeveloperApiController {
         return itemRepository.save(item);
     }
 
-    @PutMapping("/item")
-    public Item updateItem(@RequestBody Item item){
-        Optional<Item> tmp = itemRepository.findById(new ItemPK(item.typeIdGetter(), item.getNum()));
+    @PutMapping("/item/{id}/")
+    public Item updateItem(@PathVariable int id, @RequestBody Item item){
+        Optional<Item> tmp = itemRepository.findById(id);
         if(!tmp.isPresent()) {
             return null;
         }
@@ -89,14 +89,14 @@ public class DeveloperApiController {
         }
     }
 
-    @DeleteMapping("/item/{typeId}/{itemNum}")
-    public Item deleteItem(@PathVariable int typeId, @PathVariable int itemNum) {
-        Optional<Item> deletedItem = itemRepository.findById(new ItemPK(typeId, itemNum));
+    @DeleteMapping("/item/{id}/")
+    public Item deleteItem(@PathVariable int id) {
+        Optional<Item> deletedItem = itemRepository.findById(id);
         if(!deletedItem.isPresent()) {
             return null;
         }
         else {
-            itemRepository.deleteById(new ItemPK(typeId, itemNum));
+            itemRepository.deleteById(id);
             return deletedItem.get();
         }
     }
