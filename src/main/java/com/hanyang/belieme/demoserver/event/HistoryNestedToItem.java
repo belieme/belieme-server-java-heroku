@@ -32,7 +32,11 @@ public class HistoryNestedToItem {
             returnManagerId = history.getReturnManagerId();
             returnManagerName = new String(history.getReturnManagerName());
             lostManagerId = history.getLostManagerId();
-            lostManagerName = new String(history.getLostManagerName());
+            if(history.getLostManagerName() == null) {
+                lostManagerName = new String("");
+            } else {
+                lostManagerName = new String(history.getLostManagerName());   
+            }
             requestTimeStamp = history.getRequestTimeStamp();
             responseTimeStamp = history.getResponseTimeStamp();
             returnTimeStamp = history.getReturnTimeStamp();
