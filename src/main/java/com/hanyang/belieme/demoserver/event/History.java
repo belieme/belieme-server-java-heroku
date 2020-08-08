@@ -3,10 +3,10 @@ package com.hanyang.belieme.demoserver.event;
 import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 
-import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.item.*;
 
 
@@ -114,8 +114,16 @@ public class History {
         this.itemNum = itemNum;
     }
     
-    public void setItem(int num, ItemTypeDB itemType) {
-        this.item = new ItemNestedToHistory(num, itemType);
+    // public void setItem(int num, ItemTypeDB itemType) {
+    //     this.item = new ItemNestedToHistory(num, itemType);
+    // }
+    
+    public void setItem(Item item) {
+        if(item != null) {
+            this.item = item.toItemNestedToHistory();    
+        } else {
+            this.item = null;
+        }
     }
 
     public void setRequesterId(int requesterId) {
@@ -231,9 +239,31 @@ public class History {
         }
     }
 
-    public void addInfo(ItemTypeRepository itemTypeRepository) {
-        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
-        setItem(itemNum, itemTypeDB.get());
+    // public void addInfo(ItemTypeRepository itemTypeRepository) {
+    //     Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
+    //     setItem(itemNum, itemTypeDB.get());
+    // }
+    
+    public void addInfo(ItemRepository itemRepository, HistoryRepository historyRepository) {
+        List<Item> item = itemRepository.findByTypeIdAndNum(typeId, itemNum);
+        if(item.size() == 1) {
+            setItem(item.get(0));
+            Optional<History> lastHistory = historyRepository.findById(item.get(0).lastHistoryIdGetter());
+            if(lastHistory.isPresent()) {
+                String lastHistoryStatus = lastHistory.get().getStatus();
+                if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")) {
+                    this.item.setCurrentStatus("USABLE");
+                }
+                else if (lastHistoryStatus.equals("LOST")){
+                    this.item.setCurrentStatus("INACTIVATE");
+                } else {
+                    this.item.setCurrentStatus("UNUSABLE");
+                }
+            }
+            else {
+                this.item.setCurrentStatus("USABLE");
+            }
+        }
     }
 
     public long expiredTime() {
@@ -259,5 +289,25 @@ public class History {
             tmp.add(Calendar.DATE, 1);
         }
         return tmp.getTime().getTime()/1000;
+    }
+
+    public HistoryNestedToItem toHistoryNestedToItem() {
+        HistoryNestedToItem output = new HistoryNestedToItem();
+        output.setId(getId());
+        output.setRequesterId(requesterId);
+        output.setRequesterName(requesterName);
+        output.setResponseManagerId(responseManagerId);
+        output.setResponseManagerName(responseManagerName);
+        output.setReturnManagerId(returnManagerId);
+        output.setReturnManagerName(returnManagerName);
+        output.setLostManagerId(lostManagerId);
+        output.setLostManagerName(lostManagerName);
+        output.setRequestTimeStamp(requestTimeStamp);
+        output.setResponseTimeStamp(responseTimeStamp);
+        output.setReturnTimeStamp(returnTimeStamp);
+        output.setCancelTimeStamp(cancelTimeStamp);
+        output.setLostTimeStamp(lostTimeStamp);
+        
+        return output;
     }
 }

@@ -4,8 +4,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import javax.validation.constraints.Null;
-
 public class HistoryNestedToItem {
     private int id;
 
@@ -24,76 +22,24 @@ public class HistoryNestedToItem {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    public HistoryNestedToItem(History history) {
-        if(history != null) {
-            id = history.getId();
-            requesterId = history.getRequesterId();
-            requesterName = new String(history.getRequesterName());
-            responseManagerId = history.getResponseManagerId();
-            responseManagerName = new String(history.getResponseManagerName());
-            returnManagerId = history.getReturnManagerId();
-            returnManagerName = new String(history.getReturnManagerName());
-            lostManagerId = history.getLostManagerId();
-            if(history.getLostManagerName() == null) { // new String(null) can make runtime error...
-                lostManagerName = new String("");
-            } else {
-                lostManagerName = new String(history.getLostManagerName());   
-            }
-            requestTimeStamp = history.getRequestTimeStamp();
-            responseTimeStamp = history.getResponseTimeStamp();
-            returnTimeStamp = history.getReturnTimeStamp();
-            cancelTimeStamp = history.getCancelTimeStamp();
-            lostTimeStamp = history.getLostTimeStamp();
-        } else {
-            id = -1;
-            requesterId = -1;
-            requesterName = "";
-            responseManagerId = -1;
-            responseManagerName = "";
-            returnManagerId = -1;
-            returnManagerName = "";
-            lostManagerId = -1;
-            lostManagerName = "";
-            requestTimeStamp = 0;
-            responseTimeStamp = 0;
-            returnTimeStamp = 0;
-            cancelTimeStamp = 0;
-            lostTimeStamp = 0;
-        }
+    public HistoryNestedToItem() {
     }
     
     public HistoryNestedToItem(HistoryNestedToItem historyNestedToItem) {
-        if(historyNestedToItem != null) {
-            id = historyNestedToItem.id;
-            requesterId = historyNestedToItem.requesterId;
-            requesterName = new String(historyNestedToItem.requesterName);
-            responseManagerId = historyNestedToItem.responseManagerId;
-            responseManagerName = new String(historyNestedToItem.responseManagerName);
-            returnManagerId = historyNestedToItem.returnManagerId;
-            returnManagerName = new String(historyNestedToItem.returnManagerName);
-            lostManagerId = historyNestedToItem.lostManagerId;
-            lostManagerName = new String(historyNestedToItem.lostManagerName);
-            requestTimeStamp = historyNestedToItem.requestTimeStamp;
-            responseTimeStamp = historyNestedToItem.responseTimeStamp;
-            returnTimeStamp = historyNestedToItem.returnTimeStamp;
-            cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
-            lostTimeStamp = historyNestedToItem.lostTimeStamp;
-        } else {
-            id = -1;
-            requesterId = -1;
-            requesterName = "";
-            responseManagerId = -1;
-            responseManagerName = "";
-            returnManagerId = -1;
-            returnManagerName = "";
-            lostManagerId = -1;
-            lostManagerName = "";
-            requestTimeStamp = 0;
-            responseTimeStamp = 0;
-            returnTimeStamp = 0;
-            cancelTimeStamp = 0;
-            lostTimeStamp = 0;
-        }
+        id = historyNestedToItem.id;
+        requesterId = historyNestedToItem.requesterId;
+        requesterName = historyNestedToItem.requesterName;
+        responseManagerId = historyNestedToItem.responseManagerId;
+        responseManagerName = historyNestedToItem.responseManagerName;
+        returnManagerId = historyNestedToItem.returnManagerId;
+        returnManagerName = historyNestedToItem.returnManagerName;
+        lostManagerId = historyNestedToItem.lostManagerId;
+        lostManagerName = historyNestedToItem.lostManagerName;
+        requestTimeStamp = historyNestedToItem.requestTimeStamp;
+        responseTimeStamp = historyNestedToItem.responseTimeStamp;
+        returnTimeStamp = historyNestedToItem.returnTimeStamp;
+        cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
+        lostTimeStamp = historyNestedToItem.lostTimeStamp;
         
     }
 
@@ -192,6 +138,62 @@ public class HistoryNestedToItem {
             }
             return "ERROR";
         }
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public void setRequesterId(int requesterId) {
+        this.requesterId = requesterId;
+    }
+    
+    public void setRequesterName(String requesterName) {
+        this.requesterName = requesterName;
+    }
+    
+    public void setResponseManagerId(int responseManagerId) {
+        this.responseManagerId = responseManagerId;
+    }
+    
+    public void setResponseManagerName(String responseManagerName) {
+        this.responseManagerName = responseManagerName;
+    }
+    
+    public void setReturnManagerId(int returnManagerId) {
+        this.returnManagerId = returnManagerId;
+    }
+    
+    public void setReturnManagerName(String returnManagerName) {
+        this.returnManagerName = returnManagerName;
+    }
+     
+    public void setLostManagerId(int lostManagerId) {
+        this.lostManagerId = lostManagerId;
+    }
+    
+    public void setLostManagerName(String lostManagerName) {
+        this.lostManagerName = lostManagerName;
+    }
+
+    public void setRequestTimeStamp(long requestTimeStamp) {
+        this.requestTimeStamp = requestTimeStamp;
+    }
+    
+    public void setResponseTimeStamp(long responseTimeStamp) {
+        this.responseTimeStamp = responseTimeStamp;
+    }
+    
+    public void setReturnTimeStamp(long returnTimeStamp) {
+        this.returnTimeStamp = returnTimeStamp;
+    }
+    
+    public void setCancelTimeStamp(long cancelTimeStamp) {
+        this.cancelTimeStamp = cancelTimeStamp;
+    }
+    
+    public void setLostTimeStamp(long lostTimeStamp) {
+        this.lostTimeStamp = lostTimeStamp;
     }
     
     public long expiredTime() {

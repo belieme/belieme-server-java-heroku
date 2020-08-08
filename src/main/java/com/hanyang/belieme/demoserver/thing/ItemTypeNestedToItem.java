@@ -1,22 +1,17 @@
 package com.hanyang.belieme.demoserver.thing;
 
-import java.nio.charset.StandardCharsets;
-
 public class ItemTypeNestedToItem {
     private int id;
     private String name;
     private String emoji;
         
-    public ItemTypeNestedToItem(ItemTypeDB itemType) {
-        if(itemType != null) {
-            this.id = itemType.getId();
-            this.name = new String(itemType.getName());
-            this.emoji = new String(itemType.getByteArrayFromInt(itemType.getEmojiByte()), StandardCharsets.UTF_8);
-        } else {
-            this.id = -1;
-            this.name = "";
-            this.emoji = "";
-        }
+    public ItemTypeNestedToItem() {
+    }
+    
+    public ItemTypeNestedToItem(ItemTypeNestedToItem oth) {
+        this.id = oth.id;
+        this.name = oth.name;
+        this.emoji = oth.emoji;
     }
         
     public int getId(){
@@ -29,5 +24,17 @@ public class ItemTypeNestedToItem {
         
     public String getEmoji() {
         return emoji;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setEmoji(String emoji) {
+        this.emoji = emoji;
     }
 }

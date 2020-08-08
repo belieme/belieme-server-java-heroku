@@ -113,4 +113,21 @@ public class ItemType {
             return result;
         }
     }
+    
+    public ItemTypeNestedToItem toItemTypeNestedToItem() {
+        ItemTypeNestedToItem output = new ItemTypeNestedToItem();
+        output.setId(id);
+        output.setName(name);
+        output.setEmoji(emoji);
+        
+        return output;
+    }
+    
+    public ItemTypeWithItems toItemTypeWithItems() {
+        ItemTypeWithItems output = new ItemTypeWithItems();
+        output.setId(id);
+        output.setName(name);
+        output.setEmoji(emoji);
+        return output;
+    }
 }

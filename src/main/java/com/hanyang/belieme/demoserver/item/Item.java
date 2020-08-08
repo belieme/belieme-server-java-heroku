@@ -67,11 +67,11 @@ public class Item {
         this.lastHistoryId = lastHistoryId;
     }
 
-    public void setItemType(ItemTypeDB itemType) {
+    public void setItemType(ItemType itemType) {
         if(itemType == null) {
             this.itemType = null;
         } else {
-            this.itemType = new ItemTypeNestedToItem(itemType);
+            this.itemType = itemType.toItemTypeNestedToItem();
         }
     }
     
@@ -79,7 +79,7 @@ public class Item {
         if(history == null) {
             this.lastHistory = null;
         } else {
-            this.lastHistory = new HistoryNestedToItem(history);
+            this.lastHistory = history.toHistoryNestedToItem();
         }
     }
     
@@ -111,7 +111,30 @@ public class Item {
             setLastHistory(null);
         }
 
-        Optional<ItemTypeDB> itemType = itemTypeRepository.findById(typeIdGetter());
-        setItemType(itemType.get());
+        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeIdGetter());
+        ItemType itemType;
+        if(itemTypeDB.isPresent()) {
+            itemType = itemTypeDB.get().toItemType();
+        } else {
+            itemType = null;
+        }
+        setItemType(itemType);
+    }
+    
+    public ItemNestedToItemType toItemNestedToItemType() {
+        ItemNestedToItemType output = new ItemNestedToItemType();
+        output.setNum(num);
+        output.setLastHistory(lastHistory);
+        output.setStatus(status);
+        return output;
+    }
+    
+    public ItemNestedToHistory toItemNestedToHistory() {
+        ItemNestedToHistory output = new ItemNestedToHistory();
+        output.setId(id);
+        output.setNum(num);
+        output.setItemType(itemType);
+        
+        return output;
     }
 }

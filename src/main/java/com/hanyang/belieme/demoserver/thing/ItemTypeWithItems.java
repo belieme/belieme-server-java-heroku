@@ -1,7 +1,5 @@
 package com.hanyang.belieme.demoserver.thing;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,17 +15,9 @@ public class ItemTypeWithItems {
     private int amount;
     private int count;
     private String status;
-
-    public ItemTypeWithItems(ItemTypeDB itemType) {
-        if(itemType != null) {
-            this.id = itemType.getId();
-            this.name = new String(itemType.getName());
-            this.emoji = new String(itemType.getByteArrayFromInt(itemType.getEmojiByte()), StandardCharsets.UTF_8);
-        } else {
-            this.id = -1;
-            this.name = "";
-            this.emoji = "";
-        }
+    
+    public ItemTypeWithItems() {
+        
     }
 
     public int getId() {
@@ -58,6 +48,10 @@ public class ItemTypeWithItems {
         return items;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
@@ -73,7 +67,7 @@ public class ItemTypeWithItems {
         items = new ArrayList<ItemNestedToItemType>();
         for(int i = 0; i < tmpItems.size(); i++) {
             tmpItems.get(i).addInfo(itemTypeRepository, historyRepository);
-            items.add(new ItemNestedToItemType(tmpItems.get(i)));
+            items.add(tmpItems.get(i).toItemNestedToItemType());
             if(tmpItems.get(i).getStatus().equals("UNUSABLE")) {
                 amount++;
             }
@@ -93,35 +87,6 @@ public class ItemTypeWithItems {
         }
         else {
             status = "ERROR";
-        }
-    }
-
-    public ItemTypeDB toItemTypeDB() {
-        byte arr[];
-        try {
-            arr = emoji.getBytes("UTF-8");
-            return new ItemTypeDB(id, name, getIntFromByteArray(arr));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    int getIntFromByteArray(byte[] bytes) {
-        if(bytes.length >= 4) {
-            return ((bytes[0] & 0xFF) << 24) |
-                    ((bytes[1] & 0xFF) << 16) |
-                    ((bytes[2] & 0xFF) << 8 ) |
-                    ((bytes[3] & 0xFF) << 0 );
-        }
-        else {
-            int result = 0;
-            int shiftLength = 24;
-            for(int i = 0; i < bytes.length; i++) {
-                result |= ((bytes[i] & 0xFF) << shiftLength);
-                shiftLength -= 8;
-            }
-            return result;
         }
     }
 }

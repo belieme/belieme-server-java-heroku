@@ -7,12 +7,7 @@ public class ItemNestedToItemType {
     private HistoryNestedToItem lastHistory;
     private String status;
     
-    public ItemNestedToItemType(Item item) {
-        if(item != null) {
-            this.num = item.getNum();
-            this.lastHistory = new HistoryNestedToItem(item.getLastHistory());
-            this.status = item.getStatus();
-        }
+    public ItemNestedToItemType() {
     }
 
     public int getNum() {
@@ -25,5 +20,21 @@ public class ItemNestedToItemType {
     
     public String getStatus() {
         return status;
+    }
+    
+    public void setNum(int num) {
+        this.num = num;
+    }
+    
+    public void setLastHistory(HistoryNestedToItem lastHistory) {
+        if(lastHistory != null) {
+            this.lastHistory = new HistoryNestedToItem(lastHistory);
+        } else {
+            this.lastHistory = null;
+        }
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
     }
 }    

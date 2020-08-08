@@ -40,7 +40,7 @@ public class ItemTypeApiController {
     public ResponseWrapper<ItemTypeWithItems> getItem(@PathVariable int id) {
         Optional<ItemTypeDB> tmpItemType =  itemTypeRepository.findById(id);
         if(tmpItemType.isPresent()) {
-            ItemTypeWithItems itemType = new ItemTypeWithItems(tmpItemType.get());
+            ItemTypeWithItems itemType = tmpItemType.get().toItemType().toItemTypeWithItems();
             itemType.addInfo(itemTypeRepository, itemRepository, historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, itemType);
         }
