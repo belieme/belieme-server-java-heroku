@@ -251,7 +251,7 @@ public class History {
             Optional<History> lastHistory = historyRepository.findById(item.get(0).lastHistoryIdGetter());
             if(lastHistory.isPresent()) {
                 String lastHistoryStatus = lastHistory.get().getStatus();
-                if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")) {
+                if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
                     this.item.setCurrentStatus("USABLE");
                 }
                 else if (lastHistoryStatus.equals("LOST")){

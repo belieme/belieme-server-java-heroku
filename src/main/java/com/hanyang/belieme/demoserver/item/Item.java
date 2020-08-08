@@ -96,7 +96,7 @@ public class Item {
         Optional<History> lastHistory = historyRepository.findById(lastHistoryId);
         if(lastHistory.isPresent()) {
             String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")) {
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
                 status = "USABLE";
             }
             else if (lastHistoryStatus.equals("LOST")){
