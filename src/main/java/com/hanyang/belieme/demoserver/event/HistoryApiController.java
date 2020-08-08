@@ -31,7 +31,8 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.addInfo(itemTypeRepository);
+            // history.addInfo(itemTypeRepository);
+            history.addInfo(itemRepository, historyRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
@@ -40,7 +41,8 @@ public class HistoryApiController {
     public ResponseWrapper<History> getItem(@PathVariable int id) {
         Optional<History> historyOptional = historyRepository.findById(id);
         if(historyOptional.isPresent()) {
-            historyOptional.get().addInfo(itemTypeRepository);
+            // historyOptional.get().addInfo(itemTypeRepository);
+            historyOptional.get().addInfo(itemRepository, historyRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, historyOptional.get());
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -52,7 +54,8 @@ public class HistoryApiController {
         Iterator<History> iterator = list.iterator();
         while(iterator.hasNext()) {
             History history = iterator.next();
-            history.addInfo(itemTypeRepository);
+            // history.addInfo(itemTypeRepository);
+            history.addInfo(itemRepository, historyRepository);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, list);
     }
@@ -76,7 +79,8 @@ public class HistoryApiController {
 
         List<History> historyList = historyRepository.findByTypeIdAndItemNum(item.typeIdGetter(), item.itemNumGetter()); 
         for(int i = 0; i < historyList.size(); i++) {
-            historyList.get(i).addInfo(itemTypeRepository);
+            // historyList.get(i).addInfo(itemTypeRepository);
+            historyList.get(i).addInfo(itemRepository, historyRepository);
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 if(tmp.typeIdGetter() == item.typeIdGetter()) {
@@ -88,7 +92,8 @@ public class HistoryApiController {
         historyList = historyRepository.findByRequesterId(item.getRequesterId());
         int currentHistoryCount = 0;
         for(int i = 0; i < historyList.size(); i++) {
-            historyList.get(i).addInfo(itemTypeRepository);
+            // historyList.get(i).addInfo(itemTypeRepository);
+            historyList.get(i).addInfo(itemRepository, historyRepository);
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentHistoryCount++;
@@ -111,7 +116,8 @@ public class HistoryApiController {
         if(requestedItem != null) {
             item.setItemNum(requestedItem.getNum());
             History historyResult = historyRepository.save(item);
-            historyResult.addInfo(itemTypeRepository);
+            // historyResult.addInfo(itemTypeRepository);
+            historyResult.addInfo(itemRepository, historyRepository);
             requestedItem.setLastHistoryId(historyResult.getId());
             itemRepository.save(requestedItem);
             ArrayList<ItemType> itemTypeListResult = new ArrayList<>();
@@ -148,7 +154,8 @@ public class HistoryApiController {
 
         List<History> historyList = historyRepository.findByTypeIdAndItemNum(item.typeIdGetter(), item.itemNumGetter()); 
         for(int i = 0; i < historyList.size(); i++) {
-            historyList.get(i).addInfo(itemTypeRepository);
+            // historyList.get(i).addInfo(itemTypeRepository);
+            historyList.get(i).addInfo(itemRepository, historyRepository);
             History tmp = historyList.get(i);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 if(tmp.typeIdGetter() == item.typeIdGetter()) {
@@ -164,7 +171,8 @@ public class HistoryApiController {
             requestedItem.addInfo(itemTypeRepository, historyRepository);
             if(requestedItem.getStatus().equals("USABLE")) {
                 History historyResult = historyRepository.save(item);
-                historyResult.addInfo(itemTypeRepository);
+                // historyResult.addInfo(itemTypeRepository);
+                historyResult.addInfo(itemRepository, historyRepository);
                 requestedItem.setLastHistoryId(historyResult.getId());
                 itemRepository.save(requestedItem);
                 ArrayList<ItemType> itemTypeListResult = new ArrayList<>();
@@ -201,7 +209,8 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(itemTypeRepository);
+                    // historyTmp.addInfo(itemTypeRepository);
+                    historyTmp.addInfo(itemRepository, historyRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -231,7 +240,8 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(itemTypeRepository);
+                    // historyTmp.addInfo(itemTypeRepository);
+                    historyTmp.addInfo(itemRepository, historyRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -261,7 +271,8 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(itemTypeRepository);
+                    // historyTmp.addInfo(itemTypeRepository);
+                    historyTmp.addInfo(itemRepository, historyRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -291,7 +302,8 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(itemTypeRepository);
+                    // historyTmp.addInfo(itemTypeRepository);
+                    historyTmp.addInfo(itemRepository, historyRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
@@ -321,7 +333,8 @@ public class HistoryApiController {
                 Iterator<History> iterator = result.iterator();
                 while (iterator.hasNext()) {
                     History historyTmp = iterator.next();
-                    historyTmp.addInfo(itemTypeRepository);
+                    // historyTmp.addInfo(itemTypeRepository);
+                    historyTmp.addInfo(itemRepository, historyRepository);
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, result); //설마 save method에서 null을 return하겠어
             }
