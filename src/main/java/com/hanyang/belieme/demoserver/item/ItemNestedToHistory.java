@@ -47,8 +47,9 @@ public class ItemNestedToHistory {
     public void setItemType(ItemTypeNestedToItem itemType) {
         if(itemType != null) {
             this.itemType = new ItemTypeNestedToItem(itemType);    
-        }
-        this.itemType = null;        
+        } else {
+            this.itemType = null;   
+        }        
     }
     
     public void setCurrentStatus(String currentStatus) {
