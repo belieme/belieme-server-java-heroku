@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.thing.ItemTypeRepository;
 
 
 @Entity
@@ -244,25 +245,26 @@ public class History {
     //     setItem(itemNum, itemTypeDB.get());
     // }
     
-    public void addInfo(ItemRepository itemRepository, HistoryRepository historyRepository) {
+    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
         List<Item> item = itemRepository.findByTypeIdAndNum(typeId, itemNum);
         if(item.size() == 1) {
+            item.get(0).addInfo(itemTypeRepository,historyRepository);
             setItem(item.get(0));
-            Optional<History> lastHistory = historyRepository.findById(item.get(0).lastHistoryIdGetter());
-            if(lastHistory.isPresent()) {
-                String lastHistoryStatus = lastHistory.get().getStatus();
-                if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
-                    this.item.setCurrentStatus("USABLE");
-                }
-                else if (lastHistoryStatus.equals("LOST")){
-                    this.item.setCurrentStatus("INACTIVATE");
-                } else {
-                    this.item.setCurrentStatus("UNUSABLE");
-                }
-            }
-            else {
-                this.item.setCurrentStatus("USABLE");
-            }
+            // Optional<History> lastHistory = historyRepository.findById(item.get(0).lastHistoryIdGetter());
+            // if(lastHistory.isPresent()) {
+            //     String lastHistoryStatus = lastHistory.get().getStatus();
+            //     if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
+            //         this.item.setCurrentStatus("USABLE");
+            //     }
+            //     else if (lastHistoryStatus.equals("LOST")){
+            //         this.item.setCurrentStatus("INACTIVATE");
+            //     } else {
+            //         this.item.setCurrentStatus("UNUSABLE");
+            //     }
+            // }
+            // else {
+            //     this.item.setCurrentStatus("USABLE");
+            // }
         }
     }
 
