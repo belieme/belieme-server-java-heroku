@@ -134,6 +134,7 @@ public class Item {
         output.setId(id);
         output.setNum(num);
         output.setItemType(itemType);
+        output.setCurrentStatus(status);
         
         return output;
     }
