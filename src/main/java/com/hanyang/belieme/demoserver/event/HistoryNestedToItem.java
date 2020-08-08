@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.validation.constraints.Null;
+
 public class HistoryNestedToItem {
     private int id;
 
@@ -61,20 +63,37 @@ public class HistoryNestedToItem {
     }
     
     public HistoryNestedToItem(HistoryNestedToItem historyNestedToItem) {
-        id = historyNestedToItem.id;
-        requesterId = historyNestedToItem.requesterId;
-        requesterName = new String(historyNestedToItem.requesterName);
-        responseManagerId = historyNestedToItem.responseManagerId;
-        responseManagerName = new String(historyNestedToItem.responseManagerName);
-        returnManagerId = historyNestedToItem.returnManagerId;
-        returnManagerName = new String(historyNestedToItem.returnManagerName);
-        lostManagerId = historyNestedToItem.lostManagerId;
-        lostManagerName = new String(historyNestedToItem.lostManagerName);
-        requestTimeStamp = historyNestedToItem.requestTimeStamp;
-        responseTimeStamp = historyNestedToItem.responseTimeStamp;
-        returnTimeStamp = historyNestedToItem.returnTimeStamp;
-        cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
-        lostTimeStamp = historyNestedToItem.lostTimeStamp;
+        if(historyNestedToItem != null) {
+            id = historyNestedToItem.id;
+            requesterId = historyNestedToItem.requesterId;
+            requesterName = new String(historyNestedToItem.requesterName);
+            responseManagerId = historyNestedToItem.responseManagerId;
+            responseManagerName = new String(historyNestedToItem.responseManagerName);
+            returnManagerId = historyNestedToItem.returnManagerId;
+            returnManagerName = new String(historyNestedToItem.returnManagerName);
+            lostManagerId = historyNestedToItem.lostManagerId;
+            lostManagerName = new String(historyNestedToItem.lostManagerName);
+            requestTimeStamp = historyNestedToItem.requestTimeStamp;
+            responseTimeStamp = historyNestedToItem.responseTimeStamp;
+            returnTimeStamp = historyNestedToItem.returnTimeStamp;
+            cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
+            lostTimeStamp = historyNestedToItem.lostTimeStamp;
+        } else {
+            id = -1;
+            requesterId = -1;
+            requesterName = "";
+            responseManagerId = -1;
+            responseManagerName = "";
+            returnManagerId = -1;
+            returnManagerName = "";
+            lostManagerId = -1;
+            lostManagerName = "";
+            requestTimeStamp = 0;
+            responseTimeStamp = 0;
+            returnTimeStamp = 0;
+            cancelTimeStamp = 0;
+            lostTimeStamp = 0;
+        }
         
     }
 
