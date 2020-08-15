@@ -6,17 +6,17 @@ import java.util.List;
 import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.event.*;
 
-public class ItemTypeWithItems {
+public class ThingWithItems {
     private int id;
     private String name;
     private String emoji;
-    private List<ItemNestedToItemType> items;
+    private List<ItemNestedToThing> items;
 
     private int amount;
     private int count;
     private String status;
     
-    public ItemTypeWithItems() {
+    public ThingWithItems() {
         
     }
 
@@ -44,7 +44,7 @@ public class ItemTypeWithItems {
         return status;
     }
     
-    public List<ItemNestedToItemType> getItems() {
+    public List<ItemNestedToThing> getItems() {
         return items;
     }
 
@@ -60,18 +60,18 @@ public class ItemTypeWithItems {
         this.emoji = emoji;
     }
 
-    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
+    public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         amount = 0;
         count = 0;
-        List<Item> tmpItems = itemRepository.findByTypeId(id);
-        items = new ArrayList<ItemNestedToItemType>();
-        for(int i = 0; i < tmpItems.size(); i++) {
-            tmpItems.get(i).addInfo(itemTypeRepository, historyRepository);
-            items.add(tmpItems.get(i).toItemNestedToItemType());
-            if(tmpItems.get(i).getStatus().equals("UNUSABLE")) {
+        List<Item> itemListByThingId = itemRepository.findByThingId(id);
+        this.items = new ArrayList<ItemNestedToThing>();
+        for(int i = 0; i < itemListByThingId.size(); i++) {
+            itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
+            this.items.add(itemListByThingId.get(i).toItemNestedToThing());
+            if(itemListByThingId.get(i).getStatus().equals("UNUSABLE")) {
                 amount++;
             }
-            else if(tmpItems.get(i).getStatus().equals("USABLE")) {
+            else if(itemListByThingId.get(i).getStatus().equals("USABLE")) {
                 amount++;
                 count++;
             }

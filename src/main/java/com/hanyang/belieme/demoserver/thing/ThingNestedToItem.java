@@ -1,14 +1,14 @@
 package com.hanyang.belieme.demoserver.thing;
 
-public class ItemTypeNestedToItem {
+public class ThingNestedToItem {
     private int id;
     private String name;
     private String emoji;
         
-    public ItemTypeNestedToItem() {
+    public ThingNestedToItem() {
     }
     
-    public ItemTypeNestedToItem(ItemTypeNestedToItem oth) {
+    public ThingNestedToItem(ThingNestedToItem oth) {
         this.id = oth.id;
         this.name = oth.name;
         this.emoji = oth.emoji;

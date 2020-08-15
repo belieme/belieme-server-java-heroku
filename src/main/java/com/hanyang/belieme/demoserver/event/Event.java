@@ -4,19 +4,18 @@ import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.item.*;
-import com.hanyang.belieme.demoserver.thing.ItemTypeRepository;
+import com.hanyang.belieme.demoserver.thing.ThingRepository;
 
 
 @Entity
-public class History {
+public class Event {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private int typeId;
+    private int thingId;
     private int itemNum;
     private int requesterId;
     private String requesterName;
@@ -34,13 +33,13 @@ public class History {
     private long lostTimeStamp;
     
     @Transient
-    private ItemNestedToHistory item;
+    private ItemNestedToEvent item;
 
-    public History() {
+    public Event() {
     }
     
-    public int typeIdGetter() {
-        return typeId;
+    public int thingIdGetter() {
+        return thingId;
     }
 
     public int itemNumGetter() {
@@ -51,7 +50,7 @@ public class History {
         return id;
     }
     
-    public ItemNestedToHistory getItem() {
+    public ItemNestedToEvent getItem() {
         return item;
     }
 
@@ -107,21 +106,17 @@ public class History {
         return lostTimeStamp;
     }
 
-    public void setTypeId(int typeId) {
-        this.typeId = typeId;
+    public void setThingId(int thingId) {
+        this.thingId = thingId;
     }
 
     public void setItemNum(int itemNum) {
         this.itemNum = itemNum;
     }
     
-    // public void setItem(int num, ItemTypeDB itemType) {
-    //     this.item = new ItemNestedToHistory(num, itemType);
-    // }
-    
     public void setItem(Item item) {
         if(item != null) {
-            this.item = item.toItemNestedToHistory();    
+            this.item = item.toItemNestedToEvent();    
         } else {
             this.item = null;
         }
@@ -240,31 +235,11 @@ public class History {
         }
     }
 
-    // public void addInfo(ItemTypeRepository itemTypeRepository) {
-    //     Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeId);
-    //     setItem(itemNum, itemTypeDB.get());
-    // }
-    
-    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
-        List<Item> item = itemRepository.findByTypeIdAndNum(typeId, itemNum);
+    public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+        List<Item> item = itemRepository.findByThingIdAndNum(thingId, itemNum);
         if(item.size() == 1) {
-            item.get(0).addInfo(itemTypeRepository,historyRepository);
+            item.get(0).addInfo(thingRepository,eventRepository);
             setItem(item.get(0));
-            // Optional<History> lastHistory = historyRepository.findById(item.get(0).lastHistoryIdGetter());
-            // if(lastHistory.isPresent()) {
-            //     String lastHistoryStatus = lastHistory.get().getStatus();
-            //     if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
-            //         this.item.setCurrentStatus("USABLE");
-            //     }
-            //     else if (lastHistoryStatus.equals("LOST")){
-            //         this.item.setCurrentStatus("INACTIVATE");
-            //     } else {
-            //         this.item.setCurrentStatus("UNUSABLE");
-            //     }
-            // }
-            // else {
-            //     this.item.setCurrentStatus("USABLE");
-            // }
         }
     }
 
@@ -293,8 +268,8 @@ public class History {
         return tmp.getTime().getTime()/1000;
     }
 
-    public HistoryNestedToItem toHistoryNestedToItem() {
-        HistoryNestedToItem output = new HistoryNestedToItem();
+    public EventNestedToItem toEventNestedToItem() {
+        EventNestedToItem output = new EventNestedToItem();
         output.setId(getId());
         output.setRequesterId(requesterId);
         output.setRequesterName(requesterName);

@@ -2,21 +2,21 @@ package com.hanyang.belieme.demoserver.item;
 
 import com.hanyang.belieme.demoserver.thing.*;
 
-public class ItemNestedToHistory {
+public class ItemNestedToEvent {
     private int id;
     private int num;
-    private ItemTypeNestedToItem itemType;
+    private ThingNestedToItem thing;
     
     private String currentStatus;
     
-    public ItemNestedToHistory() {
+    public ItemNestedToEvent() {
     }
-    // public ItemNestedToHistory(int num, ItemType itemType) {
+    // public ItemNestedToEvent(int num, Thing thing) {
     //     this.num = num;
-    //     if(itemType != null) {
-    //         this.itemType = itemType.toItemTypeNestedToItem();
+    //     if(thing != null) {
+    //         this.thing = thing.toThingNestedToItem();
     //     } else {
-    //         this.itemType = null;
+    //         this.thing = null;
     //     }
     // }
 
@@ -28,8 +28,8 @@ public class ItemNestedToHistory {
         return num;
     }
 
-    public ItemTypeNestedToItem getItemType() {
-        return itemType;
+    public ThingNestedToItem getThing() {
+        return thing;
     }
     
     public String getCurrentStatus() {
@@ -44,11 +44,11 @@ public class ItemNestedToHistory {
         this.num = num;
     }
     
-    public void setItemType(ItemTypeNestedToItem itemType) {
-        if(itemType != null) {
-            this.itemType = new ItemTypeNestedToItem(itemType);    
+    public void setThing(ThingNestedToItem thing) {
+        if(thing != null) {
+            this.thing = new ThingNestedToItem(thing);    
         } else {
-            this.itemType = null;   
+            this.thing = null;   
         }        
     }
     

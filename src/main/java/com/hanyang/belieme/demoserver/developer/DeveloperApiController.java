@@ -14,13 +14,13 @@ import com.hanyang.belieme.demoserver.event.*;
 @RequestMapping(path="/developer")//git ignore
 public class DeveloperApiController {
     @Autowired
-    private HistoryRepository historyRepository;
+    private EventRepository eventRepository;
 
     @Autowired
     private ItemRepository itemRepository;
 
     @Autowired
-    private ItemTypeRepository itemTypeRepository;
+    private ThingRepository thingRepository;
 
     @GetMapping("/")
     public String getInfo() {
@@ -29,56 +29,56 @@ public class DeveloperApiController {
         return result;
     }
 
-    @GetMapping("/itemType")
-    public Iterable<ItemTypeDB> getItemTypes() {
-        return itemTypeRepository.findAll();
+    @GetMapping("/things")
+    public Iterable<ThingDB> getThings() {
+        return thingRepository.findAll();
     }
 
-    @PostMapping("/itemType")
-    public ItemTypeDB createItemType(@RequestBody ItemTypeDB itemType) {
-        return itemTypeRepository.save(itemType);
+    @PostMapping("/things")
+    public ThingDB createThing(@RequestBody ThingDB thing) {
+        return thingRepository.save(thing);
     }
 
-    @PutMapping("/itemType")
-    public ItemTypeDB updateItemType(@RequestBody ItemTypeDB itemType){
-        Optional<ItemTypeDB> tmp = itemTypeRepository.findById(itemType.getId());
+    @PutMapping("/things")
+    public ThingDB updateThing(@RequestBody ThingDB thing){
+        Optional<ThingDB> tmp = thingRepository.findById(thing.getId());
         if(!tmp.isPresent()) {
             return null;
         }
         else {
-            return itemTypeRepository.save(itemType);
+            return thingRepository.save(thing);
         }
     }
 
-    @DeleteMapping("/itemType/{id}")
-    public ItemTypeDB deleteItemType(@PathVariable int id) {
-        Optional<ItemTypeDB> deletedItem = itemTypeRepository.findById(id);
+    @DeleteMapping("/things/{id}")
+    public ThingDB deleteThing(@PathVariable int id) {
+        Optional<ThingDB> deletedItem = thingRepository.findById(id);
         if(!deletedItem.isPresent()) {
             return null;
         }
         else {
-            itemTypeRepository.deleteById(id);
+            thingRepository.deleteById(id);
             return deletedItem.get();
         }
     }
     
-    @DeleteMapping("/itemType/deleteAll")
-    public String deleteAllItemType() {
-        itemTypeRepository.deleteAll();
-        return "deleted all itemType";
+    @DeleteMapping("/things/deleteAll")
+    public String deleteAllThing() {
+        thingRepository.deleteAll();
+        return "deleted all thing";
     }
 
-    @GetMapping("/item")
+    @GetMapping("/items")
     public Iterable<Item> getItems() {
         return itemRepository.findAll();
     }
 
-    @PostMapping("/item")
+    @PostMapping("/items")
     public Item createItem(@RequestBody Item item) {
         return itemRepository.save(item);
     }
 
-    @PutMapping("/item/{id}/")
+    @PutMapping("/items/{id}")
     public Item updateItem(@PathVariable int id, @RequestBody Item item){
         Optional<Item> tmp = itemRepository.findById(id);
         if(!tmp.isPresent()) {
@@ -89,7 +89,7 @@ public class DeveloperApiController {
         }
     }
 
-    @DeleteMapping("/item/{id}/")
+    @DeleteMapping("/items/{id}")
     public Item deleteItem(@PathVariable int id) {
         Optional<Item> deletedItem = itemRepository.findById(id);
         if(!deletedItem.isPresent()) {
@@ -101,56 +101,56 @@ public class DeveloperApiController {
         }
     }
     
-    @DeleteMapping("/item/deleteAll")
+    @DeleteMapping("/items/deleteAll")
     public String deleteAllItem() {
         itemRepository.deleteAll();
         return "deleted all item";
     }
 
-    @GetMapping("/history")
-    public Iterable<History> getHistories() {
-        return historyRepository.findAll();
+    @GetMapping("/events")
+    public Iterable<Event> getHistories() {
+        return eventRepository.findAll();
     }
 
-    @PostMapping("/history")
-    public History createHistory(@RequestBody History history) {
-        return historyRepository.save(history);
+    @PostMapping("/events")
+    public Event createEvent(@RequestBody Event event) {
+        return eventRepository.save(event);
     }
 
-    @PutMapping("/history")
-    public History updateHistory(@RequestBody History history){
-        Optional<History> tmp = historyRepository.findById(history.getId());
+    @PutMapping("/events")
+    public Event updateEvent(@RequestBody Event event){
+        Optional<Event> tmp = eventRepository.findById(event.getId());
         if(!tmp.isPresent()) {
             return null;
         }
         else {
-            return historyRepository.save(history);
+            return eventRepository.save(event);
         }
     }
 
-    @DeleteMapping("/history/{id}")
-    public History deleteHistory(@PathVariable int id) {
-        Optional<History> deletedHistory = historyRepository.findById(id);
-        if(!deletedHistory.isPresent()) {
+    @DeleteMapping("/events/{id}")
+    public Event deleteEvent(@PathVariable int id) {
+        Optional<Event> deletedEvent = eventRepository.findById(id);
+        if(!deletedEvent.isPresent()) {
             return null;
         }
         else {
-            historyRepository.deleteById(id);
-            return deletedHistory.get();
+            eventRepository.deleteById(id);
+            return deletedEvent.get();
         }
     }
     
-    @DeleteMapping("/history/deleteAll")
-    public String deleteAllHistory() {
-        historyRepository.deleteAll();
+    @DeleteMapping("/events/deleteAll")
+    public String deleteAllEvent() {
+        eventRepository.deleteAll();
         return "deleted all histories";
     }
 
     @DeleteMapping("/deleteAll")
     public String deleteAll() {
-        historyRepository.deleteAll();
+        eventRepository.deleteAll();
         itemRepository.deleteAll();
-        itemTypeRepository.deleteAll();
+        thingRepository.deleteAll();
         return "OK";
     }
 }

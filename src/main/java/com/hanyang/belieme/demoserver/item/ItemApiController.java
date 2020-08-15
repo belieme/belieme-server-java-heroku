@@ -13,124 +13,83 @@ import com.hanyang.belieme.demoserver.common.*;
 
 
 @RestController
-@RequestMapping(path="/item")
+@RequestMapping(path="/items")
 public class ItemApiController {
     @Autowired
     private ItemRepository itemRepository;
 
     @Autowired
-    private ItemTypeRepository itemTypeRepository;
+    private ThingRepository thingRepository;
 
     @Autowired
-    private HistoryRepository historyRepository;
+    private EventRepository eventRepository;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseWrapper<Iterable<Item>> getItems() {
-        Iterable<Item> items = itemRepository.findAll();
-        Iterator<Item> iterator = items.iterator();
+        Iterable<Item> allItemList = itemRepository.findAll();
+        Iterator<Item> iterator = allItemList.iterator();
         while(iterator.hasNext()) {
             Item item = iterator.next();
-            item.addInfo(itemTypeRepository, historyRepository);
+            item.addInfo(thingRepository, eventRepository);
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, items);
+        return new ResponseWrapper<>(ResponseHeader.OK, allItemList);
     }
 
-    @GetMapping("/byTypeId/{typeId}/")
-    public ResponseWrapper<Iterable<Item>> getItemsByTypeName(@PathVariable int typeId) {
-        Iterable<Item> items = itemRepository.findByTypeId(typeId);
-        Iterator<Item> iterator = items.iterator();
-        while(iterator.hasNext()) {
-            Item item = iterator.next();
-            item.addInfo(itemTypeRepository, historyRepository);
+    @GetMapping("/byThingId/{thingId}")
+    public ResponseWrapper<List<Item>> getItemsByThingId(@PathVariable int thingId) {
+        List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
+        for(int i = 0; i < itemListByThingId.size(); i++) {
+            itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, items);
+        return new ResponseWrapper<>(ResponseHeader.OK, itemListByThingId);
     }
 
-    @GetMapping("/{typeId}/{itemNum}/")
-    public ResponseWrapper<Item> getItem(@PathVariable int typeId, @PathVariable int itemNum) {
-        List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);
+    @GetMapping("/{thingId}/{itemNum}")
+    public ResponseWrapper<Item> getItem(@PathVariable int thingId, @PathVariable int itemNum) {
+        List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, itemNum);
         if(itemList.size() == 1) {
             Item item = itemList.get(0);
-            item.addInfo(itemTypeRepository, historyRepository);
+            item.addInfo(thingRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, item);
         } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
+        } else { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
     }
 
 
-    @PostMapping("/")
-    public ResponseWrapper<Iterable<Item>> createItem(@RequestBody Item item) {
-        if(item.typeIdGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 typeId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    @PostMapping("")
+    public ResponseWrapper<List<Item>> createItem(@RequestBody Item requestBody) {
+        if(requestBody.thingIdGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 thingId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Iterator<Item> iterator;
 
-        Iterable<Item> items = itemRepository.findByTypeId(item.typeIdGetter());
-        iterator = items.iterator();
+        List<Item> itemListByThingId = itemRepository.findByThingId(requestBody.thingIdGetter());
 
-        Optional<ItemTypeDB> type = itemTypeRepository.findById(item.typeIdGetter());
+        Optional<ThingDB> thingOptional = thingRepository.findById(requestBody.thingIdGetter());
 
         int max = 0;
-        while(iterator.hasNext()) {
-            Item tmp = iterator.next();
+        for(int i = 0; i < itemListByThingId.size(); i++) {
+            Item tmp = itemListByThingId.get(i);
             if(max < tmp.getNum()) {
                 max = tmp.getNum();
             }
         }
-        item.setNum(max+1);
-        item.setLastHistoryId(-1);
+        requestBody.setNum(max+1);
+        requestBody.setLastEventId(-1);
 
-        if(type.isPresent()) {
-            itemRepository.save(item);
-            Iterable<Item> result = itemRepository.findByTypeId(item.typeIdGetter());
-            iterator = result.iterator();
-
-            while(iterator.hasNext()) {
-                iterator.next().addInfo(itemTypeRepository, historyRepository);
+        if(thingOptional.isPresent()) {
+            itemRepository.save(requestBody);
+            List<Item> responseBody = itemRepository.findByThingId(requestBody.thingIdGetter());
+            
+            for(int i = 0; i < responseBody.size(); i++) {
+                responseBody.get(i).addInfo(thingRepository, eventRepository);
             }
-            return new ResponseWrapper<>(ResponseHeader.OK, result);
+            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
     }
-
-    // @PutMapping("/deactivate/{typeId}/{itemNum}/")
-    // public ResponseWrapper<Item> deactivateItem(@PathVariable int typeId, @PathVariable int itemNum) {
-    //     List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);;
-    //     if(itemList.size() == 1) {
-    //         Item item = itemList.get(0);
-    //         item.deactivate();
-    //         Item result = itemRepository.save(item);
-    //         result.addInfo(itemTypeRepository,historyRepository);
-    //         return new ResponseWrapper<>(ResponseHeader.OK, result);
-    //     }
-    //     else if(itemList.size() == 0) {
-    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-    //     }
-    //     else {
-    //        return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-    //     }
-    // }
-
-    // @PutMapping("/activate/{typeId}/{itemNum}/")
-    // public ResponseWrapper<Item> activateItem(@PathVariable int typeId, @PathVariable int itemNum) {
-    //     List<Item> itemList = itemRepository.findByTypeIdAndNum(typeId, itemNum);;
-    //     if(itemList.size() == 1) {
-    //         Item item = itemList.get(0);
-    //         item.activate();
-    //         Item result = itemRepository.save(item);
-    //         result.addInfo(itemTypeRepository,historyRepository);
-    //         return new ResponseWrapper<>(ResponseHeader.OK, result);
-    //     }
-    //     else if(itemList.size() == 0) {
-    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-    //     }
-    //     else {
-    //        return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-    //     }
-    // }
 }

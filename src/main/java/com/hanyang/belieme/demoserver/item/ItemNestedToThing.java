@@ -2,20 +2,20 @@ package com.hanyang.belieme.demoserver.item;
 
 import com.hanyang.belieme.demoserver.event.*;
 
-public class ItemNestedToItemType {
+public class ItemNestedToThing {
     private int num;
-    private HistoryNestedToItem lastHistory;
+    private EventNestedToItem lastEvent;
     private String status;
     
-    public ItemNestedToItemType() {
+    public ItemNestedToThing() {
     }
 
     public int getNum() {
         return num;
     }
     
-    public HistoryNestedToItem getLastHistory() {
-        return lastHistory;
+    public EventNestedToItem getLastEvent() {
+        return lastEvent;
     }
     
     public String getStatus() {
@@ -26,11 +26,11 @@ public class ItemNestedToItemType {
         this.num = num;
     }
     
-    public void setLastHistory(HistoryNestedToItem lastHistory) {
-        if(lastHistory != null) {
-            this.lastHistory = new HistoryNestedToItem(lastHistory);
+    public void setLastEvent(EventNestedToItem lastEvent) {
+        if(lastEvent != null) {
+            this.lastEvent = new EventNestedToItem(lastEvent);
         } else {
-            this.lastHistory = null;
+            this.lastEvent = null;
         }
     }
     

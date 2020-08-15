@@ -12,27 +12,27 @@ import com.hanyang.belieme.demoserver.event.*;
 public class Item {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int typeId;
+    private int thingId;
     private int num;
     
-    private int lastHistoryId;
+    private int lastEventId;
 
     @Transient
     private String status;
 
     @Transient
-    private ItemTypeNestedToItem itemType;
+    private ThingNestedToItem thing;
     
     @Transient
-    private HistoryNestedToItem lastHistory;
+    private EventNestedToItem lastEvent;
 
     public Item() {
     }
 
-    public Item(int typeId, int num) {
-        this.typeId = typeId;
+    public Item(int thingId, int num) {
+        this.thingId = thingId;
         this.num = num;
-        this.lastHistoryId = -1;
+        this.lastEventId = -1;
     }
     
     public int getId() {
@@ -47,93 +47,91 @@ public class Item {
         return status;
     }
 
-    public ItemTypeNestedToItem getItemType() {
-        return itemType;
+    public ThingNestedToItem getThing() {
+        return thing;
     }
     
-    public HistoryNestedToItem getLastHistory() {
-        return lastHistory;
+    public EventNestedToItem getLastEvent() {
+        return lastEvent;
     }
 
-    public void setTypeId(int typeId) {
-        this.typeId = typeId;
+    public void setThingId(int thingId) {
+        this.thingId = thingId;
     }
 
     public void setNum(int num) {
         this.num = num;
     }
 
-    public void setLastHistoryId(int lastHistoryId) {
-        this.lastHistoryId = lastHistoryId;
+    public void setLastEventId(int lastEventId) {
+        this.lastEventId = lastEventId;
     }
 
-    public void setItemType(ItemType itemType) {
-        if(itemType == null) {
-            this.itemType = null;
+    public void setThing(Thing thing) {
+        if(thing == null) {
+            this.thing = null;
         } else {
-            this.itemType = itemType.toItemTypeNestedToItem();
+            this.thing = thing.toThingNestedToItem();
         }
     }
     
-    public void setLastHistory(History history) {
-        if(history == null) {
-            this.lastHistory = null;
+    public void setLastEvent(Event event) {
+        if(event == null) {
+            this.lastEvent = null;
         } else {
-            this.lastHistory = history.toHistoryNestedToItem();
+            this.lastEvent = event.toEventNestedToItem();
         }
     }
     
-    public int typeIdGetter() {
-        return typeId;
+    public int thingIdGetter() {
+        return thingId;
     }
     
-    public int lastHistoryIdGetter() {
-        return lastHistoryId;
+    public int lastEventIdGetter() {
+        return lastEventId;
     }
 
     //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
-    public void addInfo(ItemTypeRepository itemTypeRepository, HistoryRepository historyRepository) {
-        Optional<History> lastHistory = historyRepository.findById(lastHistoryId);
-        if(lastHistory.isPresent()) {
-            String lastHistoryStatus = lastHistory.get().getStatus();
-            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
+    public void addInfo(ThingRepository thingRepository, EventRepository eventRepository) {
+        Optional<Event> lastEventOptional = eventRepository.findById(lastEventId);
+        if(lastEventOptional.isPresent()) {
+            String lastEventStatus = lastEventOptional.get().getStatus();
+            if(lastEventStatus.equals("EXPIRED")||lastEventStatus.equals("RETURNED")||lastEventStatus.equals("FOUND")||lastEventStatus.equals("FOUNDANDRETURNED")) {
                 status = "USABLE";
             }
-            else if (lastHistoryStatus.equals("LOST")){
+            else if (lastEventStatus.equals("LOST")){
                 status = "INACTIVATE";
             } else {
                 status = "UNUSABLE";
             }
-            setLastHistory(lastHistory.get());
+            setLastEvent(lastEventOptional.get());
         }
         else {
             status = "USABLE";
-            setLastHistory(null);
+            setLastEvent(null);
         }
 
-        Optional<ItemTypeDB> itemTypeDB = itemTypeRepository.findById(typeIdGetter());
-        ItemType itemType;
-        if(itemTypeDB.isPresent()) {
-            itemType = itemTypeDB.get().toItemType();
+        Optional<ThingDB> thingDBOptional = thingRepository.findById(thingIdGetter());
+        if(thingDBOptional.isPresent()) {
+            setThing(thingDBOptional.get().toThing());
         } else {
-            itemType = null;
+            setThing(null);
         }
-        setItemType(itemType);
     }
     
-    public ItemNestedToItemType toItemNestedToItemType() {
-        ItemNestedToItemType output = new ItemNestedToItemType();
+    public ItemNestedToThing toItemNestedToThing() {
+        ItemNestedToThing output = new ItemNestedToThing();
         output.setNum(num);
-        output.setLastHistory(lastHistory);
+        output.setLastEvent(lastEvent);
         output.setStatus(status);
         return output;
     }
     
-    public ItemNestedToHistory toItemNestedToHistory() {
-        ItemNestedToHistory output = new ItemNestedToHistory();
+    public ItemNestedToEvent toItemNestedToEvent() {
+        ItemNestedToEvent output = new ItemNestedToEvent();
         output.setId(id);
         output.setNum(num);
-        output.setItemType(itemType);
+        output.setThing(thing);
         output.setCurrentStatus(status);
         
         return output;

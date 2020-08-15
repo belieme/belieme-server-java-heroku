@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class HistoryNestedToItem {
+public class EventNestedToItem {
     private int id;
 
     private int requesterId;
@@ -22,24 +22,24 @@ public class HistoryNestedToItem {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    public HistoryNestedToItem() {
+    public EventNestedToItem() {
     }
     
-    public HistoryNestedToItem(HistoryNestedToItem historyNestedToItem) {
-        id = historyNestedToItem.id;
-        requesterId = historyNestedToItem.requesterId;
-        requesterName = historyNestedToItem.requesterName;
-        responseManagerId = historyNestedToItem.responseManagerId;
-        responseManagerName = historyNestedToItem.responseManagerName;
-        returnManagerId = historyNestedToItem.returnManagerId;
-        returnManagerName = historyNestedToItem.returnManagerName;
-        lostManagerId = historyNestedToItem.lostManagerId;
-        lostManagerName = historyNestedToItem.lostManagerName;
-        requestTimeStamp = historyNestedToItem.requestTimeStamp;
-        responseTimeStamp = historyNestedToItem.responseTimeStamp;
-        returnTimeStamp = historyNestedToItem.returnTimeStamp;
-        cancelTimeStamp = historyNestedToItem.cancelTimeStamp;
-        lostTimeStamp = historyNestedToItem.lostTimeStamp;
+    public EventNestedToItem(EventNestedToItem eventNestedToItem) {
+        id = eventNestedToItem.id;
+        requesterId = eventNestedToItem.requesterId;
+        requesterName = eventNestedToItem.requesterName;
+        responseManagerId = eventNestedToItem.responseManagerId;
+        responseManagerName = eventNestedToItem.responseManagerName;
+        returnManagerId = eventNestedToItem.returnManagerId;
+        returnManagerName = eventNestedToItem.returnManagerName;
+        lostManagerId = eventNestedToItem.lostManagerId;
+        lostManagerName = eventNestedToItem.lostManagerName;
+        requestTimeStamp = eventNestedToItem.requestTimeStamp;
+        responseTimeStamp = eventNestedToItem.responseTimeStamp;
+        returnTimeStamp = eventNestedToItem.returnTimeStamp;
+        cancelTimeStamp = eventNestedToItem.cancelTimeStamp;
+        lostTimeStamp = eventNestedToItem.lostTimeStamp;
         
     }
 

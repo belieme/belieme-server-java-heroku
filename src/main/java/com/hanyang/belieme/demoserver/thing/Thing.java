@@ -7,7 +7,7 @@ import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.event.*;
 
 
-public class ItemType {
+public class Thing {
     private int id;
     private String name;
     private String emoji;
@@ -16,10 +16,10 @@ public class ItemType {
     private int count;
     private String status;
 
-    public ItemType() {
+    public Thing() {
     }
 
-    public ItemType(int id, String name, String emoji) {
+    public Thing(int id, String name, String emoji) {
         this.id = id;
         this.name = name;
         this.emoji = emoji;
@@ -57,12 +57,12 @@ public class ItemType {
         this.emoji = emoji;
     }
 
-    public void addInfo(ItemTypeRepository itemTypeRepository, ItemRepository itemRepository, HistoryRepository historyRepository) {
+    public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         amount = 0;
         count = 0;
-        List<Item> items = itemRepository.findByTypeId(id);
+        List<Item> items = itemRepository.findByThingId(id);
         for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(itemTypeRepository, historyRepository);
+            items.get(i).addInfo(thingRepository, eventRepository);
             if(items.get(i).getStatus().equals("UNUSABLE")) {
                 amount++;
             }
@@ -85,11 +85,11 @@ public class ItemType {
         }
     }
 
-    public ItemTypeDB toItemTypeDB() {
+    public ThingDB toThingDB() {
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ItemTypeDB(id, name, getIntFromByteArray(arr));
+            return new ThingDB(id, name, getIntFromByteArray(arr));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -114,8 +114,8 @@ public class ItemType {
         }
     }
     
-    public ItemTypeNestedToItem toItemTypeNestedToItem() {
-        ItemTypeNestedToItem output = new ItemTypeNestedToItem();
+    public ThingNestedToItem toThingNestedToItem() {
+        ThingNestedToItem output = new ThingNestedToItem();
         output.setId(id);
         output.setName(name);
         output.setEmoji(emoji);
@@ -123,8 +123,8 @@ public class ItemType {
         return output;
     }
     
-    public ItemTypeWithItems toItemTypeWithItems() {
-        ItemTypeWithItems output = new ItemTypeWithItems();
+    public ThingWithItems toThingWithItems() {
+        ThingWithItems output = new ThingWithItems();
         output.setId(id);
         output.setName(name);
         output.setEmoji(emoji);
