@@ -229,7 +229,7 @@ public class Event {
     }
 
     public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-        Optional<Item> itemOptional = itemRepository.findByItemId(itemId);
+        Optional<Item> itemOptional = itemRepository.findById(itemId);
         if(itemOptional.isPresent()) {
             itemOptional.get().addInfo(thingRepository, eventRepository);
             setItem(itemOptional.get());
