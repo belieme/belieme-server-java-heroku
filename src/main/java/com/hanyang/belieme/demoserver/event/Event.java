@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.item.*;
@@ -15,8 +16,7 @@ public class Event {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private int thingId;
-    private int itemNum;
+    private int itemId;
     private int requesterId;
     private String requesterName;
     private int responseManagerId;
@@ -37,15 +37,11 @@ public class Event {
 
     public Event() {
     }
+        
+    public int itemIdGetter() {
+        return itemId;
+    }
     
-    public int thingIdGetter() {
-        return thingId;
-    }
-
-    public int itemNumGetter() {
-        return itemNum;
-    }
-
     public int getId() {
         return id;
     }
@@ -106,12 +102,8 @@ public class Event {
         return lostTimeStamp;
     }
 
-    public void setThingId(int thingId) {
-        this.thingId = thingId;
-    }
-
-    public void setItemNum(int itemNum) {
-        this.itemNum = itemNum;
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
     }
     
     public void setItem(Item item) {
@@ -195,6 +187,7 @@ public class Event {
     }
 
     public String getStatus() {
+        //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
         if(requestTimeStamp != 0) {
             if(returnTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
@@ -236,11 +229,13 @@ public class Event {
     }
 
     public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-        List<Item> item = itemRepository.findByThingIdAndNum(thingId, itemNum);
-        if(item.size() == 1) {
-            item.get(0).addInfo(thingRepository,eventRepository);
-            setItem(item.get(0));
-        }
+        Optional<Item> itemOptional = itemRepository.findByItemId(itemId);
+        if(itemOptional.isPresent()) {
+            itemOptional.get().addInfo(thingRepository, eventRepository);
+            setItem(itemOptional.get());
+        } else {
+            setItem(null);
+        }        
     }
 
     public long expiredTime() {

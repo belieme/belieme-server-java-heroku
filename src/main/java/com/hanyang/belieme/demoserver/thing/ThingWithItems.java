@@ -76,7 +76,7 @@ public class ThingWithItems {
                 count++;
             }
         }
-        if(amount == 0) {
+        if(amount == 0) { //TODO deactivate구현할때 바꾸기
             status = "INACTIVE";
         }
         else if(count == 0) {

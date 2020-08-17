@@ -25,22 +25,21 @@ public class EventNestedToItem {
     public EventNestedToItem() {
     }
     
-    public EventNestedToItem(EventNestedToItem eventNestedToItem) {
-        id = eventNestedToItem.id;
-        requesterId = eventNestedToItem.requesterId;
-        requesterName = eventNestedToItem.requesterName;
-        responseManagerId = eventNestedToItem.responseManagerId;
-        responseManagerName = eventNestedToItem.responseManagerName;
-        returnManagerId = eventNestedToItem.returnManagerId;
-        returnManagerName = eventNestedToItem.returnManagerName;
-        lostManagerId = eventNestedToItem.lostManagerId;
-        lostManagerName = eventNestedToItem.lostManagerName;
-        requestTimeStamp = eventNestedToItem.requestTimeStamp;
-        responseTimeStamp = eventNestedToItem.responseTimeStamp;
-        returnTimeStamp = eventNestedToItem.returnTimeStamp;
-        cancelTimeStamp = eventNestedToItem.cancelTimeStamp;
-        lostTimeStamp = eventNestedToItem.lostTimeStamp;
-        
+    public EventNestedToItem(EventNestedToItem oth) {
+        id = oth.id;
+        requesterId = oth.requesterId;
+        requesterName = oth.requesterName;
+        responseManagerId = oth.responseManagerId;
+        responseManagerName = oth.responseManagerName;
+        returnManagerId = oth.returnManagerId;
+        returnManagerName = oth.returnManagerName;
+        lostManagerId = oth.lostManagerId;
+        lostManagerName = oth.lostManagerName;
+        requestTimeStamp = oth.requestTimeStamp;
+        responseTimeStamp = oth.responseTimeStamp;
+        returnTimeStamp = oth.returnTimeStamp;
+        cancelTimeStamp = oth.cancelTimeStamp;
+        lostTimeStamp = oth.lostTimeStamp;
     }
 
     public int getId() {
@@ -100,6 +99,7 @@ public class EventNestedToItem {
     }
 
     public String getStatus() {
+        //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
         if(requestTimeStamp != 0) {
             if(returnTimeStamp != 0) {
                 if(lostTimeStamp != 0) {

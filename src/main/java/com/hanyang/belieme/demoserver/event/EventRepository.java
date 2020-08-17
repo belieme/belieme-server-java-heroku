@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface EventRepository extends CrudRepository <Event, Integer> {
     List<Event> findByRequesterId(int requesterId);
-    List<Event> findByThingIdAndItemNum(int thingId, int itemNum);
+    List<Event> findByItemId(int itemId);
 }

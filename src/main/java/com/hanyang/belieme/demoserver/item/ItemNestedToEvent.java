@@ -11,14 +11,6 @@ public class ItemNestedToEvent {
     
     public ItemNestedToEvent() {
     }
-    // public ItemNestedToEvent(int num, Thing thing) {
-    //     this.num = num;
-    //     if(thing != null) {
-    //         this.thing = thing.toThingNestedToItem();
-    //     } else {
-    //         this.thing = null;
-    //     }
-    // }
 
     public int getId() {
         return id;

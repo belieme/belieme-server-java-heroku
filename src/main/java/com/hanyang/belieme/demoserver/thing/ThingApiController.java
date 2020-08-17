@@ -24,10 +24,10 @@ public class ThingApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<Iterable<Thing>> getItems() {
-        Iterable<ThingDB> tmpThings = thingRepository.findAll();
+    public ResponseWrapper<Iterable<Thing>> getAllThings() {
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
         ArrayList<Thing> responseBody = new ArrayList<>();
-        for (Iterator<ThingDB> it = tmpThings.iterator(); it.hasNext(); ) {
+        for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
             Thing tmp = it.next().toThing();
             tmp.addInfo(thingRepository, itemRepository, eventRepository);
             responseBody.add(tmp);
@@ -36,10 +36,10 @@ public class ThingApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> getItem(@PathVariable int id) {
-        Optional<ThingDB> tmpThing =  thingRepository.findById(id);
-        if(tmpThing.isPresent()) {
-            ThingWithItems responseBody = tmpThing.get().toThing().toThingWithItems();
+    public ResponseWrapper<ThingWithItems> getThingById(@PathVariable int id) {
+        Optional<ThingDB> targetOptional = thingRepository.findById(id);
+        if(targetOptional.isPresent()) {
+            ThingWithItems responseBody = targetOptional.get().toThing().toThingWithItems();
             responseBody.addInfo(thingRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
@@ -47,18 +47,18 @@ public class ThingApiController {
     }
 
     @PostMapping("")
-    public ResponseWrapper<Iterable<Thing>> createItem(@RequestBody Thing requestBody) {
-        if(requestBody.getName() == null || requestBody.getEmoji() == null) {
+    public ResponseWrapper<Iterable<Thing>> createNewThing(@RequestBody Thing requestBody) {
+        if(requestBody.getName() == null || requestBody.getEmoji() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        ThingDB savedThing = thingRepository.save(requestBody.toThingDB());
-        for(int i = 0; i < requestBody.getAmount(); i++) {
+        ThingDB savedThing = thingRepository.save(requestBody.toThingDB()); 
+        for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
             Item newItem = new Item(savedThing.getId(), i + 1);
             itemRepository.save(newItem);
         }
         
-        Iterable<ThingDB> allThingsListDB = thingRepository.findAll();
-        Iterator<ThingDB> iterator = allThingsListDB.iterator();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
 
         ArrayList<Thing> responseBody = new ArrayList<>();
         while(iterator.hasNext()) {
@@ -70,8 +70,8 @@ public class ThingApiController {
     }
 
     @PutMapping("")
-    public ResponseWrapper<ArrayList<Thing>> updateItem(@RequestBody Thing requestBody){
-        if(requestBody.getId() == 0 || requestBody.getName() == null || requestBody.getEmoji() == null) { // id가 0으로 자동 생성 될 수 있을까? 그리고 Id 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@RequestBody Thing requestBody){ // 논의점 바뀐것만 보여주는게 좋지 않을까??
+        if(requestBody.getId() == 0 || requestBody.getName() == null || requestBody.getEmoji() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         Optional<ThingDB> targetOptional = thingRepository.findById(requestBody.getId());
@@ -80,7 +80,7 @@ public class ThingApiController {
             ThingDB requestBodyDB = requestBody.toThingDB();
             target.setName(requestBodyDB.getName());
             target.setEmojiByte(requestBodyDB.getEmojiByte());
-            thingRepository.save(target).toThing();
+            thingRepository.save(target);
 
             Iterable<ThingDB> allThingsListDB = thingRepository.findAll();
             Iterator<ThingDB> iterator = allThingsListDB.iterator();
@@ -93,12 +93,12 @@ public class ThingApiController {
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
-        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null); // 여기가 not found가 맞는 것인가
+        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);
     }
 
     // deactivate Thing을 만들긴 해야할 거 같지만 생각좀 해봐야 할 듯
     // @PutMapping("/deactivate/{id}/")
-    // public ResponseWrapper<Void> deactivateItem(@PathVariable int id) {
+    // public ResponseWrapper<Void> deactivateThing(@PathVariable int id) {
     //     if(itemTypeRepository.findById(id).isPresent()) {
     //         List<Item> itemList = itemRepository.findByTypeId(id);
     //         for (int i = 0; i < itemList.size(); i++) {

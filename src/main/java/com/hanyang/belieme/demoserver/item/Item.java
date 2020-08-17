@@ -121,6 +121,7 @@ public class Item {
     
     public ItemNestedToThing toItemNestedToThing() {
         ItemNestedToThing output = new ItemNestedToThing();
+        output.setId(id);
         output.setNum(num);
         output.setLastEvent(lastEvent);
         output.setStatus(status);

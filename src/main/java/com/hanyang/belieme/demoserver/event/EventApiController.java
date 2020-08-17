@@ -55,32 +55,10 @@ public class EventApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, eventListByRequesterId);
     }
 
-    @PostMapping("/request")
-    public ResponseWrapper<PostMappingResponse> createRequestEvent(@RequestBody Event requestBody) {
-        if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null || requestBody.thingIdGetter() == 0) { // id가 -1으로 자동 생성 될 수 있을까? 그리고 thingId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    @PostMapping("/request/{thingId}/{itemNum}")
+    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable int thingId, @PathVariable int itemNum, @RequestBody Event requestBody) {
+        if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null) { 
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        }
-        requestBody.setResponseManagerId(0);
-        requestBody.setResponseManagerName(null);
-        requestBody.setReturnManagerId(0);
-        requestBody.setReturnManagerName(null);
-        requestBody.setLostManagerId(0);
-        requestBody.setLostManagerName(null);
-        requestBody.setRequestTimeStampNow();
-        requestBody.setResponseTimeStampZero();
-        requestBody.setReturnTimeStampZero();
-        requestBody.setCancelTimeStampZero();
-        requestBody.setLostTimeStampZero();
-
-        List<Event> eventListByItem = eventRepository.findByThingIdAndItemNum(requestBody.thingIdGetter(), requestBody.itemNumGetter()); 
-        for(int i = 0; i < eventListByItem.size(); i++) {
-            eventListByItem.get(i).addInfo(thingRepository, itemRepository, eventRepository);
-            Event tmp = eventListByItem.get(i);
-            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
-                if(tmp.thingIdGetter() == requestBody.thingIdGetter()) {
-                    return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
-                }
-            }
         }
         
         List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
@@ -94,101 +72,179 @@ public class EventApiController {
         }
         if(currentEventCount >= 3) {
             return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_EVENT_EXCEPTION, null);
-        } 
+        }
+
+        List<Item> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
+        Item requestedItem;
+        if(itemListByThingIdAndNum.size() == 0) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<Item> requestItemOptional = itemRepository.findById(itemListByThingIdAndNum.get(0).getId());
+        if(requestItemOptional.isPresent()) {
+            requestedItem = requestItemOptional.get();
+            requestedItem.addInfo(thingRepository, eventRepository);
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }         
+        
+        if(!requestedItem.getStatus().equals("USABLE")) {
+            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+        }
+        
+        requestBody.setItemId(requestedItem.getId());
+        requestBody.setResponseManagerId(0);
+        requestBody.setResponseManagerName(null);
+        requestBody.setReturnManagerId(0);
+        requestBody.setReturnManagerName(null);
+        requestBody.setLostManagerId(0);
+        requestBody.setLostManagerName(null);
+        requestBody.setRequestTimeStampNow();
+        requestBody.setResponseTimeStampZero();
+        requestBody.setReturnTimeStampZero();
+        requestBody.setCancelTimeStampZero();
+        requestBody.setLostTimeStampZero();
             
+        Event eventOutput = eventRepository.save(requestBody);
+        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
+            
+        requestedItem.setLastEventId(eventOutput.getId());
+        itemRepository.save(requestedItem);
+            
+        ArrayList<Thing> thingListOutput = new ArrayList<>();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing();
+            tmp.addInfo(thingRepository, itemRepository, eventRepository);
+            thingListOutput.add(tmp);
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
+    }
+    
+    @PostMapping("/request/{thingId}")
+    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable int thingId, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
+        if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null) { 
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
+        int currentEventCount = 0;
+        for(int i = 0; i < eventListByRequesterId.size(); i++) {
+            eventListByRequesterId.get(i).addInfo(thingRepository, itemRepository, eventRepository);
+            Event tmp = eventListByRequesterId.get(i);
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
+                currentEventCount++;
+            }
+        }
+        if(currentEventCount >= 3) {
+            return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_EVENT_EXCEPTION, null);
+        }
+        
         Item requestedItem = null;
-        List<Item> items = itemRepository.findByThingId(requestBody.thingIdGetter());
-        for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(thingRepository, eventRepository);
-            if (items.get(i).getStatus().equals("USABLE")) {
-                requestedItem = items.get(i);
+        List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
+        for(int i = 0; i < itemListByThingId.size(); i++) {
+            itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
+            if (itemListByThingId.get(i).getStatus().equals("USABLE")) {
+                requestedItem = itemListByThingId.get(i);
                 break;
             }
         }
-
-        if(requestedItem != null) {
-            requestBody.setItemNum(requestedItem.getNum());
-            Event eventOutput = eventRepository.save(requestBody);
-            eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
-            requestedItem.setLastEventId(eventOutput.getId());
-            itemRepository.save(requestedItem);
-            ArrayList<Thing> thingListOutput = new ArrayList<>();
-            Iterable<ThingDB> allThingDBList = thingRepository.findAll();
-            Iterator<ThingDB> iterator = allThingDBList.iterator();
-            while(iterator.hasNext()) {
-                Thing tmp = iterator.next().toThing();
-                tmp.addInfo(thingRepository, itemRepository, eventRepository);
-                thingListOutput.add(tmp);
-            }
-            return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
-        }
-        else {
+        if(requestedItem == null) {
             return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
         }
+        
+        requestBody.setItemId(requestedItem.getId());
+        requestBody.setResponseManagerId(0);
+        requestBody.setResponseManagerName(null);
+        requestBody.setReturnManagerId(0);
+        requestBody.setReturnManagerName(null);
+        requestBody.setLostManagerId(0);
+        requestBody.setLostManagerName(null);
+        requestBody.setRequestTimeStampNow();
+        requestBody.setResponseTimeStampZero();
+        requestBody.setReturnTimeStampZero();
+        requestBody.setCancelTimeStampZero();
+        requestBody.setLostTimeStampZero();
+        
+        Event eventOutput = eventRepository.save(requestBody);
+        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
+        
+        requestedItem.setLastEventId(eventOutput.getId());
+        itemRepository.save(requestedItem);
+        
+        ArrayList<Thing> thingListOutput = new ArrayList<>();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing();
+            tmp.addInfo(thingRepository, itemRepository, eventRepository);
+            thingListOutput.add(tmp);
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
     
-    @PostMapping("/lost")
-    public ResponseWrapper<PostMappingResponse> createLostEvent(@RequestBody Event requestBody) {
-        if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null || requestBody.thingIdGetter() == 0 || requestBody.itemNumGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 thingId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    @PostMapping("/lost/{thingId}/{itemNum}")
+    public ResponseWrapper<PostMappingResponse> createLostEvent(@PathVariable int thingId, @PathVariable int itemNum, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
+        if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
+        
+        List<Item> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
+        Item requestedItem;
+        if(itemListByThingIdAndNum.size() == 0) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<Item> requestItemOptional = itemRepository.findById(itemListByThingIdAndNum.get(0).getId());
+        if(requestItemOptional.isPresent()) {
+            requestedItem = requestItemOptional.get();
+            requestedItem.addInfo(thingRepository, eventRepository);
+        }
+        else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }         
+        
+        if(!requestedItem.getStatus().equals("USABLE")) {
+            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+        }        
+        
+        requestBody.setItemId(requestedItem.getId());
         requestBody.setRequesterId(0);
-        requestBody.setRequesterName("");
+        requestBody.setRequesterName(null);
         requestBody.setResponseManagerId(0);
-        requestBody.setResponseManagerName("");
+        requestBody.setResponseManagerName(null);
         requestBody.setReturnManagerId(0);
-        requestBody.setReturnManagerName("");
+        requestBody.setReturnManagerName(null);
         requestBody.setRequestTimeStampZero();
         requestBody.setResponseTimeStampZero();
         requestBody.setReturnTimeStampZero();
         requestBody.setCancelTimeStampZero();
         requestBody.setLostTimeStampNow();
-
-        List<Event> eventListByItem = eventRepository.findByThingIdAndItemNum(requestBody.thingIdGetter(), requestBody.itemNumGetter()); 
-        for(int i = 0; i < eventListByItem.size(); i++) {
-            eventListByItem.get(i).addInfo(thingRepository, itemRepository, eventRepository);
-            Event tmp = eventListByItem.get(i);
-            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
-                if(tmp.thingIdGetter() == requestBody.thingIdGetter()) {
-                    return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
-                }
-            }
-        }
         
-        List<Item> requestedItemList = itemRepository.findByThingIdAndNum(requestBody.thingIdGetter(), requestBody.itemNumGetter());
+        Event eventOutput = eventRepository.save(requestBody);
+        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
         
-        if(requestedItemList.size() == 1) {
-            Item requestedItem = requestedItemList.get(0);
-            requestedItem.addInfo(thingRepository, eventRepository);
-            if(requestedItem.getStatus().equals("USABLE")) {
-                Event eventOutput = eventRepository.save(requestBody);
-                eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
-                requestedItem.setLastEventId(eventOutput.getId());
-                itemRepository.save(requestedItem);
-                ArrayList<Thing> thingListOutput = new ArrayList<>();
-                Iterable<ThingDB> allThingDBList = thingRepository.findAll();
-                Iterator<ThingDB> iterator = allThingDBList.iterator();
-                while(iterator.hasNext()) {
-                    Thing tmp = iterator.next().toThing();
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
-                    thingListOutput.add(tmp);
-                }
-                return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
-            }
-            else {
-                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
-            }
+        requestedItem.setLastEventId(eventOutput.getId());
+        itemRepository.save(requestedItem);
+        
+        ArrayList<Thing> thingListOutput = new ArrayList<>();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing();
+            tmp.addInfo(thingRepository, itemRepository, eventRepository);
+            thingListOutput.add(tmp);
         }
-        else if(requestedItemList.size() == 0) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-        else {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
 
     @PutMapping("/cancel/{id}")
-    public ResponseWrapper<List<Event>> cancelItem(@PathVariable int id) {
+    public ResponseWrapper<List<Event>> cancelItem(@PathVariable int id) { // requester의 event들만 output으로 해야하는가?
         Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             Event eventToUpdate = eventBeforeUpdateOptional.get();

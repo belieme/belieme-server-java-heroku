@@ -25,7 +25,7 @@ public class ItemApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<Iterable<Item>> getItems() {
+    public ResponseWrapper<Iterable<Item>> getAllItems() {
         Iterable<Item> allItemList = itemRepository.findAll();
         Iterator<Item> iterator = allItemList.iterator();
         while(iterator.hasNext()) {
@@ -44,13 +44,13 @@ public class ItemApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, itemListByThingId);
     }
 
-    @GetMapping("/{thingId}/{itemNum}")
-    public ResponseWrapper<Item> getItem(@PathVariable int thingId, @PathVariable int itemNum) {
-        List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, itemNum);
+    @GetMapping("/{thingId}/{itemNum}") 
+    public ResponseWrapper<Item> getItemByThingIdAndNum(@PathVariable int thingId, @PathVariable int num) {
+        List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, num);
         if(itemList.size() == 1) {
-            Item item = itemList.get(0);
-            item.addInfo(thingRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, item);
+            Item output = itemList.get(0);
+            output.addInfo(thingRepository, eventRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
@@ -58,10 +58,9 @@ public class ItemApiController {
         }
     }
 
-
     @PostMapping("")
-    public ResponseWrapper<List<Item>> createItem(@RequestBody Item requestBody) {
-        if(requestBody.thingIdGetter() == 0) { // id가 0으로 자동 생성 될 수 있을까? 그리고 thingId 안쓰면 어차피 뒤에서 걸리는데 필요할까?
+    public ResponseWrapper<List<Item>> createNewItem(@RequestBody Item requestBody) {
+        if(requestBody.thingIdGetter() == 0) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
 
@@ -77,7 +76,7 @@ public class ItemApiController {
             }
         }
         requestBody.setNum(max+1);
-        requestBody.setLastEventId(-1);
+        requestBody.setLastEventId(0); //default는 0? -1?
 
         if(thingOptional.isPresent()) {
             itemRepository.save(requestBody);
