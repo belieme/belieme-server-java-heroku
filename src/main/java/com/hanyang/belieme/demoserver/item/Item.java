@@ -32,7 +32,7 @@ public class Item {
     public Item(int thingId, int num) {
         this.thingId = thingId;
         this.num = num;
-        this.lastEventId = -1;
+        this.lastEventId = 0; //Last history id의 default는 0 or -1?
     }
     
     public int getId() {

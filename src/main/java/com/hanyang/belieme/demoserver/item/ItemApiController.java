@@ -37,6 +37,9 @@ public class ItemApiController {
 
     @GetMapping("/byThingId/{thingId}")
     public ResponseWrapper<List<Item>> getItemsByThingId(@PathVariable int thingId) {
+        if(!thingRepository.findById(thingId).isPresent()) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
         List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
         for(int i = 0; i < itemListByThingId.size(); i++) {
             itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
@@ -58,15 +61,11 @@ public class ItemApiController {
         }
     }
 
-    @PostMapping("")
-    public ResponseWrapper<List<Item>> createNewItem(@RequestBody Item requestBody) {
-        if(requestBody.thingIdGetter() == 0) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        }
+    @PostMapping("/{thingId}")
+    public ResponseWrapper<List<Item>> createNewItem(int thingId) {
+        List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
 
-        List<Item> itemListByThingId = itemRepository.findByThingId(requestBody.thingIdGetter());
-
-        Optional<ThingDB> thingOptional = thingRepository.findById(requestBody.thingIdGetter());
+        Optional<ThingDB> thingOptional = thingRepository.findById(thingId);
 
         int max = 0;
         for(int i = 0; i < itemListByThingId.size(); i++) {
@@ -75,12 +74,11 @@ public class ItemApiController {
                 max = tmp.getNum();
             }
         }
-        requestBody.setNum(max+1);
-        requestBody.setLastEventId(0); //default는 0? -1?
+        Item newItem = new Item(thingId, max+1); 
 
         if(thingOptional.isPresent()) {
-            itemRepository.save(requestBody);
-            List<Item> responseBody = itemRepository.findByThingId(requestBody.thingIdGetter());
+            itemRepository.save(newItem);
+            List<Item> responseBody = itemRepository.findByThingId(newItem.thingIdGetter());
             
             for(int i = 0; i < responseBody.size(); i++) {
                 responseBody.get(i).addInfo(thingRepository, eventRepository);
