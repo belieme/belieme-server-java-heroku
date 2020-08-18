@@ -44,7 +44,7 @@ public class ItemApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, itemListByThingId);
     }
 
-    @GetMapping("/{thingId}/{itemNum}") 
+    @GetMapping("/{thingId}/{num}") 
     public ResponseWrapper<Item> getItemByThingIdAndNum(@PathVariable int thingId, @PathVariable int num) {
         List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, num);
         if(itemList.size() == 1) {
