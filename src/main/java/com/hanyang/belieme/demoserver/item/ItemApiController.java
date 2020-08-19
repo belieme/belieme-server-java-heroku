@@ -24,7 +24,7 @@ public class ItemApiController {
     @Autowired
     private EventRepository eventRepository;
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseWrapper<Iterable<Item>> getAllItems() {
         Iterable<Item> allItemList = itemRepository.findAll();
         Iterator<Item> iterator = allItemList.iterator();
