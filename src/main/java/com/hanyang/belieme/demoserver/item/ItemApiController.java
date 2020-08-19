@@ -62,7 +62,7 @@ public class ItemApiController {
     }
 
     @PostMapping("/{thingId}")
-    public ResponseWrapper<List<Item>> createNewItem(int thingId) {
+    public ResponseWrapper<List<Item>> createNewItem(@PathVariable int thingId) {
         List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
 
         Optional<ThingDB> thingOptional = thingRepository.findById(thingId);
