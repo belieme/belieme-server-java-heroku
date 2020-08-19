@@ -46,8 +46,8 @@ public class EventApiController {
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
     
-    @GetMapping("/byRequesterId/{requesterId}")
-    public ResponseWrapper<List<Event>> getItemsByRequesterId(@PathVariable int requesterId) {
+    @GetMapping("")
+    public ResponseWrapper<List<Event>> getItemsByRequesterId(@RequestParam("requesterId") int requesterId) {
         List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requesterId);
         for(int i = 0; i < eventListByRequesterId.size(); i++) {
             eventListByRequesterId.get(i).addInfo(thingRepository, itemRepository, eventRepository);

@@ -35,21 +35,21 @@ public class ItemApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, allItemList);
     }
 
-    @GetMapping("/byThingId/{thingId}")
-    public ResponseWrapper<List<Item>> getItemsByThingId(@PathVariable int thingId) {
-        if(!thingRepository.findById(thingId).isPresent()) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-        List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
-        for(int i = 0; i < itemListByThingId.size(); i++) {
-            itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
-        }
-        return new ResponseWrapper<>(ResponseHeader.OK, itemListByThingId);
-    }
+    // @GetMapping("/byThingId/{thingId}")
+    // public ResponseWrapper<List<Item>> getItemsByThingId(@PathVariable int thingId) {
+    //     if(!thingRepository.findById(thingId).isPresent()) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     }
+    //     List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
+    //     for(int i = 0; i < itemListByThingId.size(); i++) {
+    //         itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
+    //     }
+    //     return new ResponseWrapper<>(ResponseHeader.OK, itemListByThingId);
+    // }
 
-    @GetMapping("/{thingId}/{num}") 
-    public ResponseWrapper<Item> getItemByThingIdAndNum(@PathVariable int thingId, @PathVariable int num) {
-        List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, num);
+    @GetMapping("") 
+    public ResponseWrapper<Item> getItemByThingIdAndNum(@RequestParam("thingId") int thingId, @RequestParam("itemNum") int itemNum) {
+        List<Item> itemList = itemRepository.findByThingIdAndNum(thingId, itemNum);
         if(itemList.size() == 1) {
             Item output = itemList.get(0);
             output.addInfo(thingRepository, eventRepository);
@@ -61,8 +61,8 @@ public class ItemApiController {
         }
     }
 
-    @PostMapping("/{thingId}")
-    public ResponseWrapper<List<Item>> createNewItem(@PathVariable int thingId) {
+    @PostMapping("")
+    public ResponseWrapper<List<Item>> createNewItem(@RequestParam("thingId") int thingId) {
         List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
 
         Optional<ThingDB> thingOptional = thingRepository.findById(thingId);

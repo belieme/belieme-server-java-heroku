@@ -69,12 +69,12 @@ public class ThingApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
     }
 
-    @PutMapping("")
-    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@RequestBody Thing requestBody){ // 논의점 바뀐것만 보여주는게 좋지 않을까??
-        if(requestBody.getId() == 0 || requestBody.getName() == null || requestBody.getEmoji() == null) {
+    @PutMapping("{id}")
+    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@PathVariable int id, @RequestBody Thing requestBody){
+        if(requestBody.getName() == null || requestBody.getEmoji() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Optional<ThingDB> targetOptional = thingRepository.findById(requestBody.getId());
+        Optional<ThingDB> targetOptional = thingRepository.findById(id);
         if(targetOptional.isPresent()) {
             ThingDB target = targetOptional.get();
             ThingDB requestBodyDB = requestBody.toThingDB();
