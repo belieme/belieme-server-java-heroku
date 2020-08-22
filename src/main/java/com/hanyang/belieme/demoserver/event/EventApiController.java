@@ -25,7 +25,7 @@ public class EventApiController {
     @Autowired
     private ThingRepository thingRepository;
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseWrapper<Iterable<Event>> getItems() {
         Iterable<Event> allEventList = eventRepository.findAll();
         Iterator<Event> iterator = allEventList.iterator();

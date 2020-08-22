@@ -2,13 +2,19 @@ package com.hanyang.belieme.demoserver.user;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
 public class User {
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    
+    private String token;
+    
     @Column(name = "student_id", nullable = false)
-    private int studentId;
+    private String studentId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -18,8 +24,15 @@ public class User {
     @Column(name = "permission", nullable = false)
     private String permission;
 
-
-    public int getStudentId() {
+    public int getId() {
+        return id;
+    }
+    
+    public String token() {
+        return token;
+    }
+    
+    public String getStudentId() {
         return studentId;
     }
 
@@ -33,6 +46,10 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void permissionSetUser() {

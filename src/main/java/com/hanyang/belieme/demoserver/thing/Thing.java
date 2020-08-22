@@ -11,6 +11,7 @@ public class Thing {
     private int id;
     private String name;
     private String emoji;
+    private String description;
 
     private int amount;
     private int count;
@@ -19,10 +20,11 @@ public class Thing {
     public Thing() {
     }
 
-    public Thing(int id, String name, String emoji) {
+    public Thing(int id, String name, String emoji, String description) {
         this.id = id;
         this.name = name;
         this.emoji = emoji;
+        this.description = description;
     }
 
     public int getId() {
@@ -35,6 +37,13 @@ public class Thing {
 
     public String getEmoji() {
         return emoji;
+    }
+    
+    public String getDescription() {
+        if(description != null) {
+            return description;    
+        }
+        return "자세한 설명은 생략한다!";
     }
 
     public int getAmount() {

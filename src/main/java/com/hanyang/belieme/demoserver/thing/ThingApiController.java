@@ -12,7 +12,7 @@ import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.common.*;
 
 @RestController
-@RequestMapping(path="/things")
+@RequestMapping(path="university/{univCode}/major/{majorCode}/things")
 public class ThingApiController {
     @Autowired
     private ThingRepository thingRepository;
@@ -24,7 +24,7 @@ public class ThingApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<Iterable<Thing>> getAllThings() {
+    public ResponseWrapper<Iterable<Thing>> getAllThings(@PathVariable String univCode, @PathVariable String majorCode) {
         Iterable<ThingDB> allThingDBList = thingRepository.findAll();
         ArrayList<Thing> responseBody = new ArrayList<>();
         for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
@@ -36,7 +36,7 @@ public class ThingApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> getThingById(@PathVariable int id) {
+    public ResponseWrapper<ThingWithItems> getThingById(@PathVariable String univCode, @PathVariable String majorCode, @PathVariable int id) {
         Optional<ThingDB> targetOptional = thingRepository.findById(id);
         if(targetOptional.isPresent()) {
             ThingWithItems responseBody = targetOptional.get().toThing().toThingWithItems();
@@ -47,7 +47,7 @@ public class ThingApiController {
     }
 
     @PostMapping("")
-    public ResponseWrapper<Iterable<Thing>> createNewThing(@RequestBody Thing requestBody) {
+    public ResponseWrapper<Iterable<Thing>> createNewThing(@PathVariable String univCode, @PathVariable String majorCode, @RequestBody Thing requestBody) {
         if(requestBody.getName() == null || requestBody.getEmoji() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -69,8 +69,8 @@ public class ThingApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
     }
 
-    @PutMapping("{id}")
-    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@PathVariable int id, @RequestBody Thing requestBody){
+    @PatchMapping("{id}")
+    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@PathVariable String univCode, @PathVariable String majorCode, @PathVariable int id, @RequestBody Thing requestBody){
         if(requestBody.getName() == null || requestBody.getEmoji() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
