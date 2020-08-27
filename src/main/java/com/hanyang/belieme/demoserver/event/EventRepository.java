@@ -4,7 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface EventRepository extends CrudRepository <Event, Integer> {
-    List<Event> findByRequesterId(int requesterId);
-    List<Event> findByItemId(int itemId);
+public interface EventRepository extends CrudRepository <EventDB, Integer> {
+    List<EventDB> findByRequesterId(int requesterId);
+    List<EventDB> findByItemId(int itemId);
 }

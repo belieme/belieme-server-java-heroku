@@ -1,10 +1,8 @@
 package com.hanyang.belieme.demoserver.thing;
 
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
-import com.hanyang.belieme.demoserver.item.*;
-import com.hanyang.belieme.demoserver.event.*;
+import com.hanyang.belieme.demoserver.department.Department;
 
 
 public class Thing {
@@ -12,19 +10,14 @@ public class Thing {
     private String name;
     private String emoji;
     private String description;
+    
+    private Department department;
 
     private int amount;
     private int count;
     private String status;
 
     public Thing() {
-    }
-
-    public Thing(int id, String name, String emoji, String description) {
-        this.id = id;
-        this.name = name;
-        this.emoji = emoji;
-        this.description = description;
     }
 
     public int getId() {
@@ -45,6 +38,10 @@ public class Thing {
         }
         return "자세한 설명은 생략한다!";
     }
+    
+    public Department getDepartment() {
+        return department;
+    }
 
     public int getAmount() {
         return amount;
@@ -58,47 +55,46 @@ public class Thing {
         return status;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
-
+    
     public void setEmoji(String emoji) {
         this.emoji = emoji;
     }
-
-    public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-        amount = 0;
-        count = 0;
-        List<Item> items = itemRepository.findByThingId(id);
-        for(int i = 0; i < items.size(); i++) {
-            items.get(i).addInfo(thingRepository, eventRepository);
-            if(items.get(i).getStatus().equals("UNUSABLE")) {
-                amount++;
-            }
-            else if(items.get(i).getStatus().equals("USABLE")) {
-                amount++;
-                count++;
-            }
-        }
-        if(amount == 0) { // 여기도 생각할 여지가 필요할 듯, TODO deactivate 만들 때 쓰기
-            status = "INACTIVE";
-        }
-        else if(count == 0) {
-            status = "UNUSABLE";
-        }
-        else if(amount >= count) {
-            status = "USABLE";
-        }
-        else {
-            status = "ERROR";
-        }
+    
+    public void setDescription(String description) {
+        this.description = description;
     }
-
+    
+    public void setDepartment(Department department) {
+        this.department = department;  // copy constructor로 만들기
+    }
+    
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+    
+    public void setCount(int count) {
+        this.count = count;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
     public ThingDB toThingDB() {
+        if(emoji == null) {
+            return new ThingDB(id, name, 0, description);
+        }
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ThingDB(id, name, getIntFromByteArray(arr));
+            return new ThingDB(id, name, getIntFromByteArray(arr), description);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -121,22 +117,5 @@ public class Thing {
             }
             return result;
         }
-    }
-    
-    public ThingNestedToItem toThingNestedToItem() {
-        ThingNestedToItem output = new ThingNestedToItem();
-        output.setId(id);
-        output.setName(name);
-        output.setEmoji(emoji);
-        
-        return output;
-    }
-    
-    public ThingWithItems toThingWithItems() {
-        ThingWithItems output = new ThingWithItems();
-        output.setId(id);
-        output.setName(name);
-        output.setEmoji(emoji);
-        return output;
     }
 }

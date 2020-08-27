@@ -13,23 +13,25 @@ public class User {
     
     private String token;
     
+    private int departmentId;
+    
     @Column(name = "student_id", nullable = false)
     private String studentId;
 
-    @Column(name = "name", nullable = false)
     private String name;
-
-    //TODO department 연결 및 한양 API정보 추가
     
-    @Column(name = "permission", nullable = false)
     private String permission;
-
+    
     public int getId() {
         return id;
     }
     
-    public String token() {
+    public String getToken() {
         return token;
+    }
+    
+    public int departmentIdGetter() {
+        return departmentId;
     }
     
     public String getStudentId() {
@@ -50,6 +52,14 @@ public class User {
     
     public void setToken(String token) {
         this.token = token;
+    }
+    
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
+    }
+    
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public void permissionSetUser() {

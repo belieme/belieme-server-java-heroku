@@ -12,6 +12,7 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,8 +69,57 @@ public class DepartmentApiController {
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        
+        List<Department> departmentListByUnivId = departmentRepository.findByUniversityId(requestBody.universityIdGetter());
+        for(int i = 0; i < departmentListByUnivId.size(); i++) {
+            if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
+                return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+            }
+        }
         // requestBody.able(); TODO default는 무엇인가...
         Department output = departmentRepository.save(requestBody);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
+    
+    @PatchMapping("/{departmentCode}")
+    public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Department requestBody) {
+        if(requestBody.getDepartmentName() == null || requestBody.getDepartmentCode() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        
+        int id;
+        try {
+            id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);    
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<Department> targetOptional = departmentRepository.findById(id);
+        if(targetOptional.isPresent()) {
+            Department target = targetOptional.get();
+            if(departmentCode.equals(requestBody.getDepartmentCode())) {
+                target.setDepartmentName(requestBody.getDepartmentName());
+                Department output = departmentRepository.save(target);
+                return new ResponseWrapper<>(ResponseHeader.OK, output);    
+            }
+            List<Department> departmentListByUnivId = departmentRepository.findByUniversityId(requestBody.universityIdGetter());
+            for(int i = 0; i < departmentListByUnivId.size(); i++) {
+                if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
+                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                }
+            }
+            target.setDepartmentCode(requestBody.getDepartmentCode());
+            target.setDepartmentName(requestBody.getDepartmentName());
+            Department output = departmentRepository.save(target);
+            return new ResponseWrapper<>(ResponseHeader.OK, output);    
+        } else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+    }
+    
+    //TODO 활성화/비활성화 patch
+    
+    //TODO majorList 추가/제거
 }

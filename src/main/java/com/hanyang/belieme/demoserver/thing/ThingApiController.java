@@ -8,12 +8,24 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.item.*;
+
+import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.event.*;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.common.*;
+import com.hanyang.belieme.demoserver.department.Department;
+import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 
 @RestController
-@RequestMapping(path="university/{univCode}/major/{majorCode}/things")
+@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/things")
 public class ThingApiController {
+    @Autowired
+    private UniversityRepository universityRepository;
+    
+    @Autowired
+    private DepartmentRepository departmentRepository;
+    
     @Autowired
     private ThingRepository thingRepository;
 
@@ -24,36 +36,66 @@ public class ThingApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<Iterable<Thing>> getAllThings(@PathVariable String univCode, @PathVariable String majorCode) {
-        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
-        ArrayList<Thing> responseBody = new ArrayList<>();
-        for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-            Thing tmp = it.next().toThing();
-            tmp.addInfo(thingRepository, itemRepository, eventRepository);
-            responseBody.add(tmp);
+    public ResponseWrapper<Iterable<Thing>> getAllThings(@PathVariable String univCode, @PathVariable String departmentCode) {
+        try {
+            int id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(id);
+            ArrayList<Thing> responseBody = new ArrayList<>();
+            for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
+                Thing tmp = it.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
+                responseBody.add(tmp);
+            }
+            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> getThingById(@PathVariable String univCode, @PathVariable String majorCode, @PathVariable int id) {
+    public ResponseWrapper<ThingWithItems> getThingById(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) {
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
         Optional<ThingDB> targetOptional = thingRepository.findById(id);
         if(targetOptional.isPresent()) {
-            ThingWithItems responseBody = targetOptional.get().toThing().toThingWithItems();
-            responseBody.addInfo(thingRepository, itemRepository, eventRepository);
+            if(departmentId != targetOptional.get().getDepartmentId()) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
+            }
+            ThingWithItems responseBody = targetOptional.get().toThingWithItems(departmentRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
 
     @PostMapping("")
-    public ResponseWrapper<Iterable<Thing>> createNewThing(@PathVariable String univCode, @PathVariable String majorCode, @RequestBody Thing requestBody) {
-        if(requestBody.getName() == null || requestBody.getEmoji() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
+    public ResponseWrapper<Iterable<Thing>> createNewThing(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Thing requestBody) {
+        if(requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        ThingDB savedThing = thingRepository.save(requestBody.toThingDB()); 
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        ThingDB requestBodyDB = requestBody.toThingDB();
+        requestBodyDB.setDepartmentId(departmentId);
+        
+        ThingDB savedThing = thingRepository.save(requestBodyDB); 
         for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
-            Item newItem = new Item(savedThing.getId(), i + 1);
+            ItemDB newItem = new ItemDB(savedThing.getId(), i + 1);
             itemRepository.save(newItem);
         }
         
@@ -62,24 +104,45 @@ public class ThingApiController {
 
         ArrayList<Thing> responseBody = new ArrayList<>();
         while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing();
-            tmp.addInfo(thingRepository, itemRepository, eventRepository);
+            Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
             responseBody.add(tmp);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
     }
 
     @PatchMapping("{id}")
-    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@PathVariable String univCode, @PathVariable String majorCode, @PathVariable int id, @RequestBody Thing requestBody){
-        if(requestBody.getName() == null || requestBody.getEmoji() == null) {
+    public ResponseWrapper<ArrayList<Thing>> updateNameAndEmojiOfThing(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Thing requestBody){
+        if(requestBody.getName() == null && requestBody.getEmoji() == null && requestBody.getDescription() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
         Optional<ThingDB> targetOptional = thingRepository.findById(id);
         if(targetOptional.isPresent()) {
             ThingDB target = targetOptional.get();
+            
+            if(target.getDepartmentId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
+            }
+            
             ThingDB requestBodyDB = requestBody.toThingDB();
-            target.setName(requestBodyDB.getName());
-            target.setEmojiByte(requestBodyDB.getEmojiByte());
+            if(requestBodyDB.getName() != null) {
+                target.setName(requestBodyDB.getName());    
+            }
+            if(requestBodyDB.getEmojiByte() != 0) {
+                target.setEmojiByte(requestBodyDB.getEmojiByte());    
+            }
+            if(requestBodyDB.getDescription() != null) {
+                target.setDescription(requestBodyDB.getDescription());
+            }
             thingRepository.save(target);
 
             Iterable<ThingDB> allThingsListDB = thingRepository.findAll();
@@ -87,8 +150,7 @@ public class ThingApiController {
 
             ArrayList<Thing> responseBody = new ArrayList<>();
             while(iterator.hasNext()) {
-                Thing tmp = iterator.next().toThing();
-                tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);

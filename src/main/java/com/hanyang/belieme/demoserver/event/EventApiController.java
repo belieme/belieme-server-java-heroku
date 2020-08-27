@@ -9,13 +9,24 @@ import java.util.List;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
+import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.common.*;
+import com.hanyang.belieme.demoserver.department.Department;
+import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 
 @RestController
-@RequestMapping(path="/events")
+@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/events")
 public class EventApiController {
+    @Autowired
+    private UniversityRepository universityRepository;
+    
+    @Autowired
+    private DepartmentRepository departmentRepository;
+    
     @Autowired
     private EventRepository eventRepository;
 
@@ -25,116 +36,82 @@ public class EventApiController {
     @Autowired
     private ThingRepository thingRepository;
 
-    @GetMapping("/all")
-    public ResponseWrapper<Iterable<Event>> getItems() {
-        Iterable<Event> allEventList = eventRepository.findAll();
-        Iterator<Event> iterator = allEventList.iterator();
-        while(iterator.hasNext()) {
-            Event event = iterator.next();
-            event.addInfo(thingRepository, itemRepository, eventRepository);
-        }
-        return new ResponseWrapper<>(ResponseHeader.OK, allEventList);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseWrapper<Event> getItem(@PathVariable int id) {
-        Optional<Event> eventOptional = eventRepository.findById(id);
-        if(eventOptional.isPresent()) {
-            eventOptional.get().addInfo(thingRepository, itemRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, eventOptional.get());
-        }
-        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-    }
-    
-    @GetMapping("")
-    public ResponseWrapper<List<Event>> getItemsByRequesterId(@RequestParam("requesterId") int requesterId) {
-        List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requesterId);
-        for(int i = 0; i < eventListByRequesterId.size(); i++) {
-            eventListByRequesterId.get(i).addInfo(thingRepository, itemRepository, eventRepository);
-        }
-        return new ResponseWrapper<>(ResponseHeader.OK, eventListByRequesterId);
-    }
-
-    @PostMapping("/request/{thingId}/{itemNum}")
-    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable int thingId, @PathVariable int itemNum, @RequestBody Event requestBody) {
-        if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null) { 
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        }
-        
-        List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
-        int currentEventCount = 0;
-        for(int i = 0; i < eventListByRequesterId.size(); i++) {
-            eventListByRequesterId.get(i).addInfo(thingRepository, itemRepository, eventRepository);
-            Event tmp = eventListByRequesterId.get(i);
-            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
-                currentEventCount++;
-            }
-        }
-        if(currentEventCount >= 3) {
-            return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_EVENT_EXCEPTION, null);
-        }
-
-        List<Item> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
-        Item requestedItem;
-        if(itemListByThingIdAndNum.size() == 0) {
+    @GetMapping("/")
+    public ResponseWrapper<Iterable<Event>> getItems(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "requesterId", required = false) Integer requesterId) {
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+        } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        Optional<Item> requestItemOptional = itemRepository.findById(itemListByThingIdAndNum.get(0).getId());
-        if(requestItemOptional.isPresent()) {
-            requestedItem = requestItemOptional.get();
-            requestedItem.addInfo(thingRepository, eventRepository);
-        }
-        else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }         
+        Iterable<EventDB> allEventList = eventRepository.findAll();
+        Iterator<EventDB> iterator = allEventList.iterator();
         
-        if(!requestedItem.getStatus().equals("USABLE")) {
-            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
-        }
-        
-        requestBody.setItemId(requestedItem.getId());
-        requestBody.setResponseManagerId(0);
-        requestBody.setResponseManagerName(null);
-        requestBody.setReturnManagerId(0);
-        requestBody.setReturnManagerName(null);
-        requestBody.setLostManagerId(0);
-        requestBody.setLostManagerName(null);
-        requestBody.setRequestTimeStampNow();
-        requestBody.setResponseTimeStampZero();
-        requestBody.setReturnTimeStampZero();
-        requestBody.setCancelTimeStampZero();
-        requestBody.setLostTimeStampZero();
-            
-        Event eventOutput = eventRepository.save(requestBody);
-        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
-            
-        requestedItem.setLastEventId(eventOutput.getId());
-        itemRepository.save(requestedItem);
-            
-        ArrayList<Thing> thingListOutput = new ArrayList<>();
-        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
-        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        List<Event> output = new ArrayList<>();
         while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing();
-            tmp.addInfo(thingRepository, itemRepository, eventRepository);
-            thingListOutput.add(tmp);
+            EventDB eventDB = iterator.next();
+            Event tmp = eventDB.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                if(requesterId == null || tmp.getRequesterId() == requesterId) {
+                    output.add(tmp);    
+                }
+            }
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
+        return new ResponseWrapper<>(ResponseHeader.OK, output);
     }
-    
-    @PostMapping("/request/{thingId}")
-    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable int thingId, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
+
+    @GetMapping("/{id}")
+    public ResponseWrapper<Event> getItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) {
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventOptional = eventRepository.findById(id);
+        Event output;
+        if(eventOptional.isPresent()) {
+            output = eventOptional.get().toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(output.getItem().getThing().getDepartment().getId() == departmentId) {
+                 return new ResponseWrapper<>(ResponseHeader.OK, output);   
+            }
+            //TODO NotFoundException의 종류를 늘려야 하나? Exception바꿀까?
+        } 
+        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    }
+
+    @PostMapping("/request")
+    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum, @RequestBody Event requestBody) {
         if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null) { 
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        List<Event> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        if(!targetThingOptional.isPresent()) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else if(targetThingOptional.get().getDepartmentId() !=     departmentId) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+        }
+        
+        List<EventDB> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
         int currentEventCount = 0;
         for(int i = 0; i < eventListByRequesterId.size(); i++) {
-            eventListByRequesterId.get(i).addInfo(thingRepository, itemRepository, eventRepository);
-            Event tmp = eventListByRequesterId.get(i);
+            Event tmp = eventListByRequesterId.get(i).toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
             }
@@ -144,117 +121,183 @@ public class EventApiController {
         }
         
         Item requestedItem = null;
-        List<Item> itemListByThingId = itemRepository.findByThingId(thingId);
-        for(int i = 0; i < itemListByThingId.size(); i++) {
-            itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
-            if (itemListByThingId.get(i).getStatus().equals("USABLE")) {
-                requestedItem = itemListByThingId.get(i);
-                break;
+        if(itemNum == null) {
+            List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
+            for(int i = 0; i < itemListByThingId.size(); i++) {
+                requestedItem = itemListByThingId.get(i).toItem(departmentRepository, thingRepository, eventRepository);
+                if (requestedItem.getStatus().equals("USABLE")) {
+                    break;
+                }
+                requestedItem = null;
+            }
+            if(requestedItem == null) {
+                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+            }
+        } else {
+            int itemId;
+            try {
+                itemId = Item.findItemIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+            } catch(NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            } catch(WrongInDataBaseException e) {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+            }
+            
+            Optional<ItemDB> requestItemOptional = itemRepository.findById(itemId);
+            if(requestItemOptional.isPresent()) {
+                requestedItem = requestItemOptional.get().toItem(departmentRepository, thingRepository, eventRepository);
+            } else {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+            
+            if(!requestedItem.getStatus().equals("USABLE")) {
+                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
             }
         }
-        if(requestedItem == null) {
-            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
-        }
+
+        EventDB newEventDB = new EventDB();
         
-        requestBody.setItemId(requestedItem.getId());
-        requestBody.setResponseManagerId(0);
-        requestBody.setResponseManagerName(null);
-        requestBody.setReturnManagerId(0);
-        requestBody.setReturnManagerName(null);
-        requestBody.setLostManagerId(0);
-        requestBody.setLostManagerName(null);
-        requestBody.setRequestTimeStampNow();
-        requestBody.setResponseTimeStampZero();
-        requestBody.setReturnTimeStampZero();
-        requestBody.setCancelTimeStampZero();
-        requestBody.setLostTimeStampZero();
-        
-        Event eventOutput = eventRepository.save(requestBody);
-        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
-        
-        requestedItem.setLastEventId(eventOutput.getId());
-        itemRepository.save(requestedItem);
-        
+        newEventDB.setItemId(requestedItem.getId());
+        newEventDB.setRequesterId(requestBody.getRequesterId());
+        newEventDB.setRequesterName(requestBody.getRequesterName());
+        newEventDB.setResponseManagerId(0);
+        newEventDB.setResponseManagerName(null);
+        newEventDB.setReturnManagerId(0);
+        newEventDB.setReturnManagerName(null);
+        newEventDB.setLostManagerId(0);
+        newEventDB.setLostManagerName(null);
+        newEventDB.setRequestTimeStampNow();
+        newEventDB.setResponseTimeStampZero();
+        newEventDB.setReturnTimeStampZero();
+        newEventDB.setCancelTimeStampZero();
+        newEventDB.setLostTimeStampZero();
+            
+        Event eventOutput = eventRepository.save(newEventDB).toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            
+        ItemDB updatedItemDB = requestedItem.toItemDB();
+        updatedItemDB.setLastEventId(eventOutput.getId());
+        itemRepository.save(updatedItemDB);
+            
         ArrayList<Thing> thingListOutput = new ArrayList<>();
         Iterable<ThingDB> allThingDBList = thingRepository.findAll();
         Iterator<ThingDB> iterator = allThingDBList.iterator();
         while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing();
-            tmp.addInfo(thingRepository, itemRepository, eventRepository);
-            thingListOutput.add(tmp);
+            Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(tmp.getDepartment().getId() == departmentId) {
+                thingListOutput.add(tmp);   
+            }
         }
         return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
     
-    @PostMapping("/lost/{thingId}/{itemNum}")
-    public ResponseWrapper<PostMappingResponse> createLostEvent(@PathVariable int thingId, @PathVariable int itemNum, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
+    @PostMapping("/lost")
+    public ResponseWrapper<PostMappingResponse> createLostEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = true) int itemNum, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
         if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        List<Item> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
-        Item requestedItem;
-        if(itemListByThingIdAndNum.size() == 0) {
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+        } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
-        
-        Optional<Item> requestItemOptional = itemRepository.findById(itemListByThingIdAndNum.get(0).getId());
-        if(requestItemOptional.isPresent()) {
-            requestedItem = requestItemOptional.get();
-            requestedItem.addInfo(thingRepository, eventRepository);
-        }
-        else {
+
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }         
+        } else if(targetThingOptional.get().getDepartmentId() !=     departmentId) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+        }
         
+        Item requestedItem;
+        int itemId;
+        try {
+            itemId = Item.findItemIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+            
+        Optional<ItemDB> requestItemOptional = itemRepository.findById(itemId);
+        if(requestItemOptional.isPresent()) {
+            requestedItem = requestItemOptional.get().toItem(departmentRepository, thingRepository, eventRepository);
+        } else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+            
         if(!requestedItem.getStatus().equals("USABLE")) {
             return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
-        }        
+        }      
         
-        requestBody.setItemId(requestedItem.getId());
-        requestBody.setRequesterId(0);
-        requestBody.setRequesterName(null);
-        requestBody.setResponseManagerId(0);
-        requestBody.setResponseManagerName(null);
-        requestBody.setReturnManagerId(0);
-        requestBody.setReturnManagerName(null);
-        requestBody.setRequestTimeStampZero();
-        requestBody.setResponseTimeStampZero();
-        requestBody.setReturnTimeStampZero();
-        requestBody.setCancelTimeStampZero();
-        requestBody.setLostTimeStampNow();
+        EventDB newEventDB = new EventDB();
         
-        Event eventOutput = eventRepository.save(requestBody);
-        eventOutput.addInfo(thingRepository, itemRepository, eventRepository);
+        newEventDB.setItemId(requestedItem.getId());
+        newEventDB.setRequesterId(0);
+        newEventDB.setRequesterName(null);
+        newEventDB.setResponseManagerId(0);
+        newEventDB.setResponseManagerName(null);
+        newEventDB.setReturnManagerId(0);
+        newEventDB.setReturnManagerName(null);
+        newEventDB.setLostManagerId(requestBody.getLostManagerId());
+        newEventDB.setLostManagerName(requestBody.getLostManagerName());
+        newEventDB.setRequestTimeStampZero();
+        newEventDB.setResponseTimeStampZero();
+        newEventDB.setReturnTimeStampZero();
+        newEventDB.setCancelTimeStampZero();
+        newEventDB.setLostTimeStampNow();
         
-        requestedItem.setLastEventId(eventOutput.getId());
-        itemRepository.save(requestedItem);
+        Event eventOutput = eventRepository.save(newEventDB).toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            
+        ItemDB updatedItemDB = requestedItem.toItemDB();
+        updatedItemDB.setLastEventId(eventOutput.getId());
+        itemRepository.save(updatedItemDB);
         
         ArrayList<Thing> thingListOutput = new ArrayList<>();
         Iterable<ThingDB> allThingDBList = thingRepository.findAll();
         Iterator<ThingDB> iterator = allThingDBList.iterator();
         while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing();
-            tmp.addInfo(thingRepository, itemRepository, eventRepository);
-            thingListOutput.add(tmp);
+            Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(tmp.getDepartment().getId() == departmentId) {
+                thingListOutput.add(tmp);   
+            }
         }
         return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
 
-    @PutMapping("/cancel/{id}")
-    public ResponseWrapper<List<Event>> cancelItem(@PathVariable int id) { // requester의 event들만 output으로 해야하는가?
-        Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
+    @PutMapping("/{id}/cancel")
+    public ResponseWrapper<List<Event>> cancelItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) { // requester의 event들만 output으로 해야하는가?
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
-            Event eventToUpdate = eventBeforeUpdateOptional.get();
+            EventDB eventToUpdate = eventBeforeUpdateOptional.get();
+            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+            }
+            
             if(eventToUpdate.getStatus().equals("REQUESTED")) {
                 eventToUpdate.setCancelTimeStampNow();
                 eventRepository.save(eventToUpdate);
-                List<Event> output = eventRepository.findByRequesterId(eventToUpdate.getRequesterId());
-                for(int i = 0; i < output.size(); i++) {
-                    Event tmp = output.get(i);
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                List<Event> output = new ArrayList<>();
+                List<EventDB> eventDBList = eventRepository.findByRequesterId(eventToUpdate.getRequesterId());
+                for(int i = 0; i < eventDBList.size(); i++) {
+                    Event tmp = eventDBList.get(i).toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
@@ -267,24 +310,44 @@ public class EventApiController {
         }
     }
 
-    @PutMapping("/response/{id}")
-    public ResponseWrapper<Iterable<Event>> responseItem(@PathVariable int id, @RequestBody Event requestBody) {
+    @PutMapping("/{id}/response")
+    public ResponseWrapper<Iterable<Event>> responseItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getResponseManagerId() == 0 || requestBody.getResponseManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
-            Event eventToUpdate = eventBeforeUpdateOptional.get();
+            EventDB eventToUpdate = eventBeforeUpdateOptional.get();
+            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+            }
+            
             if(eventToUpdate.getStatus().equals("REQUESTED")) {
                 eventToUpdate.setResponseTimeStampNow();
                 eventToUpdate.setResponseManagerId(requestBody.getResponseManagerId());
                 eventToUpdate.setResponseManagerName(requestBody.getResponseManagerName());
                 eventRepository.save(eventToUpdate);
-                Iterable<Event> output = eventRepository.findAll();
-                Iterator<Event> iterator = output.iterator();
+                
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
                 while (iterator.hasNext()) {
-                    Event tmp = iterator.next();
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                    Event tmp = iterator.next().toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
@@ -297,24 +360,43 @@ public class EventApiController {
         }
     }
 
-    @PutMapping("/return/{id}")
-    public ResponseWrapper<Iterable<Event>> returnItem(@PathVariable int id, @RequestBody Event requestBody) {
+    @PutMapping("/{id}/return")
+    public ResponseWrapper<Iterable<Event>> returnItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
-            Event eventToEvent = eventBeforeUpdateOptional.get();
-            if(eventToEvent.getStatus().equals("USING") || eventToEvent.getStatus().equals("DELAYED")) {
-                eventToEvent.setReturnTimeStampNow();
-                eventToEvent.setReturnManagerId(requestBody.getReturnManagerId());
-                eventToEvent.setReturnManagerName(requestBody.getReturnManagerName());
-                eventRepository.save(eventToEvent);
-                Iterable<Event> output = eventRepository.findAll();
-                Iterator<Event> iterator = output.iterator();
+            EventDB eventToUpdate = eventBeforeUpdateOptional.get();
+            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+            }
+            
+            if(eventToUpdate.getStatus().equals("USING") || eventToUpdate.getStatus().equals("DELAYED")) {
+                eventToUpdate.setReturnTimeStampNow();
+                eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
+                eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
+                eventRepository.save(eventToUpdate);
+                
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
                 while (iterator.hasNext()) {
-                    Event tmp = iterator.next();
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                    Event tmp = iterator.next().toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
@@ -327,24 +409,44 @@ public class EventApiController {
         }
     }
     
-    @PutMapping("/lost/{id}")
-    public ResponseWrapper<Iterable<Event>> lostItem(@PathVariable int id, @RequestBody Event requestBody) {
+    @PutMapping("{id}/lost")
+    public ResponseWrapper<Iterable<Event>> lostItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
-            Event eventToUpdate = eventBeforeUpdateOptional.get();
+            EventDB eventToUpdate = eventBeforeUpdateOptional.get();
+            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+            }
+            
             if(eventToUpdate.getStatus().equals("USING") || eventToUpdate.getStatus().equals("DELAYED")) {
                 eventToUpdate.setLostTimeStampNow();
                 eventToUpdate.setLostManagerId(requestBody.getLostManagerId());
                 eventToUpdate.setLostManagerName(requestBody.getLostManagerName());
                 eventRepository.save(eventToUpdate);
-                Iterable<Event> output = eventRepository.findAll();
-                Iterator<Event> iterator = output.iterator();
+                
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
                 while (iterator.hasNext()) {
-                    Event tmp = iterator.next();
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                    Event tmp = iterator.next().toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
@@ -357,24 +459,44 @@ public class EventApiController {
         }
     }
     
-    @PutMapping("/found/{id}")
-    public ResponseWrapper<Iterable<Event>> foundItem(@PathVariable int id, @RequestBody Event requestBody) {
+    @PutMapping("/{id}/found")
+    public ResponseWrapper<Iterable<Event>> foundItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        Optional<Event> eventBeforeUpdateOptional = eventRepository.findById(id);
+        
+        int departmentId;
+        try {
+            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
-            Event eventToEvent = eventBeforeUpdateOptional.get();
-            if(eventToEvent.getStatus().equals("LOST")) {
-                eventToEvent.setReturnTimeStampNow();
-                eventToEvent.setReturnManagerId(requestBody.getReturnManagerId());
-                eventToEvent.setReturnManagerName(requestBody.getReturnManagerName());
-                eventRepository.save(eventToEvent);
-                Iterable<Event> output = eventRepository.findAll();
-                Iterator<Event> iterator = output.iterator();
+            EventDB eventToUpdate = eventBeforeUpdateOptional.get();
+            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+            }
+            
+            if(eventToUpdate.getStatus().equals("LOST")) {
+                eventToUpdate.setReturnTimeStampNow();
+                eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
+                eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
+                eventRepository.save(eventToUpdate);
+                
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
                 while (iterator.hasNext()) {
-                    Event tmp = iterator.next();
-                    tmp.addInfo(thingRepository, itemRepository, eventRepository);
+                    Event tmp = iterator.next().toEvent(departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
                 }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }

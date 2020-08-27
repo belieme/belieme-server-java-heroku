@@ -1,5 +1,6 @@
 package com.hanyang.belieme.demoserver.university;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.common.ResponseHeader;
@@ -9,9 +10,9 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +38,7 @@ public class UniversityApiController {
                 return new ResponseWrapper<>(ResponseHeader.OK, univOptional.get());    
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
-            
+            }    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -56,21 +56,42 @@ public class UniversityApiController {
         }
     }
     
-    @PutMapping("/{id}")
-    public ResponseWrapper<University> updateUniverity(@PathVariable int id, @RequestBody University requestBody) {
+    @PatchMapping("/{univCode}")
+    public ResponseWrapper<University> updateUniverity(@PathVariable String univCode, @RequestBody University requestBody) {
         if(requestBody.getName() == null || requestBody.getUniversityCode() == null) {
-            return new ResponseWrapper<University>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        } else {
-            Optional<University> targetOptional = universityRepository.findById(id);
-            if(targetOptional.isPresent()) {
-                University target = targetOptional.get();
-                target.setUniversityCode(requestBody.getUniversityCode());
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+        }
+        int id;
+        try {
+            id = University.findIdByUniversityCode(universityRepository, univCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        Optional<University> targetOptional = universityRepository.findById(id);
+        if(targetOptional.isPresent()) {
+            University target = targetOptional.get();
+            if(univCode.equals(requestBody.getUniversityCode())) {
                 target.setName(requestBody.getName());
                 University output = universityRepository.save(target);
-                return new ResponseWrapper<>(ResponseHeader.OK, output);    
-            } else {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+                return new ResponseWrapper<>(ResponseHeader.OK, output); 
             }
+            
+            Iterable<University> universityList = universityRepository.findAll();
+            Iterator<University> iter = universityList.iterator();
+            while(iter.hasNext()) {
+                if(iter.next().getUniversityCode().equals(requestBody.getUniversityCode())) {
+                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                }
+            }
+            target.setUniversityCode(requestBody.getUniversityCode());
+            target.setName(requestBody.getName());
+            University output = universityRepository.save(target);
+            return new ResponseWrapper<>(ResponseHeader.OK, output);    
+        } else {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
     }
+    
 }

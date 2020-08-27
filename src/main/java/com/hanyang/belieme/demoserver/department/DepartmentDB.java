@@ -3,25 +3,37 @@ package com.hanyang.belieme.demoserver.department;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import com.hanyang.belieme.demoserver.common.StringListConverter;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
-public class Department {
+
+@Entity
+public class DepartmentDB {
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     
-    private University university;
+    private int universityId;
     
     private String departmentCode;
 
     private String departmentName;
     
+    @Convert(converter = StringListConverter.class)
     private ArrayList<String> majorCodes;
     
     private boolean available;
     
-    public Department(String departmentId, String departmentName) {
+    public DepartmentDB(String departmentId, String departmentName) {
         this.departmentCode = departmentId;
         this.departmentName = departmentName;
         majorCodes = new ArrayList<String>();
@@ -44,16 +56,16 @@ public class Department {
         return new ArrayList<String>(majorCodes);
     }
     
-    public University getUniversity() {
-        return university;
+    public int getUniversityId() {
+        return universityId;
     }
     
     public boolean isAvailble() {
         return available;
     }
     
-    public void setUniversity(University university) {
-        this.university = university; //TODO copyConstructor이용
+    public void setUniversityId(int universityId) {
+        this.universityId = universityId;
     }
     
     public void setDepartmentCode(String departmentCode) {
@@ -78,16 +90,5 @@ public class Department {
     
     public void able() {
         available = true;
-    }
-    
-    public static int findIdByUniversityCodeAndDepartmentCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String departmentCode) throws NotFoundException, WrongInDataBaseException {
-        List<Department> tmpList = departmentRepository.findByUniversityIdAndDepartmentCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
-        if(tmpList.size() == 0) {
-            throw new NotFoundException();
-        } else if(tmpList.size() == 1) {
-            return tmpList.get(0).getId();
-        } else {
-            throw new WrongInDataBaseException();
-        }
     }
 }

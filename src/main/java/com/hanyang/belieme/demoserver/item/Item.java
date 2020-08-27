@@ -1,38 +1,24 @@
 package com.hanyang.belieme.demoserver.item;
 
-import javax.persistence.*;
-
-import java.util.Optional;
-
 import com.hanyang.belieme.demoserver.thing.*;
+
+import java.util.List;
+
 import com.hanyang.belieme.demoserver.event.*;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
-
-@Entity
 public class Item {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int thingId;
     private int num;
-    
-    private int lastEventId;
 
-    @Transient
     private String status;
 
-    @Transient
     private ThingNestedToItem thing;
     
-    @Transient
     private EventNestedToItem lastEvent;
 
     public Item() {
-    }
-
-    public Item(int thingId, int num) {
-        this.thingId = thingId;
-        this.num = num;
-        this.lastEventId = 0; //Last history id의 default는 0 or -1?
     }
     
     public int getId() {
@@ -54,87 +40,52 @@ public class Item {
     public EventNestedToItem getLastEvent() {
         return lastEvent;
     }
-
-    public void setThingId(int thingId) {
-        this.thingId = thingId;
+    
+    public void setId(int id) {
+        this.id = id;
     }
-
+    
     public void setNum(int num) {
         this.num = num;
     }
-
-    public void setLastEventId(int lastEventId) {
-        this.lastEventId = lastEventId;
+    
+    public void setThing(ThingNestedToItem thing) {
+        if(thing != null) {
+            this.thing = new ThingNestedToItem(thing);    
+        } else {
+            this.thing = null;   
+        }        
     }
-
-    public void setThing(Thing thing) {
-        if(thing == null) {
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public void setLastEvent(EventNestedToItem lastEvent) {
+        if(lastEvent != null) {
+            this.lastEvent = new EventNestedToItem(lastEvent);
+        } else {
             this.thing = null;
-        } else {
-            this.thing = thing.toThingNestedToItem();
         }
     }
     
-    public void setLastEvent(Event event) {
-        if(event == null) {
-            this.lastEvent = null;
-        } else {
-            this.lastEvent = event.toEventNestedToItem();
-        }
-    }
-    
-    public int thingIdGetter() {
-        return thingId;
-    }
-    
-    public int lastEventIdGetter() {
-        return lastEventId;
-    }
-
-    //대상이 저장된 정보 뿐만 아니라 다른 table로부터 derived 된 정보까 추가 하는 메소드(ex status ... )
-    public void addInfo(ThingRepository thingRepository, EventRepository eventRepository) {
-        Optional<Event> lastEventOptional = eventRepository.findById(lastEventId);
-        if(lastEventOptional.isPresent()) {
-            String lastEventStatus = lastEventOptional.get().getStatus();
-            if(lastEventStatus.equals("EXPIRED")||lastEventStatus.equals("RETURNED")||lastEventStatus.equals("FOUND")||lastEventStatus.equals("FOUNDANDRETURNED")) {
-                status = "USABLE";
-            }
-            else if (lastEventStatus.equals("LOST")){
-                status = "INACTIVATE";
-            } else {
-                status = "UNUSABLE";
-            }
-            setLastEvent(lastEventOptional.get());
-        }
-        else {
-            status = "USABLE";
-            setLastEvent(null);
-        }
-
-        Optional<ThingDB> thingDBOptional = thingRepository.findById(thingIdGetter());
-        if(thingDBOptional.isPresent()) {
-            setThing(thingDBOptional.get().toThing());
-        } else {
-            setThing(null);
-        }
-    }
-    
-    public ItemNestedToThing toItemNestedToThing() {
-        ItemNestedToThing output = new ItemNestedToThing();
+    public ItemDB toItemDB() {
+        ItemDB output = new ItemDB();
         output.setId(id);
         output.setNum(num);
-        output.setLastEvent(lastEvent);
-        output.setStatus(status);
-        return output;
-    }
-    
-    public ItemNestedToEvent toItemNestedToEvent() {
-        ItemNestedToEvent output = new ItemNestedToEvent();
-        output.setId(id);
-        output.setNum(num);
-        output.setThing(thing);
-        output.setCurrentStatus(status);
+        output.setThingId(thing.getId());
+        output.setLastEventId(lastEvent.getId());
         
         return output;
+    }
+    
+    public static int findItemIdByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
+        List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
+        if(itemListByThingIdAndNum.size() == 0) {
+            throw new NotFoundException();
+        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+            throw new WrongInDataBaseException();
+        }
+        return itemListByThingIdAndNum.get(0).getId();
     }
 }

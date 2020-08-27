@@ -1,16 +1,24 @@
 package com.hanyang.belieme.demoserver.event;
 
+import javax.persistence.*;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 import java.util.TimeZone;
 
+import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.thing.ThingRepository;
 
-public class Event {
-    private int id;
+
+@Entity
+public class EventDB {
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;    
     
-    private ItemNestedToEvent item;
-    
+    private int itemId;
     private int requesterId;
     private String requesterName;
     private int responseManagerId;
@@ -26,17 +34,15 @@ public class Event {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    
-
-    public Event() {
+    public EventDB() {
     }
     
     public int getId() {
         return id;
     }
     
-    public ItemNestedToEvent getItem() {
-        return item;
+    public int getItemId() {
+        return itemId;
     }
 
     public int getRequesterId() {
@@ -90,13 +96,9 @@ public class Event {
     public long getLostTimeStamp() {
         return lostTimeStamp;
     }
-    
-    public void setId(int id) {
-        this.id = id;
-    }
-    
-    public void setItem(ItemNestedToEvent item) {
-        this.item = item;
+
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
     }
 
     public void setRequesterId(int requesterId) {
@@ -131,36 +133,46 @@ public class Event {
         this.lostManagerName = lostManagerName;
     }
 
-    public void setRequestTimeStamp(long requestTimeStamp) {
-        this.requestTimeStamp = requestTimeStamp;
+    public void setRequestTimeStampZero() {
+        this.requestTimeStamp = 0;
     }
 
-    public void setResponseTimeStamp(long responseTimeStamp) {
-        this.responseTimeStamp = responseTimeStamp;
+    public void setResponseTimeStampZero() {
+        this.responseTimeStamp = 0;
     }
 
-    public void setReturnTimeStamp(long returnTimeStamp) {
-        this.returnTimeStamp = returnTimeStamp;
+    public void setReturnTimeStampZero() {
+        this.returnTimeStamp = 0;
     }
 
-    public void setCancelTimeStamp(long cancelTimeStamp) {
-        this.cancelTimeStamp = cancelTimeStamp;
+    public void setCancelTimeStampZero() {
+        this.cancelTimeStamp = 0;
     }
     
-    public void setLostTimeStamp(long lostTimeStamp) {
-        this.lostTimeStamp = lostTimeStamp;
+    public void setLostTimeStampZero() {
+        this.lostTimeStamp = 0;
     }
 
-    // public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-    //     Optional<Item> itemOptional = itemRepository.findById(itemId);
-    //     if(itemOptional.isPresent()) {
-    //         itemOptional.get().addInfo(thingRepository, eventRepository);
-    //         setItem(itemOptional.get());
-    //     } else {
-    //         setItem(null);
-    //     }        
-    // }
+    public void setRequestTimeStampNow() {
+        this.requestTimeStamp = System.currentTimeMillis()/1000;
+    }
 
+    public void setResponseTimeStampNow() {
+        this.responseTimeStamp = System.currentTimeMillis()/1000;
+    }
+
+    public void setReturnTimeStampNow() {
+        this.returnTimeStamp = System.currentTimeMillis()/1000;
+    }
+
+    public void setCancelTimeStampNow() {
+        this.cancelTimeStamp = System.currentTimeMillis()/1000;
+    }
+    
+    public void setLostTimeStampNow() {
+        this.lostTimeStamp = System.currentTimeMillis()/1000;
+    }
+    
     public String getStatus() {
         //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
         if(requestTimeStamp != 0) {
@@ -227,10 +239,41 @@ public class Event {
         }
         return tmp.getTime().getTime()/1000;
     }
+    
+    public Event toEvent(DepartmentRepository departmentRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+        Event output = new Event();
+        ItemNestedToEvent item;
+        
+        Optional<ItemDB> itemOptional = itemRepository.findById(itemId);
+        if(itemOptional.isPresent()) {
+            item = itemOptional.get().toItemNestedToEvent(departmentRepository, thingRepository, eventRepository);
+        } else {
+            item = null;
+        }
+        output.setId(id);
+        output.setItem(item);
+        output.setRequesterId(requesterId);
+        output.setRequesterName(requesterName);
+        output.setResponseManagerId(responseManagerId);
+        output.setResponseManagerName(responseManagerName);
+        output.setReturnManagerId(returnManagerId);
+        output.setReturnManagerName(returnManagerName);
+        output.setLostManagerId(lostManagerId);
+        output.setLostManagerName(lostManagerName);
+        
+        output.setRequestTimeStamp(requestTimeStamp);
+        output.setResponseTimeStamp(responseTimeStamp);
+        output.setReturnTimeStamp(returnTimeStamp);
+        output.setCancelTimeStamp(cancelTimeStamp);
+        output.setLostTimeStamp(lostTimeStamp);
+        
+        return output;
+    }
 
     public EventNestedToItem toEventNestedToItem() {
         EventNestedToItem output = new EventNestedToItem();
-        output.setId(getId());
+        
+        output.setId(id);
         output.setRequesterId(requesterId);
         output.setRequesterName(requesterName);
         output.setResponseManagerId(responseManagerId);
