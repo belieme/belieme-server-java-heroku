@@ -88,6 +88,7 @@ public class DepartmentApiController {
         
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
+        newDepartmentDB.setMajorCodes(null);
         // newDepartmentDB.able(); TODO default는 무엇인가...
         Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
