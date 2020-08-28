@@ -1,5 +1,6 @@
 package com.hanyang.belieme.demoserver.thing;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.item.*;
@@ -19,7 +20,7 @@ public class ThingWithItems {
 
     
     public ThingWithItems() {
-        
+        items = new ArrayList<>();
     }
 
     public int getId() {
