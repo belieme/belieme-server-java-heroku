@@ -51,6 +51,13 @@ public class UniversityApiController {
         if(requestBody.getName() == null || requestBody.getUniversityCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         } else {
+            Iterable<University> universityList = universityRepository.findAll();
+            Iterator<University> iter = universityList.iterator();
+            while(iter.hasNext()) {
+                if(iter.next().getUniversityCode().equals(requestBody.getUniversityCode())) {
+                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                }
+            }
             University output = universityRepository.save(requestBody);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
