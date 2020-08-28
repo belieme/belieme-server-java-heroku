@@ -174,8 +174,12 @@ public class EventApiController {
             
         Event eventOutput = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
             
-        ItemDB updatedItemDB = requestedItem.toItemDB();
+        ItemDB updatedItemDB = new ItemDB();
+        updatedItemDB.setId(requestedItem.getId());
+        updatedItemDB.setNum(requestedItem.getNum());
+        updatedItemDB.setThingId(requestedItem.getThing().getId());
         updatedItemDB.setLastEventId(eventOutput.getId());
+        
         itemRepository.save(updatedItemDB);
             
         ArrayList<Thing> thingListOutput = new ArrayList<>();
@@ -252,8 +256,12 @@ public class EventApiController {
         
         Event eventOutput = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
             
-        ItemDB updatedItemDB = requestedItem.toItemDB();
-        updatedItemDB.setLastEventId(eventOutput.getId());
+        ItemDB updatedItemDB = new ItemDB();
+        updatedItemDB.setId(requestedItem.getId());
+        updatedItemDB.setNum(requestedItem.getNum());
+        updatedItemDB.setThingId(requestedItem.getThing().getId());
+        updatedItemDB.setLastEventId(eventOutput.getId());;
+        
         itemRepository.save(updatedItemDB);
         
         ArrayList<Thing> thingListOutput = new ArrayList<>();
