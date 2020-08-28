@@ -54,6 +54,9 @@ public class DepartmentDB {
     }
     
     public ArrayList<String> getMajorCodes() {
+        if(majorCodes == null) {
+            return null;
+        }
         return new ArrayList<String>(majorCodes);
     }
     
@@ -115,7 +118,7 @@ public class DepartmentDB {
         output.setId(id);
         output.setDepartmentCode(departmentCode);
         output.setDepartmentName(departmentName);
-        output.setMajorCodes(new ArrayList<String>(majorCodes));
+        output.setMajorCodes(getMajorCodes());
         output.setAvailable(isAvailble());
         
         return output;

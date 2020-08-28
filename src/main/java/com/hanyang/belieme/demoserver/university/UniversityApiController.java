@@ -65,7 +65,7 @@ public class UniversityApiController {
     
     @PatchMapping("/{univCode}")
     public ResponseWrapper<University> updateUniverity(@PathVariable String univCode, @RequestBody University requestBody) {
-        if(requestBody.getName() == null || requestBody.getUniversityCode() == null) {
+        if(requestBody.getName() == null || requestBody.getUniversityCode() == null) { //TODO 하나씩만도 되게 만들기
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         int id;
