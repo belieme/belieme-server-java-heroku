@@ -17,7 +17,7 @@ public class Department {
 
     private String departmentName;
     
-    private ArrayList<String> majorCodes;
+    // private ArrayList<String> majorCodes;
     
     private boolean available;
     
@@ -36,9 +36,9 @@ public class Department {
         return departmentName;
     }
     
-    public ArrayList<String> getMajorCodes() {
-        return new ArrayList<String>(majorCodes);
-    }
+    // public ArrayList<String> getMajorCodes() {
+    //     return new ArrayList<String>(majorCodes);
+    // }
     
     public University getUniversity() {
         return university;
@@ -64,9 +64,9 @@ public class Department {
         this.departmentName = departmentName;
     }
     
-    public void setMajorCodes(ArrayList<String> majorCodes) {
-        this.majorCodes = majorCodes;
-    }
+    // public void setMajorCodes(ArrayList<String> majorCodes) {
+    //     this.majorCodes = majorCodes;
+    // }
     
     public void setAvailable(boolean available) {
         this.available = available;

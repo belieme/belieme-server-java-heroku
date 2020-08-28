@@ -25,8 +25,8 @@ public class DepartmentDB {
 
     private String departmentName;
     
-    @Convert(converter = StringListConverter.class)
-    private ArrayList<String> majorCodes;
+    // @Convert(converter = StringListConverter.class)
+    // private ArrayList<String> majorCodes;
     
     private boolean available;
     
@@ -37,7 +37,7 @@ public class DepartmentDB {
     public DepartmentDB(String departmentId, String departmentName) {
         this.departmentCode = departmentId;
         this.departmentName = departmentName;
-        majorCodes = new ArrayList<String>();
+        // majorCodes = new ArrayList<String>();
         available = true;
     }
 
@@ -53,12 +53,12 @@ public class DepartmentDB {
         return departmentName;
     }
     
-    public ArrayList<String> getMajorCodes() {
-        if(majorCodes == null) {
-            return null;
-        }
-        return new ArrayList<String>(majorCodes);
-    }
+    // public ArrayList<String> getMajorCodes() {
+    //     if(majorCodes == null) {
+    //         return null;
+    //     }
+    //     return new ArrayList<String>(majorCodes);
+    // }
     
     public int getUniversityId() {
         return universityId;
@@ -84,21 +84,21 @@ public class DepartmentDB {
         this.departmentName = departmentName;
     }
     
-    public void setMajorCodes(ArrayList<String> majorCodes) {
-        this.majorCodes = majorCodes;
-    }
+    // public void setMajorCodes(ArrayList<String> majorCodes) {
+    //     this.majorCodes = majorCodes;
+    // }
     
     public void setAvailable(boolean available) {
         this.available = available;
     }
     
-    public void addMajor(String majorCode) {
-        majorCodes.add(majorCode);
-    }
+    // public void addMajor(String majorCode) {
+    //     majorCodes.add(majorCode);
+    // }
     
-    public boolean deleteMajor(String majorCode) {
-        return majorCodes.remove(majorCode);
-    }
+    // public boolean deleteMajor(String majorCode) {
+    //     return majorCodes.remove(majorCode);
+    // }
     
     public void unable() {
         available = false;
@@ -118,7 +118,7 @@ public class DepartmentDB {
         output.setId(id);
         output.setDepartmentCode(departmentCode);
         output.setDepartmentName(departmentName);
-        output.setMajorCodes(getMajorCodes());
+        // output.setMajorCodes(getMajorCodes());
         output.setAvailable(isAvailble());
         
         return output;
