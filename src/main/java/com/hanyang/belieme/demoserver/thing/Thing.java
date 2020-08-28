@@ -32,7 +32,7 @@ public class Thing {
         return emoji;
     }
     
-    public String getDescription() {
+    public String getDescription() { //문제가 있누...
         if(description != null) {
             return description;    
         }

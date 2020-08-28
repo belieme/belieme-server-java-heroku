@@ -32,11 +32,13 @@ public class ThingDB {
         this.id = id;
         this.name = name;
         this.emojiByte = emojiByte;
+        this.description = description;
     }
 
     public ThingDB(String name, int emojiByte, String description) {
         this.name = name;
         this.emojiByte = emojiByte;
+        this.description = description;
     }
 
     public int getId() {

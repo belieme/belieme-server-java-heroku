@@ -96,7 +96,7 @@ public class DepartmentApiController {
     
     @PatchMapping("/{departmentCode}")
     public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Department requestBody) {
-        if(requestBody.getDepartmentName() == null || requestBody.getDepartmentCode() == null) {
+        if(requestBody.getDepartmentName() == null || requestBody.getDepartmentCode() == null) { //TODO 하나씩만도 되게 만들기
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
