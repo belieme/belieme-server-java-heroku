@@ -1,9 +1,8 @@
 package com.hanyang.belieme.demoserver.department;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
-import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,8 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.hanyang.belieme.demoserver.common.StringListConverter;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
@@ -32,6 +29,10 @@ public class DepartmentDB {
     private ArrayList<String> majorCodes;
     
     private boolean available;
+    
+    public DepartmentDB() {
+        
+    }
     
     public DepartmentDB(String departmentId, String departmentName) {
         this.departmentCode = departmentId;
@@ -64,6 +65,10 @@ public class DepartmentDB {
         return available;
     }
     
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public void setUniversityId(int universityId) {
         this.universityId = universityId;
     }
@@ -74,6 +79,14 @@ public class DepartmentDB {
     
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+    
+    public void setMajorCodes(ArrayList<String> majorCodes) {
+        this.majorCodes = majorCodes;
+    }
+    
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
     
     public void addMajor(String majorCode) {
@@ -90,5 +103,21 @@ public class DepartmentDB {
     
     public void able() {
         available = true;
+    }
+    
+    public Department toDepartment(UniversityRepository universityRepository) {
+        Department output = new Department();
+        
+        Optional<University> universityOptional = universityRepository.findById(universityId);
+        if(universityOptional.isPresent()) {
+            output.setUniversity(universityOptional.get());
+        }
+        output.setId(id);
+        output.setDepartmentCode(departmentCode);
+        output.setDepartmentName(departmentName);
+        output.setMajorCodes(new ArrayList<String>(majorCodes));
+        output.setAvailable(isAvailble());
+        
+        return output;
     }
 }

@@ -56,7 +56,7 @@ public class ItemApiController {
         List<Item> output = new ArrayList<>();       
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
         for(int i = 0; i < itemListByThingId.size(); i++) {
-            output.add(itemListByThingId.get(i).toItem(departmentRepository, thingRepository, eventRepository));
+            output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, thingRepository, eventRepository));
         }
         return new ResponseWrapper<>(ResponseHeader.OK, output);
     }
@@ -84,7 +84,7 @@ public class ItemApiController {
         Item output;
         if(itemList.size() == 1) {
             ItemDB itemDB = itemList.get(0);
-            output = itemDB.toItem(departmentRepository, thingRepository, eventRepository);
+            output = itemDB.toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -131,7 +131,7 @@ public class ItemApiController {
             List<Item> output = new ArrayList<>();
             
             for(int i = 0; i < tmp.size(); i++) {
-                output.add(tmp.get(i).toItem(departmentRepository, thingRepository, eventRepository));
+                output.add(tmp.get(i).toItem(universityRepository, departmentRepository, thingRepository, eventRepository));
             }
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }

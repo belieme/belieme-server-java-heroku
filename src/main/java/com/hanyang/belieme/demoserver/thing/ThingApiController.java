@@ -42,7 +42,7 @@ public class ThingApiController {
             Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(id);
             ArrayList<Thing> responseBody = new ArrayList<>();
             for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-                Thing tmp = it.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
+                Thing tmp = it.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
@@ -69,7 +69,7 @@ public class ThingApiController {
             if(departmentId != targetOptional.get().getDepartmentId()) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
             }
-            ThingWithItems responseBody = targetOptional.get().toThingWithItems(departmentRepository, itemRepository, eventRepository);
+            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -104,7 +104,7 @@ public class ThingApiController {
 
         ArrayList<Thing> responseBody = new ArrayList<>();
         while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
+            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
             responseBody.add(tmp);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
@@ -150,7 +150,7 @@ public class ThingApiController {
 
             ArrayList<Thing> responseBody = new ArrayList<>();
             while(iterator.hasNext()) {
-                Thing tmp = iterator.next().toThing(departmentRepository, thingRepository, itemRepository, eventRepository); 
+                Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);

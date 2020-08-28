@@ -21,11 +21,7 @@ public class Department {
     
     private boolean available;
     
-    public Department(String departmentId, String departmentName) {
-        this.departmentCode = departmentId;
-        this.departmentName = departmentName;
-        majorCodes = new ArrayList<String>();
-        available = true;
+    public Department() {
     }
 
     public int getId() {
@@ -48,8 +44,12 @@ public class Department {
         return university;
     }
     
-    public boolean isAvailble() {
+    public boolean getAvailble() {
         return available;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
     
     public void setUniversity(University university) {
@@ -64,24 +64,32 @@ public class Department {
         this.departmentName = departmentName;
     }
     
-    public void addMajor(String majorCode) {
-        majorCodes.add(majorCode);
+    public void setMajorCodes(ArrayList<String> majorCodes) {
+        this.majorCodes = majorCodes;
     }
     
-    public boolean deleteMajor(String majorCode) {
-        return majorCodes.remove(majorCode);
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
     
-    public void unable() {
-        available = false;
-    }
-    
-    public void able() {
-        available = true;
+    public DepartmentDB toDepartmentDB() {
+        DepartmentDB output = new DepartmentDB();
+        
+        output.setId(id);
+        output.setDepartmentCode(departmentCode);
+        output.setDepartmentName(departmentName);
+        if(university != null) {
+            output.setUniversityId(university.getId());
+        } else {
+            output.setUniversityId(0);
+        }
+        output.setAvailable(getAvailble());
+        
+        return output;
     }
     
     public static int findIdByUniversityCodeAndDepartmentCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String departmentCode) throws NotFoundException, WrongInDataBaseException {
-        List<Department> tmpList = departmentRepository.findByUniversityIdAndDepartmentCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
+        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndDepartmentCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
         if(tmpList.size() == 0) {
             throw new NotFoundException();
         } else if(tmpList.size() == 1) {

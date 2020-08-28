@@ -1,5 +1,7 @@
 package com.hanyang.belieme.demoserver.department;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +33,14 @@ public class DepartmentApiController {
     @GetMapping("")
     public ResponseWrapper<Iterable<Department>> getDepartments(@PathVariable String univCode) {
         try {
-            int id = University.findIdByUniversityCode(universityRepository, univCode);
-            return new ResponseWrapper<>(ResponseHeader.OK, departmentRepository.findByUniversityId(id));
+            int univId = University.findIdByUniversityCode(universityRepository, univCode);
+            
+            List<Department> output = new ArrayList<>();
+            Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
+            while(iterator.hasNext()) {
+                output.add(iterator.next().toDepartment(universityRepository));
+            }
+            return new ResponseWrapper<>(ResponseHeader.OK, output);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -44,9 +52,9 @@ public class DepartmentApiController {
     public ResponseWrapper<Department> getDepartment(@PathVariable String univCode, @PathVariable String departmentCode) {
         try {
             int id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
-            Optional<Department> departmentOptional = departmentRepository.findById(id);
+            Optional<DepartmentDB> departmentOptional = departmentRepository.findById(id);
             if(departmentOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get());
+                return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get().toDepartment(universityRepository));
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -62,22 +70,26 @@ public class DepartmentApiController {
         if(requestBody.getDepartmentCode() == null || requestBody.getDepartmentName() == null) {
             return new ResponseWrapper<Department>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
+        int univId;
         try {
-            requestBody.setUniversityId(University.findIdByUniversityCode(universityRepository, univCode));
+            univId = University.findIdByUniversityCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        List<Department> departmentListByUnivId = departmentRepository.findByUniversityId(requestBody.universityIdGetter());
+        List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
         for(int i = 0; i < departmentListByUnivId.size(); i++) {
             if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
                 return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
             }
         }
-        // requestBody.able(); TODO default는 무엇인가...
-        Department output = departmentRepository.save(requestBody);
+        
+        DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
+        newDepartmentDB.setUniversityId(univId);
+        // newDepartmentDB.able(); TODO default는 무엇인가...
+        Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
     
@@ -96,15 +108,24 @@ public class DepartmentApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        Optional<Department> targetOptional = departmentRepository.findById(id);
+        int univId;
+        try {
+            univId = University.findIdByUniversityCode(universityRepository, univCode);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        Optional<DepartmentDB> targetOptional = departmentRepository.findById(id);
         if(targetOptional.isPresent()) {
-            Department target = targetOptional.get();
+            DepartmentDB target = targetOptional.get();
             if(departmentCode.equals(requestBody.getDepartmentCode())) {
                 target.setDepartmentName(requestBody.getDepartmentName());
-                Department output = departmentRepository.save(target);
-                return new ResponseWrapper<>(ResponseHeader.OK, output);    
+                Department output = departmentRepository.save(target).toDepartment(universityRepository);
+                return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
-            List<Department> departmentListByUnivId = departmentRepository.findByUniversityId(requestBody.universityIdGetter());
+            List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
             for(int i = 0; i < departmentListByUnivId.size(); i++) {
                 if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
                     return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
@@ -112,8 +133,8 @@ public class DepartmentApiController {
             }
             target.setDepartmentCode(requestBody.getDepartmentCode());
             target.setDepartmentName(requestBody.getDepartmentName());
-            Department output = departmentRepository.save(target);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);    
+            Department output = departmentRepository.save(target).toDepartment(universityRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }

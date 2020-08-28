@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("universities")
+@RequestMapping("/universities")
 public class UniversityApiController {
     @Autowired
     UniversityRepository universityRepository;
