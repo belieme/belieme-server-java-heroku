@@ -50,11 +50,12 @@ public class Item {
     }
     
     public void setThing(ThingNestedToItem thing) {
-        if(thing != null) {
-            this.thing = new ThingNestedToItem(thing);    
-        } else {
-            this.thing = null;   
-        }        
+        this.thing = thing;
+        // if(thing != null) {
+        //     this.thing = new ThingNestedToItem(thing);    
+        // } else {
+        //     this.thing = null;   
+        // }        
     }
     
     public void setStatus(String status) {
