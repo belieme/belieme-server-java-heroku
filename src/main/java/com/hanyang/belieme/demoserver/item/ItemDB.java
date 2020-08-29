@@ -91,6 +91,7 @@ public class ItemDB {
             System.out.println("here!!!!");
             thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository);
         } else {
+            System.out.println("here??!!");
             thing = null;
         }
         
