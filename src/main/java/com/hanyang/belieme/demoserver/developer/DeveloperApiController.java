@@ -27,4 +27,9 @@ public class DeveloperApiController {
                 "Date : " + (new Date(System.currentTimeMillis())) + "\n";
         return result;
     }
+    
+    @GetMapping("/items")
+    public Iterable<ItemDB> getAllItems() {
+        return itemRepository.findAll();
+    } 
 }

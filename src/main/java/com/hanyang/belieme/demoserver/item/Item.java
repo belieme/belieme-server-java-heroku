@@ -49,7 +49,7 @@ public class Item {
         this.num = num;
     }
     
-    public void setThing(ThingNestedToItem thing) {
+    public void setThing(ThingNestedToItem thing) { // TODO 무엇이 문제인가...
         this.thing = thing;
         // if(thing != null) {
         //     this.thing = new ThingNestedToItem(thing);    
