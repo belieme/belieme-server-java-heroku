@@ -104,7 +104,7 @@ public class EventApiController {
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(targetThingOptional.get().getDepartmentId() !=     departmentId) {
+        } else if(targetThingOptional.get().getDepartmentId() != departmentId) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
         }
         
@@ -114,6 +114,9 @@ public class EventApiController {
             Event tmp = eventListByRequesterId.get(i).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
+                if(tmp.getItem().getThing().getId() == thingId) {
+                    return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
+                }
             }
         }
         if(currentEventCount >= 3) {
