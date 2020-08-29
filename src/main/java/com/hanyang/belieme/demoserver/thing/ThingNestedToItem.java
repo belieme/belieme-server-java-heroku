@@ -13,13 +13,13 @@ public class ThingNestedToItem {
     public ThingNestedToItem() {
     }
     
-    public ThingNestedToItem(ThingNestedToItem oth) {
-        this.id = oth.id;
-        this.name = oth.name;
-        this.emoji = oth.emoji;
-        this.description = oth.description;
-        this.department = oth.department; // copy constructor로 만들기
-    }
+    // public ThingNestedToItem(ThingNestedToItem oth) {
+    //     this.id = oth.id;
+    //     this.name = oth.name;
+    //     this.emoji = oth.emoji;
+    //     this.description = oth.description;
+    //     this.department = oth.department; // copy constructor로 만들기
+    // }
         
     public int getId(){
         return id;
