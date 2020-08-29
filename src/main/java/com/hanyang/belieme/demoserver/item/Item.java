@@ -61,7 +61,7 @@ public class Item {
         if(lastEvent != null) {
             this.lastEvent = new EventNestedToItem(lastEvent);
         } else {
-            this.thing = null;
+            this.lastEvent = null;
         }
     }
     
