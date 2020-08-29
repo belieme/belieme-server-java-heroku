@@ -49,12 +49,8 @@ public class Item {
         this.num = num;
     }
     
-    public void setThing(ThingNestedToItem thing) { // TODO 무엇이 문제인가...
-        if(thing != null) {
-            this.thing = new ThingNestedToItem(thing);    
-        } else {
-            this.thing = null;   
-        }        
+    public void setThing(ThingNestedToItem othThing) { // TODO 무엇이 문제인가...
+        this.thing = othThing;   
     }
     
     public void setStatus(String status) {

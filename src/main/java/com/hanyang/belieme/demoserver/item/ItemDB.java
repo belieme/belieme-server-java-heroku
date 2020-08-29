@@ -64,7 +64,7 @@ public class ItemDB {
     public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ThingRepository thingRepository, EventRepository eventRepository) {
         Item output = new Item();
         String status;
-        ThingNestedToItem thing;    
+        ThingNestedToItem thing = null;    
         EventNestedToItem lastEvent;
         
         Optional<EventDB> lastEventOptional = eventRepository.findById(lastEventId);
