@@ -37,11 +37,7 @@ public class ItemNestedToEvent {
     }
     
     public void setThing(ThingNestedToItem thing) {
-        if(thing != null) {
-            this.thing = new ThingNestedToItem(thing);    
-        } else {
-            this.thing = null;   
-        }        
+        this.thing = thing;     
     }
     
     public void setCurrentStatus(String currentStatus) {
