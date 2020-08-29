@@ -60,4 +60,8 @@ public class ThingNestedToItem {
     public void setDepartment(Department department) {
         this.department = department;  // copy constructor로 만들기
     }
+    
+    public String toString() {
+        return name + " " + emoji + " " + description;  
+    }
 }
