@@ -101,6 +101,7 @@ public class ItemDB {
         output.setStatus(status);
         output.setLastEvent(lastEvent);
         
+        System.out.println(thing);
         System.out.println(output.getThing().toString());
         
         return output;
