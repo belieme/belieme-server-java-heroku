@@ -19,8 +19,8 @@ import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 
 @RestController
-@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/things")
-public class ThingApiController {
+@RequestMapping(path="/beta/universities/{univCode}/departments/{departmentCode}/things")
+public class BetaThingApiController {
     @Autowired
     private UniversityRepository universityRepository;
     
@@ -39,8 +39,8 @@ public class ThingApiController {
     @GetMapping("")
     public ResponseWrapper<List<Thing>> getAllThings(@PathVariable String univCode, @PathVariable String departmentCode) {
         try {
-            int departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
-            Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(departmentId);
+            int id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(id);
             ArrayList<Thing> responseBody = new ArrayList<>();
             for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
                 Thing tmp = it.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
@@ -77,7 +77,7 @@ public class ThingApiController {
     }
 
     @PostMapping("")
-    public ResponseWrapper<ThingWithItems> createNewThing(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Thing requestBody) {
+    public ResponseWrapper<List<Thing>> createNewThing(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Thing requestBody) {
         if(requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -94,17 +94,25 @@ public class ThingApiController {
         ThingDB requestBodyDB = requestBody.toThingDB();
         requestBodyDB.setDepartmentId(departmentId);
         
-        ThingWithItems savedThing = thingRepository.save(requestBodyDB).toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository); 
+        ThingDB savedThing = thingRepository.save(requestBodyDB); 
         for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
             ItemDB newItem = new ItemDB(savedThing.getId(), i + 1);
             itemRepository.save(newItem);
         }
         
-        return new ResponseWrapper<>(ResponseHeader.OK, savedThing);
+        Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(departmentId);
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+
+        ArrayList<Thing> responseBody = new ArrayList<>();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
+            responseBody.add(tmp);
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
     }
 
     @PatchMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> updateNameAndEmojiOfThing(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Thing requestBody){
+    public ResponseWrapper<List<Thing>> updateNameAndEmojiOfThing(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Thing requestBody){
         if(requestBody.getName() == null && requestBody.getEmoji() == null && requestBody.getDescription() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -136,8 +144,17 @@ public class ThingApiController {
             if(requestBodyDB.getDescription() != null) {
                 target.setDescription(requestBodyDB.getDescription());
             }
-            ThingWithItems output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);
+            thingRepository.save(target);
+
+            Iterable<ThingDB> allThingsListDB = thingRepository.findByDepartmentId(departmentId);
+            Iterator<ThingDB> iterator = allThingsListDB.iterator();
+
+            ArrayList<Thing> responseBody = new ArrayList<>();
+            while(iterator.hasNext()) {
+                Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
+                responseBody.add(tmp);
+            }
+            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);
     }

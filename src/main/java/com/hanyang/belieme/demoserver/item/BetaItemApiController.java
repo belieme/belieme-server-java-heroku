@@ -18,8 +18,8 @@ import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 
 
 @RestController
-@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/things/{thingId}/items")
-public class ItemApiController {
+@RequestMapping(path="/beta/universities/{univCode}/departments/{departmentCode}/things/{thingId}/items")
+public class BetaItemApiController {
     @Autowired
     private UniversityRepository universityRepository;
     
@@ -94,7 +94,7 @@ public class ItemApiController {
     }
 
     @PostMapping("")
-    public ResponseWrapper<Item> createNewItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int thingId) {
+    public ResponseWrapper<List<Item>> createNewItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int thingId) {
         int departmentId;
 
         try {
@@ -126,7 +126,13 @@ public class ItemApiController {
         ItemDB newItem = new ItemDB(thingId, max+1); 
 
         if(thingOptional.isPresent()) {
-            Item output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+            itemRepository.save(newItem);
+            List<ItemDB> tmp = itemRepository.findByThingId(newItem.getThingId());
+            List<Item> output = new ArrayList<>();
+            
+            for(int i = 0; i < tmp.size(); i++) {
+                output.add(tmp.get(i).toItem(universityRepository, departmentRepository, thingRepository, eventRepository));
+            }
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
         else {

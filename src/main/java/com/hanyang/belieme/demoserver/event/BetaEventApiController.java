@@ -19,8 +19,8 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 
 @RestController
-@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/events")
-public class EventApiController {
+@RequestMapping(path="/beta/universities/{univCode}/departments/{departmentCode}/events")
+public class BetaEventApiController {
     @Autowired
     private UniversityRepository universityRepository;
     
@@ -37,7 +37,7 @@ public class EventApiController {
     private ThingRepository thingRepository;
 
     @GetMapping("")
-    public ResponseWrapper<List<Event>> getItems(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "requesterId", required = false) Integer requesterId) {
+    public ResponseWrapper<Iterable<Event>> getItems(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "requesterId", required = false) Integer requesterId) {
         int departmentId;
         try {
             departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
@@ -87,7 +87,7 @@ public class EventApiController {
     }
 
     @PostMapping("/request")
-    public ResponseWrapper<Event> createRequestEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum, @RequestBody Event requestBody) {
+    public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum, @RequestBody Event requestBody) {
         if(requestBody.getRequesterId() == 0 || requestBody.getRequesterName() == null) { 
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -175,21 +175,30 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampZero();
             
-        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+        Event eventOutput = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(requestedItem.getId());
         updatedItemDB.setNum(requestedItem.getNum());
         updatedItemDB.setThingId(requestedItem.getThing().getId());
-        updatedItemDB.setLastEventId(output.getId());;
+        updatedItemDB.setLastEventId(eventOutput.getId());
         
         itemRepository.save(updatedItemDB);
-        
-        return new ResponseWrapper<>(ResponseHeader.OK, output);
+            
+        ArrayList<Thing> thingListOutput = new ArrayList<>();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(tmp.getDepartment().getId() == departmentId) {
+                thingListOutput.add(tmp);   
+            }
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
     
     @PostMapping("/lost")
-    public ResponseWrapper<Event> createLostEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = true) int itemNum, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
+    public ResponseWrapper<PostMappingResponse> createLostEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = true) int itemNum, @RequestBody Event requestBody) { //output에 굳이 thing list 필요할까?
         if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -248,21 +257,30 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampNow();
         
-        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+        Event eventOutput = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(requestedItem.getId());
         updatedItemDB.setNum(requestedItem.getNum());
         updatedItemDB.setThingId(requestedItem.getThing().getId());
-        updatedItemDB.setLastEventId(output.getId());;
+        updatedItemDB.setLastEventId(eventOutput.getId());;
         
         itemRepository.save(updatedItemDB);
         
-        return new ResponseWrapper<>(ResponseHeader.OK, output);
+        ArrayList<Thing> thingListOutput = new ArrayList<>();
+        Iterable<ThingDB> allThingDBList = thingRepository.findAll();
+        Iterator<ThingDB> iterator = allThingDBList.iterator();
+        while(iterator.hasNext()) {
+            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            if(tmp.getDepartment().getId() == departmentId) {
+                thingListOutput.add(tmp);   
+            }
+        }
+        return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseWrapper<Event> cancelItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) { // requester의 event들만 output으로 해야하는가?
+    public ResponseWrapper<List<Event>> cancelItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) { // requester의 event들만 output으로 해야하는가?
         int departmentId;
         try {
             departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
@@ -283,7 +301,15 @@ public class EventApiController {
             
             if(eventToUpdate.getStatus().equals("REQUESTED")) {
                 eventToUpdate.setCancelTimeStampNow();
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                eventRepository.save(eventToUpdate);
+                List<Event> output = new ArrayList<>();
+                List<EventDB> eventDBList = eventRepository.findByRequesterId(eventToUpdate.getRequesterId());
+                for(int i = 0; i < eventDBList.size(); i++) {
+                    Event tmp = eventDBList.get(i).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -296,7 +322,7 @@ public class EventApiController {
     }
 
     @PatchMapping("/{id}/response")
-    public ResponseWrapper<Event> responseItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
+    public ResponseWrapper<Iterable<Event>> responseItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getResponseManagerId() == 0 || requestBody.getResponseManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -323,8 +349,17 @@ public class EventApiController {
                 eventToUpdate.setResponseTimeStampNow();
                 eventToUpdate.setResponseManagerId(requestBody.getResponseManagerId());
                 eventToUpdate.setResponseManagerName(requestBody.getResponseManagerName());
+                eventRepository.save(eventToUpdate);
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
+                while (iterator.hasNext()) {
+                    Event tmp = iterator.next().toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -337,7 +372,7 @@ public class EventApiController {
     }
 
     @PatchMapping("/{id}/return")
-    public ResponseWrapper<Event> returnItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
+    public ResponseWrapper<Iterable<Event>> returnItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -363,7 +398,17 @@ public class EventApiController {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
                 eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                eventRepository.save(eventToUpdate);
+                
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
+                while (iterator.hasNext()) {
+                    Event tmp = iterator.next().toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -376,7 +421,7 @@ public class EventApiController {
     }
     
     @PatchMapping("{id}/lost")
-    public ResponseWrapper<Event> lostItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
+    public ResponseWrapper<Iterable<Event>> lostItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -403,8 +448,17 @@ public class EventApiController {
                 eventToUpdate.setLostTimeStampNow();
                 eventToUpdate.setLostManagerId(requestBody.getLostManagerId());
                 eventToUpdate.setLostManagerName(requestBody.getLostManagerName());
+                eventRepository.save(eventToUpdate);
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
+                while (iterator.hasNext()) {
+                    Event tmp = iterator.next().toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -417,7 +471,7 @@ public class EventApiController {
     }
     
     @PatchMapping("/{id}/found")
-    public ResponseWrapper<Event> foundItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
+    public ResponseWrapper<Iterable<Event>> foundItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -444,8 +498,17 @@ public class EventApiController {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
                 eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
+                eventRepository.save(eventToUpdate);
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                List<Event> output = new ArrayList<>();
+                Iterable<EventDB> eventDBList = eventRepository.findAll();
+                Iterator<EventDB> iterator = eventDBList.iterator();
+                while (iterator.hasNext()) {
+                    Event tmp = iterator.next().toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                    if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
+                        output.add(tmp);
+                    }
+                }
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -454,6 +517,24 @@ public class EventApiController {
         }
         else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
+    }
+
+    public class PostMappingResponse {
+        Event event;
+        ArrayList<Thing> thingList;
+
+        public PostMappingResponse(Event event, ArrayList<Thing> thingList) {
+            this.event = event;
+            this.thingList = thingList;
+        }
+
+        public Event getEvent() {
+            return event;
+        }
+
+        public ArrayList<Thing> getThingList() {
+            return thingList;
         }
     }
 }
