@@ -279,7 +279,7 @@ public class EventApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, new PostMappingResponse(eventOutput, thingListOutput));
     }
 
-    @PutMapping("/{id}/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseWrapper<List<Event>> cancelItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id) { // requester의 event들만 output으로 해야하는가?
         int departmentId;
         try {
@@ -321,7 +321,7 @@ public class EventApiController {
         }
     }
 
-    @PutMapping("/{id}/response")
+    @PatchMapping("/{id}/response")
     public ResponseWrapper<Iterable<Event>> responseItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getResponseManagerId() == 0 || requestBody.getResponseManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
@@ -371,7 +371,7 @@ public class EventApiController {
         }
     }
 
-    @PutMapping("/{id}/return")
+    @PatchMapping("/{id}/return")
     public ResponseWrapper<Iterable<Event>> returnItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
@@ -420,7 +420,7 @@ public class EventApiController {
         }
     }
     
-    @PutMapping("{id}/lost")
+    @PatchMapping("{id}/lost")
     public ResponseWrapper<Iterable<Event>> lostItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getLostManagerId() == 0 || requestBody.getLostManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
@@ -470,7 +470,7 @@ public class EventApiController {
         }
     }
     
-    @PutMapping("/{id}/found")
+    @PatchMapping("/{id}/found")
     public ResponseWrapper<Iterable<Event>> foundItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody Event requestBody) {
         if(requestBody.getReturnManagerId() == 0 || requestBody.getReturnManagerName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
