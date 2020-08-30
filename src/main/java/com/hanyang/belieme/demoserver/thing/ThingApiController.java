@@ -94,11 +94,12 @@ public class ThingApiController {
         ThingDB requestBodyDB = requestBody.toThingDB();
         requestBodyDB.setDepartmentId(departmentId);
         
-        ThingWithItems savedThing = thingRepository.save(requestBodyDB).toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository); 
+        ThingDB savedThingDB = thingRepository.save(requestBodyDB);
         for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
-            ItemDB newItem = new ItemDB(savedThing.getId(), i + 1);
+            ItemDB newItem = new ItemDB(savedThingDB.getId(), i + 1);
             itemRepository.save(newItem);
         }
+        ThingWithItems savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository); 
         
         return new ResponseWrapper<>(ResponseHeader.OK, savedThing);
     }

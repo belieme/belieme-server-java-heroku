@@ -36,7 +36,10 @@ public class ThingWithItems {
     }
     
     public String getDescription() {
-        return description;
+        if(description != null) {
+            return description;    
+        }
+        return "자세한 설명은 생략한다!";
     }
     
     public Department getDepartment() {
