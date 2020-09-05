@@ -59,7 +59,7 @@ public class UserDB {
     }
     
     public void setCreateTimeStampNow() {
-        approvalTimeStamp = System.currentTimeMillis()/1000;
+        createTimeStamp = System.currentTimeMillis()/1000;
     }
     
     public void setApprovalTimeStampNow() {

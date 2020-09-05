@@ -27,6 +27,11 @@ public class UserApiController {
         return userRepository.findAll();
     }
     
+    @DeleteMapping("")
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+    
     @GetMapping("")
     public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "accessToken") String accessToken) {
         UserDB outputResponse;
