@@ -22,6 +22,8 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 public class UserApiController {
     private static final String client_id = "a4b1abe746f384c3d43fa82a17f222";
     private static final int HYU_ID = 1;
+    private static final int CKU_ID = 2;
+    private static final int SNU_ID = 3;
     
     @Autowired
     private UserRepository userRepository;
@@ -29,7 +31,7 @@ public class UserApiController {
     @Autowired
     private UniversityRepository universityRepository;
     
-    @GetMapping("/uesrs/all")
+    @GetMapping("/users/all")
     public Iterable<UserDB> getAll(){
         return userRepository.findAll();
     }
@@ -40,7 +42,7 @@ public class UserApiController {
     }
     
     @GetMapping("/universities/{univCode}/users")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@PathVariable String univCode, @RequestParam(value = "apiToken") String apiToken) {
+    public ResponseWrapper<User> getUserInfoFromUnivApi(@PathVariable String univCode, @RequestParam(value = "apiToken") String apiToken) {
         UserDB outputResponse;
         int univId;
         try {
@@ -112,8 +114,12 @@ public class UserApiController {
                     if(in != null) in.close();            
                 } catch (Exception e) {
                     return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
-                }    
-                return new ResponseWrapper<>(ResponseHeader.OK, outputResponse);
+                }
+                try {
+                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository));   
+                } catch(NotFoundException e) {
+                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+                }
             }
             default : {
                 return new ResponseWrapper<>(ResponseHeader.UNREGISTERED_UNIVERSITY_EXCEPTION, null);
