@@ -18,7 +18,7 @@ import com.hanyang.belieme.demoserver.common.*;
 
 
 @RestController
-@RequestMapping(path="/universities/HYU/user")
+@RequestMapping(path="/universities/HYU/users")
 public class UserApiController {
     private static final String client_id = "a4b1abe746f384c3d43fa82a17f222";
     
@@ -31,7 +31,7 @@ public class UserApiController {
     }
     
     @GetMapping("")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam String accessToken) {
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "access_token") String accessToken) {
         UserDB outputResponse;
         try {
             URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginList.json");
