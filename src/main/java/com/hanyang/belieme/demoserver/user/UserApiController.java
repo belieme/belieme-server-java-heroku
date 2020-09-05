@@ -27,18 +27,17 @@ public class UserApiController {
         return userRepository.findAll();
     }
     
-    @GetMapping("/{accessTokenString}")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@PathVariable String accessTokenString) {
-        System.out.println(accessTokenString);
+    @GetMapping("")
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "accessToken") String accessToken) {
         UserDB outputResponse;
         try {
-            URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginList.json");
+            URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET"); 
+            con.setRequestMethod("GET");
             con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
             con.setRequestProperty("client_id", client_id);
             con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
-            con.setRequestProperty("access_token", accessTokenString);
+            con.setRequestProperty("access_token", accessToken);
             
             InputStream in = null;
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -55,9 +54,8 @@ public class UserApiController {
             JSONObject jsonOutput = (JSONObject)jsonParser.parse(output);
             
             JSONObject response = (JSONObject) jsonOutput.get("response");
-            JSONArray list = (JSONArray) response.get(response);
             
-            JSONObject tmp = (JSONObject) list.get(0);
+            JSONObject tmp = (JSONObject) response.get("item");
             
             List<UserDB> existUserList = userRepository.findByStudentId((String) (tmp.get("gaeinNo")));
             
@@ -73,7 +71,7 @@ public class UserApiController {
             
             newUserInfo.setStudentId((String) (tmp.get("gaeinNo")));
             newUserInfo.setName((String) (tmp.get("userNm")));
-            newUserInfo.setEntranceYear(Integer.getInteger((String) (tmp.get("iphakYear"))));
+            newUserInfo.setEntranceYear(Integer.getInteger(((String) (tmp.get("gaeinNo"))).substring(0,4)));
             newUserInfo.permissionSetUser(); //TODO status 얻어오기
             
             newUserInfo.setNewToken();
