@@ -85,6 +85,7 @@ public class UserApiController {
             if(bos != null) bos.close();
             if(in != null) in.close();            
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, outputResponse);
