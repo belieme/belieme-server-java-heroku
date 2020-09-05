@@ -7,15 +7,17 @@ public class User {
     
     private University university;
     
+    private String studentId;
+
+    private String name;
+    
+    private int entranceYear;
+    
     private String token;
     
     private long createTimeStamp;
     
     private long approvalTimeStamp;
-    
-    private String studentId;
-
-    private String name;
     
     private String permission;
     
@@ -25,6 +27,18 @@ public class User {
     
     public University getUniversity() {
         return university;
+    }
+    
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+    
+    public int getEntranceYear() {
+        return entranceYear;
     }
     
     public String getToken() {
@@ -38,21 +52,29 @@ public class User {
     public long getApprovalTimeStamp() {
         return approvalTimeStamp;
     }
-    
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public String getName() {
-        return name;
-    }
 
     public String getPermission() {
         return permission;
     }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public void setUniversity(University university) {
+        this.university = new University(university);
+    }
+    
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public void setEntranceYear(int entranceYear) {
+        this.entranceYear = entranceYear;
     }
     
     public void setToken(String token) {
@@ -67,23 +89,7 @@ public class User {
         this.approvalTimeStamp = approvalTimeStamp;
     }
     
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
-    }
-
-    public void permissionSetUser() {
-        permission = "USER";
-    }
-    
-    public void permissionSetAdmin() {
-        permission = "ADMIN";
-    }
-
-    public void permissionSetMaster() {
-        permission = "MASTER";
-    }
-
-    public void permissionSetDeveloper() {
-        permission = "DEVELOPER";
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 }

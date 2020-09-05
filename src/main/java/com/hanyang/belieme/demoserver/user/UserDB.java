@@ -1,6 +1,7 @@
 package com.hanyang.belieme.demoserver.user;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -8,6 +9,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import com.fasterxml.jackson.core.sym.Name;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.university.University;
+import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
 @Entity
 public class UserDB {
@@ -122,6 +128,26 @@ public class UserDB {
         permission = "DEVELOPER";
     }
     
+    public User toUser(UniversityRepository universityRepository) throws NotFoundException {
+        User output = new User();
+        output.setId(id);
+        output.setStudentId(studentId);
+        output.setName(name);
+        output.setEntranceYear(entranceYear);
+        output.setToken(token);
+        output.setCreateTimeStamp(createTimeStamp);
+        output.setApprovalTimeStamp(approvalTimeStamp);
+        output.setPermission(permission);
+        
+        Optional<University> universityOptional = universityRepository.findById(universityId);
+        if(universityOptional.isPresent()) {
+            output.setUniversity(universityOptional.get());
+        } else {
+            throw new NotFoundException();
+        }
+        return output;
+    }
+    
     public boolean hasDuplicateToken(UserRepository userRepository) {
         Iterator<UserDB> allUserIter = userRepository.findAll().iterator();
         
@@ -133,7 +159,10 @@ public class UserDB {
         return false;
     }
     
-    public static long tokenExpiredTime() {
-        return 60*60*24*180;//6개월 정도
+    public long tokenExpiredTime() {
+        if(approvalTimeStamp != 0) {
+             return approvalTimeStamp + 60*60*24*180;//6개월 정도   
+        }
+        return 0;
     }
 }
