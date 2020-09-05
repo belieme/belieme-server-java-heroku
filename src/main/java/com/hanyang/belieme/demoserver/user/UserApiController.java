@@ -33,7 +33,7 @@ public class UserApiController {
     }
     
     @GetMapping("")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "hayangApiToken") String hanyangApiToken, @RequestParam(value = "userToken") String userToken) {
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "apiToken") String hanyangApiToken, @RequestParam(value = "userToken") String userToken) {
         if(hanyangApiToken != null && userToken == null) {
             UserDB outputResponse;
             try {
