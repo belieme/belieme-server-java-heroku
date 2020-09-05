@@ -1,7 +1,10 @@
 package com.hanyang.belieme.demoserver.user;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -147,6 +150,8 @@ public class UserDB {
         }
         return output;
     }
+
+
     
     public boolean hasDuplicateToken(UserRepository userRepository) {
         Iterator<UserDB> allUserIter = userRepository.findAll().iterator();
@@ -161,7 +166,18 @@ public class UserDB {
     
     public long tokenExpiredTime() {
         if(approvalTimeStamp != 0) {
-             return approvalTimeStamp + 60*60*24*180;//6개월 정도   
+            // TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
+            // Calendar tmp = Calendar.getInstance();
+            // tmp.setTime(new Date(approvalTimeStamp*1000));
+            // tmp.setTimeZone(timeZone);
+            // int year = tmp.get(Calendar.YEAR);
+            // if(tmp.get(Calendar.MONTH) >= Calendar.MARCH && tmp.get(Calendar.MONTH) < Calendar.SEPTEMBER) {
+            //     tmp.set(year, Calendar.SEPTEMBER, 1, 0, 0, 0);
+            // } else {
+            //     tmp.set(year+1, Calendar.MARCH, 1, 0, 0, 0);
+            // }
+            // return tmp.getTimeInMillis()/1000;   
+            return approvalTimeStamp + 60;
         }
         return 0;
     }
