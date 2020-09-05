@@ -33,65 +33,78 @@ public class UserApiController {
     }
     
     @GetMapping("")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "accessToken") String accessToken) {
-        UserDB outputResponse;
-        try {
-            URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
-            con.setRequestProperty("client_id", client_id);
-            con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
-            con.setRequestProperty("access_token", accessToken);
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "hayangApiToken") String hanyangApiToken, @RequestParam(value = "userToken") String userToken) {
+        if(hanyangApiToken != null && userToken == null) {
+            UserDB outputResponse;
+            try {
+                URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
+                con.setRequestProperty("client_id", client_id);
+                con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
+                con.setRequestProperty("access_token", hanyangApiToken);
+                
+                InputStream in = null;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] buf = new byte[4096];
+                in = con.getInputStream();
+                while(true) {
+                    int readlen = in.read(buf);
+                    if( readlen < 1 )
+                        break;
+                    bos.write(buf, 0, readlen);
+                }
+                String output = new String(bos.toByteArray(), "UTF-8");
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonOutput = (JSONObject)jsonParser.parse(output);
+                
+                JSONObject response = (JSONObject) jsonOutput.get("response");
+                
+                JSONObject tmp = (JSONObject) response.get("item");
             
-            InputStream in = null;
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] buf = new byte[4096];
-            in = con.getInputStream();
-            while(true) {
-                int readlen = in.read(buf);
-                if( readlen < 1 )
-                    break;
-                bos.write(buf, 0, readlen);
-            }
-            String output = new String(bos.toByteArray(), "UTF-8");
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonOutput = (JSONObject)jsonParser.parse(output);
+                List<UserDB> existUserList = userRepository.findByStudentId((String) (tmp.get("gaeinNo")));
             
-            JSONObject response = (JSONObject) jsonOutput.get("response");
+                UserDB newUserInfo;
+                if(existUserList.size() == 0) {
+                    newUserInfo = new UserDB();
+                    newUserInfo.setCreateTimeStampNow();
+                } else if(existUserList.size() == 1) {
+                    newUserInfo = existUserList.get(0);
+                } else {
+                    return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+                }
             
-            JSONObject tmp = (JSONObject) response.get("item");
+                newUserInfo.setStudentId((String) (tmp.get("gaeinNo")));
+                newUserInfo.setName((String) (tmp.get("userNm")));
+                newUserInfo.setEntranceYear(Integer.parseInt(((String) (tmp.get("gaeinNo"))).substring(0,4)));
+                newUserInfo.permissionSetUser(); //TODO status 얻어오기
             
-            List<UserDB> existUserList = userRepository.findByStudentId((String) (tmp.get("gaeinNo")));
+                newUserInfo.setNewToken(userRepository);
+                newUserInfo.setApprovalTimeStampNow();
             
-            UserDB newUserInfo;
-            if(existUserList.size() == 0) {
-                newUserInfo = new UserDB();
-                newUserInfo.setCreateTimeStampNow();
-            } else if(existUserList.size() == 1) {
-                newUserInfo = existUserList.get(0);
-            } else {
+                outputResponse = userRepository.save(newUserInfo);
+            
+                if(bos != null) bos.close();
+                if(in != null) in.close();            
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
+            }    
+            return new ResponseWrapper<>(ResponseHeader.OK, outputResponse);
+        } else if(hanyangApiToken == null && userToken != null) {
+            List<UserDB> userListByToken = userRepository.findByToken(userToken);
+            if(userListByToken.size() == 0) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            } else if(userListByToken.size() != 1) {
                 return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+            } else {
+                return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0));
             }
-            
-            newUserInfo.setStudentId((String) (tmp.get("gaeinNo")));
-            newUserInfo.setName((String) (tmp.get("userNm")));
-            newUserInfo.setEntranceYear(Integer.parseInt(((String) (tmp.get("gaeinNo"))).substring(0,4)));
-            newUserInfo.permissionSetUser(); //TODO status 얻어오기
-            
-            newUserInfo.setNewToken();
-            newUserInfo.setApprovalTimeStampNow();
-            
-            outputResponse = userRepository.save(newUserInfo);
-            
-            if(bos != null) bos.close();
-            if(in != null) in.close();            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
+        } else if(hanyangApiToken == null && userToken == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_PARAM_EXCEPTION, null);
+        } else {
+            return new ResponseWrapper<>(ResponseHeader.TOO_MANY_REQUEST_PARAM_EXCEPTION, null);
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, outputResponse);
-    }
-    
-    
+    } 
 }

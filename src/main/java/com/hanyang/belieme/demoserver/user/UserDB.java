@@ -1,5 +1,8 @@
 package com.hanyang.belieme.demoserver.user;
 
+import java.util.Iterator;
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -70,8 +73,11 @@ public class UserDB {
         approvalTimeStamp = 0;
     }
     
-    public void setNewToken() {
-        this.token = "A123456";
+    public void setNewToken(UserRepository userRepository) {
+        this.token = UUID.randomUUID().toString();
+        while(hasDuplicateToken(userRepository)) {
+            this.token = UUID.randomUUID().toString();
+        }
     }
     
     public void setStudentId(String studentId) {
@@ -100,5 +106,16 @@ public class UserDB {
 
     public void permissionSetDeveloper() {
         permission = "DEVELOPER";
+    }
+    
+    public boolean hasDuplicateToken(UserRepository userRepository) {
+        Iterator<UserDB> allUserIter = userRepository.findAll().iterator();
+        
+        while(allUserIter.hasNext()) {
+            if(allUserIter.next().getToken().equals(token)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

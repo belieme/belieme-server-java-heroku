@@ -12,6 +12,8 @@ public class ResponseHeader {
     public static final ResponseHeader WRONG_IN_DATABASE_EXCEPTION = new ResponseHeader(8, "There is something wrong in database.");
     public static final ResponseHeader DUPLICATE_CODE_EXCEPTION = new ResponseHeader(9, "There is same code in the table");
     public static final ResponseHeader WRONG_IN_CONNECTION_EXCEPTION = new ResponseHeader(10, "There is error on connection");
+    public static final ResponseHeader LACK_OF_REQUEST_PARAM_EXCEPTION = new ResponseHeader(11, "Request prameter lacks information for request.");
+    public static final ResponseHeader TOO_MANY_REQUEST_PARAM_EXCEPTION = new ResponseHeader(12, "Too many request prameter information for request.");
 
     private int code;
     private String message;
