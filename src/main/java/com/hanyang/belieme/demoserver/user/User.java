@@ -1,13 +1,17 @@
 package com.hanyang.belieme.demoserver.user;
 
-import com.hanyang.belieme.demoserver.department.Department;
+import com.hanyang.belieme.demoserver.university.University;
 
 public class User {
     private int id;
     
+    private University university;
+    
     private String token;
     
-    private long issuedAt;
+    private long createTimeStamp;
+    
+    private long approvalTimeStamp;
     
     private String studentId;
 
@@ -19,12 +23,20 @@ public class User {
         return id;
     }
     
+    public University getUniversity() {
+        return university;
+    }
+    
     public String getToken() {
         return token;
     }
     
-    public long getIssuedAt() {
-        return issuedAt;
+    public long getCreateTimeStamp() {
+        return createTimeStamp;
+    }
+    
+    public long getApprovalTimeStamp() {
+        return approvalTimeStamp;
     }
     
     public String getStudentId() {
@@ -47,8 +59,12 @@ public class User {
         this.token = token;
     }
     
-    public void setIssuedAt(long issuedAt) {
-        this.issuedAt = issuedAt;
+    public void setCreateTimeStamp(long createTimeStamp) {
+        this.createTimeStamp = createTimeStamp;
+    }
+    
+    public void setApprovalTimeStamp(long approvalTimeStamp) {
+        this.approvalTimeStamp = approvalTimeStamp;
     }
     
     public void setStudentId(String studentId) {

@@ -14,6 +14,8 @@ public class UserDB {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     
+    private int universityId;
+    
     private String token;
     
     private long createTimeStamp;
@@ -31,6 +33,10 @@ public class UserDB {
     
     public int getId() {
         return id;
+    }
+    
+    public int getUniversityId() {
+        return universityId;
     }
     
     public String getToken() {
@@ -80,6 +86,14 @@ public class UserDB {
         }
     }
     
+    public void resetToken() {
+        this.token = null;
+    }
+    
+    public void setUniversityId(int universityId) {
+        this.universityId = universityId;
+    }
+    
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
@@ -117,5 +131,9 @@ public class UserDB {
             }
         }
         return false;
+    }
+    
+    public static long tokenExpiredTime() {
+        return 60*60*24*180;//6개월 정도
     }
 }

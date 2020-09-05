@@ -14,6 +14,8 @@ public class ResponseHeader {
     public static final ResponseHeader WRONG_IN_CONNECTION_EXCEPTION = new ResponseHeader(10, "There is error on connection");
     public static final ResponseHeader LACK_OF_REQUEST_PARAM_EXCEPTION = new ResponseHeader(11, "Request prameter lacks information for request.");
     public static final ResponseHeader TOO_MANY_REQUEST_PARAM_EXCEPTION = new ResponseHeader(12, "Too many request prameter information for request.");
+    public static final ResponseHeader EXPIRED_USER_TOKEN_EXCEPTION = new ResponseHeader(13, "Given user token has expired.");
+        ;
 
     private int code;
     private String message;

@@ -1,6 +1,5 @@
 package com.hanyang.belieme.demoserver.user;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import com.hanyang.belieme.demoserver.common.*;
 
 
 @RestController
-@RequestMapping(path="/universities/HYU/users")
+@RequestMapping(path="/universities/HYU/users") //TODO university 추가하기
 public class UserApiController {
     private static final String client_id = "a4b1abe746f384c3d43fa82a17f222";
     
@@ -33,8 +32,29 @@ public class UserApiController {
     }
     
     @GetMapping("")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "apiToken") String hanyangApiToken, @RequestParam(value = "userToken") String userToken) {
-        if(hanyangApiToken != null && userToken == null) {
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "apiToken", required = false) String apiToken, @RequestParam(value = "userToken", required = false) String userToken) {
+        if(apiToken == null && userToken != null) {
+            List<UserDB> userListByToken = userRepository.findByToken(userToken);
+            if(userListByToken.size() == 0) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            } else if(userListByToken.size() != 1) {
+                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+            } else {
+                UserDB target = userListByToken.get(0);
+                if(System.currentTimeMillis()/1000 < target.getApprovalTimeStamp() + UserDB.tokenExpiredTime()) {
+                    return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0));    
+                } else {
+                    target.setApprovalTimeStampZero();
+                    target.resetToken();
+                    userRepository.save(target);
+                    return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+                }
+            }
+        } else if(apiToken == null && userToken == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_PARAM_EXCEPTION, null);
+        } else if(apiToken != null && userToken != null) {
+            return new ResponseWrapper<>(ResponseHeader.TOO_MANY_REQUEST_PARAM_EXCEPTION, null);
+        } else {
             UserDB outputResponse;
             try {
                 URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
@@ -43,7 +63,7 @@ public class UserApiController {
                 con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
                 con.setRequestProperty("client_id", client_id);
                 con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
-                con.setRequestProperty("access_token", hanyangApiToken);
+                con.setRequestProperty("access_token", apiToken);
                 
                 InputStream in = null;
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -92,19 +112,6 @@ public class UserApiController {
                 return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
             }    
             return new ResponseWrapper<>(ResponseHeader.OK, outputResponse);
-        } else if(hanyangApiToken == null && userToken != null) {
-            List<UserDB> userListByToken = userRepository.findByToken(userToken);
-            if(userListByToken.size() == 0) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            } else if(userListByToken.size() != 1) {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-            } else {
-                return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0));
-            }
-        } else if(hanyangApiToken == null && userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_PARAM_EXCEPTION, null);
-        } else {
-            return new ResponseWrapper<>(ResponseHeader.TOO_MANY_REQUEST_PARAM_EXCEPTION, null);
-        }
+        } 
     } 
 }
