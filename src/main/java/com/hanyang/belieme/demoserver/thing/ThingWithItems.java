@@ -91,7 +91,7 @@ public class ThingWithItems {
     }
     
     public void setDepartment(Department department) {
-        this.department = department;  // copy constructor로 만들기
+        this.department = new Department(department);
     }
 
     // public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {

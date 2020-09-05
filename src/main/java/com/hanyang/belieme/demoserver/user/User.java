@@ -1,21 +1,14 @@
 package com.hanyang.belieme.demoserver.user;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.hanyang.belieme.demoserver.department.Department;
 
-@Entity
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     
     private String token;
     
-    private int departmentId;
+    private long issuedAt;
     
-    @Column(name = "student_id", nullable = false)
     private String studentId;
 
     private String name;
@@ -30,8 +23,8 @@ public class User {
         return token;
     }
     
-    public int departmentIdGetter() {
-        return departmentId;
+    public long getIssuedAt() {
+        return issuedAt;
     }
     
     public String getStudentId() {
@@ -54,8 +47,8 @@ public class User {
         this.token = token;
     }
     
-    public void setDepartmentId(int departmentId) {
-        this.departmentId = departmentId;
+    public void setIssuedAt(long issuedAt) {
+        this.issuedAt = issuedAt;
     }
     
     public void setStudentId(String studentId) {

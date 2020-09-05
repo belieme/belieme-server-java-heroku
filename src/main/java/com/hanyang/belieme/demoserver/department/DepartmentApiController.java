@@ -88,15 +88,14 @@ public class DepartmentApiController {
         
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
-        // newDepartmentDB.setMajorCodes(new ArrayList<String>());
-        //newDepartmentDB.able();// TODO default는 무엇인가... -> default : false
+        newDepartmentDB.able();// TODO default는 무엇인가... -> default : false 그리고 직접 입력 받으려나?
         Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
     
     @PatchMapping("/{departmentCode}")
     public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Department requestBody) {
-        if(requestBody.getDepartmentName() == null || requestBody.getDepartmentCode() == null) { //TODO 하나씩만도 되게 만들기
+        if(requestBody.getDepartmentName() == null && requestBody.getDepartmentCode() == null) { //TODO 하나씩만도 되게 만들기
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
@@ -121,19 +120,18 @@ public class DepartmentApiController {
         Optional<DepartmentDB> targetOptional = departmentRepository.findById(id);
         if(targetOptional.isPresent()) {
             DepartmentDB target = targetOptional.get();
-            if(departmentCode.equals(requestBody.getDepartmentCode())) {
-                target.setDepartmentName(requestBody.getDepartmentName());
-                Department output = departmentRepository.save(target).toDepartment(universityRepository);
-                return new ResponseWrapper<>(ResponseHeader.OK, output);
-            }
-            List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
-            for(int i = 0; i < departmentListByUnivId.size(); i++) {
-                if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
-                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+            if(requestBody.getDepartmentCode() != null && !departmentCode.equals(requestBody.getDepartmentCode())) {
+                List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
+                for(int i = 0; i < departmentListByUnivId.size(); i++) {
+                    if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
+                        return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                    }
                 }
+                target.setDepartmentCode(requestBody.getDepartmentCode());
+            } 
+            if(requestBody.getDepartmentName() != null && !target.getDepartmentName().equals(requestBody.getDepartmentName())) {
+               target.setDepartmentName(requestBody.getDepartmentName());
             }
-            target.setDepartmentCode(requestBody.getDepartmentCode());
-            target.setDepartmentName(requestBody.getDepartmentName());
             Department output = departmentRepository.save(target).toDepartment(universityRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else {

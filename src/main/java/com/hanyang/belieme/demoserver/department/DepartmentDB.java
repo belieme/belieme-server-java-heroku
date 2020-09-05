@@ -1,15 +1,12 @@
 package com.hanyang.belieme.demoserver.department;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.hanyang.belieme.demoserver.common.StringListConverter;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
@@ -25,9 +22,6 @@ public class DepartmentDB {
 
     private String departmentName;
     
-    // @Convert(converter = StringListConverter.class)
-    // private ArrayList<String> majorCodes;
-    
     private boolean available;
     
     public DepartmentDB() {
@@ -37,7 +31,6 @@ public class DepartmentDB {
     public DepartmentDB(String departmentId, String departmentName) {
         this.departmentCode = departmentId;
         this.departmentName = departmentName;
-        // majorCodes = new ArrayList<String>();
         available = true;
     }
 
@@ -52,13 +45,6 @@ public class DepartmentDB {
     public String getDepartmentName() {
         return departmentName;
     }
-    
-    // public ArrayList<String> getMajorCodes() {
-    //     if(majorCodes == null) {
-    //         return null;
-    //     }
-    //     return new ArrayList<String>(majorCodes);
-    // }
     
     public int getUniversityId() {
         return universityId;
@@ -84,21 +70,9 @@ public class DepartmentDB {
         this.departmentName = departmentName;
     }
     
-    // public void setMajorCodes(ArrayList<String> majorCodes) {
-    //     this.majorCodes = majorCodes;
-    // }
-    
     public void setAvailable(boolean available) {
         this.available = available;
     }
-    
-    // public void addMajor(String majorCode) {
-    //     majorCodes.add(majorCode);
-    // }
-    
-    // public boolean deleteMajor(String majorCode) {
-    //     return majorCodes.remove(majorCode);
-    // }
     
     public void unable() {
         available = false;

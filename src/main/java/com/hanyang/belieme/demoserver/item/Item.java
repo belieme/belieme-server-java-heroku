@@ -50,7 +50,7 @@ public class Item {
     }
     
     public void setThing(ThingNestedToItem othThing) { // TODO 무엇이 문제인가...
-        this.thing = othThing;   
+        this.thing = new ThingNestedToItem(othThing);   
     }
     
     public void setStatus(String status) {

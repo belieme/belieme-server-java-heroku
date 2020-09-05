@@ -72,7 +72,7 @@ public class Thing {
     }
     
     public void setDepartment(Department department) {
-        this.department = department;  // copy constructor로 만들기
+        this.department = new Department(department);
     }
     
     public void setAmount(int amount) {

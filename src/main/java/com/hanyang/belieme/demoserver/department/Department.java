@@ -1,6 +1,5 @@
 package com.hanyang.belieme.demoserver.department;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
@@ -17,11 +16,17 @@ public class Department {
 
     private String departmentName;
     
-    // private ArrayList<String> majorCodes;
-    
     private boolean available;
     
     public Department() {
+    }
+    
+    public Department(Department oth) {
+        this.id = oth.id;
+        this.university = new University(oth.university);
+        this.departmentCode = oth.departmentCode;
+        this.departmentName = oth.departmentName;
+        this.available = oth.available;
     }
 
     public int getId() {
@@ -36,10 +41,6 @@ public class Department {
         return departmentName;
     }
     
-    // public ArrayList<String> getMajorCodes() {
-    //     return new ArrayList<String>(majorCodes);
-    // }
-    
     public University getUniversity() {
         return university;
     }
@@ -53,7 +54,7 @@ public class Department {
     }
     
     public void setUniversity(University university) {
-        this.university = university; //TODO copyConstructor이용
+        this.university = new University(university);
     }
     
     public void setDepartmentCode(String departmentCode) {
@@ -63,10 +64,6 @@ public class Department {
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
-    
-    // public void setMajorCodes(ArrayList<String> majorCodes) {
-    //     this.majorCodes = majorCodes;
-    // }
     
     public void setAvailable(boolean available) {
         this.available = available;

@@ -11,6 +11,7 @@ public class ResponseHeader {
     public static final ResponseHeader WRONG_ADMIN_PERMISSION_EXCEPTION = new ResponseHeader(7, "Permission of admin is wrong.");
     public static final ResponseHeader WRONG_IN_DATABASE_EXCEPTION = new ResponseHeader(8, "There is something wrong in database.");
     public static final ResponseHeader DUPLICATE_CODE_EXCEPTION = new ResponseHeader(9, "There is same code in the table");
+    public static final ResponseHeader WRONG_IN_CONNECTION_EXCEPTION = new ResponseHeader(10, "There is error on connection");
 
     private int code;
     private String message;
