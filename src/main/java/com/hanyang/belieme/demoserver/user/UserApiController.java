@@ -11,9 +11,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
-
-import com.fasterxml.jackson.core.JsonParser;
 import com.hanyang.belieme.demoserver.common.*;
 
 
@@ -30,8 +27,9 @@ public class UserApiController {
         return userRepository.findAll();
     }
     
-    @GetMapping("#access_token={accessToken}")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@PathVariable String accessToken) {
+    @GetMapping("/{accessTokenString}")
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@PathVariable String accessTokenString) {
+        System.out.println(accessTokenString);
         UserDB outputResponse;
         try {
             URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginList.json");
@@ -40,7 +38,7 @@ public class UserApiController {
             con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
             con.setRequestProperty("client_id", client_id);
             con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
-            con.setRequestProperty("access_token", accessToken);
+            con.setRequestProperty("access_token", accessTokenString);
             
             InputStream in = null;
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
