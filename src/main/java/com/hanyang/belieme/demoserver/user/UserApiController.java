@@ -41,7 +41,7 @@ public class UserApiController {
         userRepository.deleteAll();
     }
     
-    @GetMapping("/universities/{univCode}/users")
+    @GetMapping("/universities/{univCode}/users") //TODO 무한루프가 있다...
     public ResponseWrapper<User> getUserInfoFromUnivApi(@PathVariable String univCode, @RequestParam(value = "apiToken") String apiToken) {
         UserDB outputResponse;
         int univId;
@@ -54,7 +54,7 @@ public class UserApiController {
         }
         switch(univId) {
             case HYU_ID : {
-                try {
+                 try {
                     URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
@@ -113,7 +113,7 @@ public class UserApiController {
                     if(bos != null) bos.close();
                     if(in != null) in.close();            
                 } catch (Exception e) {
-                    return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
+                     return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
                 try {
                     return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository));   

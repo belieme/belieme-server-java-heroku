@@ -87,9 +87,9 @@ public class UserDB {
     
     public void setNewToken(UserRepository userRepository) {
         this.token = UUID.randomUUID().toString();
-        while(hasDuplicateToken(userRepository)) {
-            this.token = UUID.randomUUID().toString();
-        }
+        // while(hasDuplicateToken(userRepository)) {
+        //     this.token = UUID.randomUUID().toString();
+        // }
     }
     
     public void resetToken() {
