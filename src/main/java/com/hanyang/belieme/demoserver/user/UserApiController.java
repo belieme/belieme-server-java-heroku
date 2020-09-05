@@ -30,13 +30,14 @@ public class UserApiController {
         return userRepository.findAll();
     }
     
-    @GetMapping("")
-    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@RequestParam(value = "access_token") String accessToken) {
+    @GetMapping("#access_token={accessToken}")
+    public ResponseWrapper<UserDB> getUserInfoFromUnivApi(@PathVariable String accessToken) {
         UserDB outputResponse;
         try {
             URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginList.json");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET"); 
+            con.setRequestProperty("Host", "https://api.hanyang.ac.kr/");
             con.setRequestProperty("client_id", client_id);
             con.setRequestProperty("swap_key", Long.toString(System.currentTimeMillis()/1000));
             con.setRequestProperty("access_token", accessToken);
