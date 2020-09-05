@@ -71,7 +71,7 @@ public class UserApiController {
             
             newUserInfo.setStudentId((String) (tmp.get("gaeinNo")));
             newUserInfo.setName((String) (tmp.get("userNm")));
-            newUserInfo.setEntranceYear(Integer.getInteger(((String) (tmp.get("gaeinNo"))).substring(0,4)));
+            newUserInfo.setEntranceYear(Integer.parseInt(((String) (tmp.get("gaeinNo"))).substring(0,4)));
             newUserInfo.permissionSetUser(); //TODO status 얻어오기
             
             newUserInfo.setNewToken();
