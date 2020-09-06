@@ -141,10 +141,11 @@ public class UserApiController {
                     if(bos != null) bos.close();
                     if(in != null) in.close();            
                 } catch (Exception e) {
+                     e.printStackTrace();
                      return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
                 try {
-                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository, departmentRepository, majorRepository));   
+                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository, departmentRepository, majorRepository));
                 } catch(NotFoundException e) {
                     return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
                 }
