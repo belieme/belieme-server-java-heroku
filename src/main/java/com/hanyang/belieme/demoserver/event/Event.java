@@ -37,18 +37,30 @@ public class Event {
     }
     
     public UserNestedToEvent getRequester() {
+        if(requester == null) {
+            return null;
+        }
         return new UserNestedToEvent(requester);
     }
     
     public UserNestedToEvent getResponseManager() {
+        if(responseManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(responseManager);
     }
     
     public UserNestedToEvent getReturnManager() {
+        if(returnManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(returnManager);
     }
     
     public UserNestedToEvent getLostManager() {
+        if(lostManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(lostManager);
     }
 
