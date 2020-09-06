@@ -102,7 +102,7 @@ public class EventApiController {
                  return new ResponseWrapper<>(ResponseHeader.OK, output);   
             }
             //TODO NotFoundException의 종류를 늘려야 하나? Exception바꿀까?
-        } 
+        }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
 
@@ -596,31 +596,6 @@ public class EventApiController {
         }
         else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-    }
-    
-    public class EventRequestBody {
-        private String requesterStudentId;
-        private String responseManagerStudentId;
-        private String returnManagerStudentId;
-        private String lostManagerStudentId;
-        
-        public EventRequestBody(){}
-        
-        public String getRequesterStudentId() {
-            return requesterStudentId;
-        }
-        
-        public String getResponseManagerStudentId() {
-            return responseManagerStudentId;
-        }
-        
-        public String getReturnManagerStudentId() {
-            return returnManagerStudentId; 
-        }
-        
-        public String getLostManagerStudentId() {
-            return lostManagerStudentId;
         }
     }
 }

@@ -688,29 +688,4 @@ public class BetaEventApiController {
             return thingList;
         }
     }
-    
-    public class EventRequestBody {
-        public EventRequestBody(){}
-        
-        private String requesterStudentId;
-        private String responseManagerStudentId;
-        private String returnManagerStudentId;
-        private String lostManagerStudentId;
-        
-        public String getRequesterStudentId() {
-            return requesterStudentId;
-        }
-        
-        public String getResponseManagerStudentId() {
-            return responseManagerStudentId;
-        }
-        
-        public String getReturnManagerStudentId() {
-            return returnManagerStudentId; 
-        }
-        
-        public String getLostManagerStudentId() {
-            return lostManagerStudentId;
-        }
-    }
 }
