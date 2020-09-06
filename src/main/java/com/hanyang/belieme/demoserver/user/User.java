@@ -3,7 +3,7 @@ package com.hanyang.belieme.demoserver.user;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hanyang.belieme.demoserver.department.Department;
+import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.university.University;
 
 public class User {
@@ -13,7 +13,7 @@ public class User {
     
     private List<String> majorCodes;
     
-    private List<Department> departments;
+    private List<DepartmentNestedToUser> departments;
     
     private String studentId;
 
@@ -41,8 +41,8 @@ public class User {
         return new ArrayList<String>(majorCodes);
     }
     
-    public List<Department> getDepartments() {
-        return new ArrayList<Department>(departments);
+    public List<DepartmentNestedToUser> getDepartments() {
+        return new ArrayList<DepartmentNestedToUser>(departments);
     }
     
     public String getStudentId() {
@@ -85,8 +85,8 @@ public class User {
         this.majorCodes = new ArrayList<String>(majorCodes);
     }
     
-    public void setDepartments(List<Department> departments) {
-        this.departments = new ArrayList<Department>(departments);
+    public void setDepartments(List<DepartmentNestedToUser> departments) {
+        this.departments = new ArrayList<DepartmentNestedToUser>(departments);
     }
     
     public void setStudentId(String studentId) {

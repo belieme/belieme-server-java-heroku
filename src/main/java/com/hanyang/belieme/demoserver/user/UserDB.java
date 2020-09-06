@@ -17,8 +17,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.hanyang.belieme.demoserver.common.IntegerListConverter;
-import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
+import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
@@ -172,7 +172,7 @@ public class UserDB {
         Iterator<Major> iter = majorListByIdList.iterator();
         
         ArrayList<String> majorCodes = new ArrayList<String>();
-        ArrayList<Department> departments = new ArrayList<Department>();
+        ArrayList<DepartmentNestedToUser> departments = new ArrayList<DepartmentNestedToUser>();
         while(iter.hasNext()) {
             Major tmp = iter.next();
             majorCodes.add(tmp.getMajorCode());
@@ -182,7 +182,7 @@ public class UserDB {
                 if(!tmpDepartmentOptional.isPresent()) {
                     throw new NotFoundException();
                 }
-                departments.add(tmpDepartmentOptional.get().toDepartment(universityRepository, majorRepository));
+                departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 continue;
             }
             for(int i = 0; i < departments.size(); i++) {
@@ -191,7 +191,7 @@ public class UserDB {
                     if(!tmpDepartmentOptional.isPresent()) {
                         throw new NotFoundException();
                     }
-                    departments.add(tmpDepartmentOptional.get().toDepartment(universityRepository, majorRepository));
+                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 }
             }
         }

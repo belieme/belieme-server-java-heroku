@@ -108,4 +108,14 @@ public class DepartmentDB {
         
         return output;
     }
+    
+    public DepartmentNestedToUser toDepartmentNestedToUser() {
+        DepartmentNestedToUser output = new DepartmentNestedToUser();
+        output.setId(id);
+        output.setDepartmentCode(departmentCode);
+        output.setDepartmentName(departmentName);
+        output.setAvailable(isAvailble());
+        return output;
+    }
+    
 }
