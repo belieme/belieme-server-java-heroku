@@ -11,6 +11,7 @@ import java.util.Optional;
 import com.hanyang.belieme.demoserver.item.*;
 
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
@@ -32,8 +33,11 @@ public class ThingApiController {
     private MajorRepository majorRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private ThingRepository thingRepository;
-
+    
     @Autowired
     private ItemRepository itemRepository;
 
@@ -47,7 +51,12 @@ public class ThingApiController {
             Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(departmentId);
             ArrayList<Thing> responseBody = new ArrayList<>();
             for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-                Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository); 
+                Thing tmp;
+                try {
+                    tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
+                } catch (NotFoundException e) {
+                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+                }
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
@@ -74,7 +83,12 @@ public class ThingApiController {
             if(departmentId != targetOptional.get().getDepartmentId()) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
             }
-            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository);
+            ThingWithItems responseBody;
+            try {
+                responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
+            } catch (NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -103,7 +117,12 @@ public class ThingApiController {
             ItemDB newItem = new ItemDB(savedThingDB.getId(), i + 1);
             itemRepository.save(newItem);
         }
-        ThingWithItems savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository); 
+        ThingWithItems savedThing;
+        try {
+            savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository); 
+        } catch (NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        }
         
         return new ResponseWrapper<>(ResponseHeader.OK, savedThing);
     }
@@ -141,7 +160,12 @@ public class ThingApiController {
             if(requestBodyDB.getDescription() != null) {
                 target.setDescription(requestBodyDB.getDescription());
             }
-            ThingWithItems output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository);
+            ThingWithItems output;
+            try {
+                output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
+            } catch (NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);

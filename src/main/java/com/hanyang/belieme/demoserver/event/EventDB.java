@@ -9,9 +9,12 @@ import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.thing.ThingRepository;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.UserDB;
+import com.hanyang.belieme.demoserver.user.UserRepository;
 
 
 @Entity
@@ -21,13 +24,9 @@ public class EventDB {
     
     private int itemId;
     private int requesterId;
-    private String requesterName;
     private int responseManagerId;
-    private String responseManagerName;
     private int returnManagerId;
-    private String returnManagerName;
     private int lostManagerId;
-    private String lostManagerName;
     
     private long requestTimeStamp;
     private long responseTimeStamp;
@@ -50,32 +49,18 @@ public class EventDB {
         return requesterId;
     }
 
-    public String getRequesterName() {
-        return requesterName;
-    }
-
     public int getResponseManagerId() {
         return responseManagerId;
     }
 
-    public String getResponseManagerName() {
-        return responseManagerName;
-    }
 
     public int getReturnManagerId() {
         return returnManagerId;
     }
 
-    public String getReturnManagerName() {
-        return returnManagerName;
-    }
     
     public int getLostManagerId() {
         return lostManagerId;
-    }
-
-    public String getLostManagerName() {
-        return lostManagerName;
     }
 
     public long getRequestTimeStamp() {
@@ -106,32 +91,16 @@ public class EventDB {
         this.requesterId = requesterId;
     }
 
-    public void setRequesterName(String requesterName) {
-        this.requesterName = requesterName;
-    }
-
     public void setResponseManagerId(int responseManagerId) {
         this.responseManagerId = responseManagerId;
-    }
-
-    public void setResponseManagerName(String responseManagerName) {
-        this.responseManagerName = responseManagerName;
     }
 
     public void setReturnManagerId(int returnManagerId) {
         this.returnManagerId = returnManagerId;
     }
-
-    public void setReturnManagerName(String returnManagerName) {
-        this.returnManagerName = returnManagerName;
-    }
     
     public void setLostManagerId(int lostManagerId) {
         this.lostManagerId = lostManagerId;
-    }
-
-    public void setLostManagerName(String lostManagerName) {
-        this.lostManagerName = lostManagerName;
     }
 
     public void setRequestTimeStampZero() {
@@ -241,7 +210,7 @@ public class EventDB {
         return tmp.getTime().getTime()/1000;
     }
     
-    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
         Event output = new Event();
         ItemNestedToEvent item;
         
@@ -251,17 +220,45 @@ public class EventDB {
         } else {
             item = null;
         }
+        
+        output.setRequester(null);
+        output.setResponseManager(null);
+        output.setReturnManager(null);
+        output.setLostManager(null);
+        if(requesterId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
+            if(tmpOptional.isPresent()) {
+                output.setRequester(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(responseManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setResponseManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(returnManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(returnManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setReturnManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(lostManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(lostManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setLostManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }
         output.setId(id);
         output.setItem(item);
-        output.setRequesterId(requesterId);
-        output.setRequesterName(requesterName);
-        output.setResponseManagerId(responseManagerId);
-        output.setResponseManagerName(responseManagerName);
-        output.setReturnManagerId(returnManagerId);
-        output.setReturnManagerName(returnManagerName);
-        output.setLostManagerId(lostManagerId);
-        output.setLostManagerName(lostManagerName);
-        
         output.setRequestTimeStamp(requestTimeStamp);
         output.setResponseTimeStamp(responseTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);
@@ -271,18 +268,47 @@ public class EventDB {
         return output;
     }
 
-    public EventNestedToItem toEventNestedToItem() {
+    public EventNestedToItem toEventNestedToItem(UserRepository userRepository) throws NotFoundException {
         EventNestedToItem output = new EventNestedToItem();
         
+        output.setRequester(null);
+        output.setResponseManager(null);
+        output.setReturnManager(null);
+        output.setLostManager(null);
+        if(requesterId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
+            if(tmpOptional.isPresent()) {
+                output.setRequester(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(responseManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setResponseManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(returnManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(returnManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setReturnManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }        
+        if(lostManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(lostManagerId);
+            if(tmpOptional.isPresent()) {
+                output.setLostManager(tmpOptional.get().toUserNestedToEvent());
+            } else {
+                throw new NotFoundException();
+            }
+        }
+        
         output.setId(id);
-        output.setRequesterId(requesterId);
-        output.setRequesterName(requesterName);
-        output.setResponseManagerId(responseManagerId);
-        output.setResponseManagerName(responseManagerName);
-        output.setReturnManagerId(returnManagerId);
-        output.setReturnManagerName(returnManagerName);
-        output.setLostManagerId(lostManagerId);
-        output.setLostManagerName(lostManagerName);
         output.setRequestTimeStamp(requestTimeStamp);
         output.setResponseTimeStamp(responseTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);

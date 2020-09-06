@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
+import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
 public class User {
     private int id;
@@ -115,5 +118,18 @@ public class User {
     
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+    
+    public static int findIdByUniversityCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {
+        int univId = University.findIdByUniversityCode(universityRepository, univCode);
+        List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
+        
+        if(targetList.size() == 0) {
+            throw new NotFoundException();
+        } else if(targetList.size() != 1) {
+            throw new WrongInDataBaseException();
+        } else {
+            return targetList.get(0).getId();
+        }
     }
 }

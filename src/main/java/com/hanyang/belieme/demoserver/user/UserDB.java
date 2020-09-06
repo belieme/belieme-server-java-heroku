@@ -202,6 +202,17 @@ public class UserDB {
         return output;
     }
     
+    public UserNestedToEvent toUserNestedToEvent() {
+        UserNestedToEvent output = new UserNestedToEvent();
+        output.setId(id);
+        output.setStudentId(studentId);
+        output.setName(name);
+        output.setEntranceYear(entranceYear);
+        output.setPermission(permission);
+        
+        return output;
+    }
+    
     public boolean hasDuplicateToken(UserRepository userRepository) {
         Iterator<UserDB> allUserIter = userRepository.findAll().iterator();
         

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
@@ -29,6 +30,9 @@ public class ItemApiController {
     
     @Autowired
     private MajorRepository majorRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @Autowired
     private ItemRepository itemRepository;
@@ -60,7 +64,12 @@ public class ItemApiController {
         List<Item> output = new ArrayList<>();       
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
         for(int i = 0; i < itemListByThingId.size(); i++) {
-            output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository));
+            try {
+                output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository));    
+            } catch (NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+            
         }
         return new ResponseWrapper<>(ResponseHeader.OK, output);
     }
@@ -88,7 +97,12 @@ public class ItemApiController {
         Item output;
         if(itemList.size() == 1) {
             ItemDB itemDB = itemList.get(0);
-            output = itemDB.toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
+            try {
+                output = itemDB.toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
+            } catch (NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+            
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -130,7 +144,13 @@ public class ItemApiController {
         ItemDB newItem = new ItemDB(thingId, max+1); 
 
         if(thingOptional.isPresent()) {
-            Item output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
+            Item output;
+            try {
+                output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
+            } catch (NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+            
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
         else {

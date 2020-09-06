@@ -6,9 +6,11 @@ import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.*;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
 
 
 @Entity
@@ -62,7 +64,7 @@ public class ItemDB {
     }
 
     
-    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, EventRepository eventRepository) {
+    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, EventRepository eventRepository) throws NotFoundException {
         Item output = new Item();
         String status;
         ThingNestedToItem thing = null;    
@@ -79,7 +81,7 @@ public class ItemDB {
             } else {
                 status = "UNUSABLE";
             }
-            lastEvent = lastEventOptional.get().toEventNestedToItem();
+            lastEvent = lastEventOptional.get().toEventNestedToItem(userRepository);
         }
         else {
             status = "USABLE";
@@ -108,7 +110,7 @@ public class ItemDB {
         return output;
     }
     
-    public ItemNestedToThing toItemNestedToThing(EventRepository eventRepository) {
+    public ItemNestedToThing toItemNestedToThing(EventRepository eventRepository, UserRepository userRepository) throws NotFoundException {
         ItemNestedToThing output = new ItemNestedToThing();
         
         String status;
@@ -125,7 +127,7 @@ public class ItemDB {
             } else {
                 status = "UNUSABLE";
             }
-            lastEvent = lastEventOptional.get().toEventNestedToItem();
+            lastEvent = lastEventOptional.get().toEventNestedToItem(userRepository);
         }
         else {
             status = "USABLE";

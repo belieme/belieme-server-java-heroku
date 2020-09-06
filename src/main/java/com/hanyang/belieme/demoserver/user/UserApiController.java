@@ -93,17 +93,14 @@ public class UserApiController {
         
                     JSONObject tmp = (JSONObject) response.get("item");
     
-                    List<UserDB> existUserList = userRepository.findByStudentId((String) (tmp.get("gaeinNo")));
+                    List<UserDB> existUserList = userRepository.findByUniversityIdAndStudentId(univId, (String) (tmp.get("gaeinNo")));
             
                     UserDB newUserInfo = null;
-                    
                     for(int i = 0; i < existUserList.size(); i++) {
-                        if(existUserList.get(i).getUniversityId() == univId) {
-                            if(newUserInfo == null) {
-                                newUserInfo = existUserList.get(i);
-                            } else {
-                                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-                            }
+                        if(newUserInfo == null) {
+                            newUserInfo = existUserList.get(i);
+                        } else {
+                            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
                         }
                     }
                     if(newUserInfo == null) {                   

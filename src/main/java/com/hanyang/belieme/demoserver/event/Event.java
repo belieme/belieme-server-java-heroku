@@ -5,20 +5,17 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.user.UserNestedToEvent;
 
 public class Event {
     private int id;
     
     private ItemNestedToEvent item;
     
-    private int requesterId;
-    private String requesterName;
-    private int responseManagerId;
-    private String responseManagerName;
-    private int returnManagerId;
-    private String returnManagerName;
-    private int lostManagerId;
-    private String lostManagerName;
+    private UserNestedToEvent requester;
+    private UserNestedToEvent responseManager;
+    private UserNestedToEvent returnManager;
+    private UserNestedToEvent lostManager;
     
     private long requestTimeStamp;
     private long responseTimeStamp;
@@ -38,37 +35,21 @@ public class Event {
     public ItemNestedToEvent getItem() {
         return item;
     }
-
-    public int getRequesterId() {
-        return requesterId;
-    }
-
-    public String getRequesterName() {
-        return requesterName;
-    }
-
-    public int getResponseManagerId() {
-        return responseManagerId;
-    }
-
-    public String getResponseManagerName() {
-        return responseManagerName;
-    }
-
-    public int getReturnManagerId() {
-        return returnManagerId;
-    }
-
-    public String getReturnManagerName() {
-        return returnManagerName;
+    
+    public UserNestedToEvent getRequester() {
+        return new UserNestedToEvent(requester);
     }
     
-    public int getLostManagerId() {
-        return lostManagerId;
+    public UserNestedToEvent getResponseManager() {
+        return new UserNestedToEvent(responseManager);
     }
-
-    public String getLostManagerName() {
-        return lostManagerName;
+    
+    public UserNestedToEvent getReturnManager() {
+        return new UserNestedToEvent(returnManager);
+    }
+    
+    public UserNestedToEvent getLostManager() {
+        return new UserNestedToEvent(lostManager);
     }
 
     public long getRequestTimeStamp() {
@@ -99,36 +80,20 @@ public class Event {
         this.item = item;
     }
 
-    public void setRequesterId(int requesterId) {
-        this.requesterId = requesterId;
-    }
-
-    public void setRequesterName(String requesterName) {
-        this.requesterName = requesterName;
-    }
-
-    public void setResponseManagerId(int responseManagerId) {
-        this.responseManagerId = responseManagerId;
-    }
-
-    public void setResponseManagerName(String responseManagerName) {
-        this.responseManagerName = responseManagerName;
-    }
-
-    public void setReturnManagerId(int returnManagerId) {
-        this.returnManagerId = returnManagerId;
-    }
-
-    public void setReturnManagerName(String returnManagerName) {
-        this.returnManagerName = returnManagerName;
+    public void setRequester(UserNestedToEvent requester) {
+        this.requester = requester;
     }
     
-    public void setLostManagerId(int lostManagerId) {
-        this.lostManagerId = lostManagerId;
+    public void setResponseManager(UserNestedToEvent responseManager) {
+        this.responseManager = responseManager;
     }
-
-    public void setLostManagerName(String lostManagerName) {
-        this.lostManagerName = lostManagerName;
+    
+    public void setReturnManager(UserNestedToEvent returnManager) {
+        this.returnManager = returnManager;
+    }
+    
+    public void setLostManager(UserNestedToEvent lostManager) {
+        this.lostManager = lostManager;
     }
 
     public void setRequestTimeStamp(long requestTimeStamp) {
@@ -226,25 +191,5 @@ public class Event {
             tmp.add(Calendar.DATE, 1);
         }
         return tmp.getTime().getTime()/1000;
-    }
-
-    public EventNestedToItem toEventNestedToItem() {
-        EventNestedToItem output = new EventNestedToItem();
-        output.setId(getId());
-        output.setRequesterId(requesterId);
-        output.setRequesterName(requesterName);
-        output.setResponseManagerId(responseManagerId);
-        output.setResponseManagerName(responseManagerName);
-        output.setReturnManagerId(returnManagerId);
-        output.setReturnManagerName(returnManagerName);
-        output.setLostManagerId(lostManagerId);
-        output.setLostManagerName(lostManagerName);
-        output.setRequestTimeStamp(requestTimeStamp);
-        output.setResponseTimeStamp(responseTimeStamp);
-        output.setReturnTimeStamp(returnTimeStamp);
-        output.setCancelTimeStamp(cancelTimeStamp);
-        output.setLostTimeStamp(lostTimeStamp);
-        
-        return output;
     }
 }

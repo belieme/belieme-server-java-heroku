@@ -7,10 +7,12 @@ import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.EventRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.ItemDB;
 import com.hanyang.belieme.demoserver.item.ItemNestedToThing;
 import com.hanyang.belieme.demoserver.item.ItemRepository;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.UserRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -98,7 +100,7 @@ public class ThingDB {
         return output;
     }
     
-    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
         Thing output = new Thing();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
@@ -112,7 +114,7 @@ public class ThingDB {
         String status = "ERROR";
         List<ItemDB> items = itemRepository.findByThingId(id);
         for(int i = 0; i < items.size(); i++) {
-            ItemNestedToThing tmp = items.get(i).toItemNestedToThing(eventRepository);
+            ItemNestedToThing tmp = items.get(i).toItemNestedToThing(eventRepository, userRepository);
             if(tmp.getStatus().equals("UNUSABLE")) {
                 amount++;
             }
@@ -166,7 +168,7 @@ public class ThingDB {
         return output;
     }
     
-    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
         ThingWithItems output = new ThingWithItems();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
@@ -181,7 +183,7 @@ public class ThingDB {
         String status = "ERROR";
         
         for(int i = 0; i < itemListByThingId.size(); i++) {
-            ItemNestedToThing tmp = itemListByThingId.get(i).toItemNestedToThing(eventRepository);
+            ItemNestedToThing tmp = itemListByThingId.get(i).toItemNestedToThing(eventRepository, userRepository);
             output.getItems().add(tmp);
             if(tmp.getStatus().equals("UNUSABLE")) {
                 amount++;
