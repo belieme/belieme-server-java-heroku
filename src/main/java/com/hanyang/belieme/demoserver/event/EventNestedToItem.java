@@ -25,10 +25,24 @@ public class EventNestedToItem {
     
     public EventNestedToItem(EventNestedToItem oth) {
         id = oth.id;
-        requester = new UserNestedToEvent(oth.requester);
-        responseManager = new UserNestedToEvent(oth.responseManager);
-        returnManager = new UserNestedToEvent(oth.returnManager);
-        lostManager = new UserNestedToEvent(oth.lostManager);
+        
+        requester = null;
+        responseManager = null;
+        returnManager = null;
+        lostManager = null;
+        
+        if(oth.requester != null) {
+            requester = new UserNestedToEvent(oth.requester);    
+        }
+        if(oth.responseManager != null) {
+            responseManager = new UserNestedToEvent(oth.responseManager);    
+        }
+        if(oth.returnManager != null) {
+            returnManager = new UserNestedToEvent(oth.returnManager);   
+        }
+        if(oth.lostManager != null) {
+            lostManager = new UserNestedToEvent(oth.lostManager);    
+        }
         
         requestTimeStamp = oth.requestTimeStamp;
         responseTimeStamp = oth.responseTimeStamp;
@@ -42,18 +56,30 @@ public class EventNestedToItem {
     }
     
     public UserNestedToEvent getRequester() {
+        if(requester == null) {
+            return null;
+        }
         return new UserNestedToEvent(requester);
     }
     
     public UserNestedToEvent getResponseManager() {
+        if(responseManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(responseManager);
     }
     
     public UserNestedToEvent getReturnManager() {
+        if(returnManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(returnManager);
     }
     
     public UserNestedToEvent getLostManager() {
+        if(lostManager == null) {
+            return null;
+        }
         return new UserNestedToEvent(lostManager);
     }
 

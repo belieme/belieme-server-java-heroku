@@ -89,12 +89,9 @@ public class ItemDB {
         }
 
         Optional<ThingDB> thingDBOptional = thingRepository.findById(getThingId());
-        System.out.println("now!!!!");
         if(thingDBOptional.isPresent()) {
-            System.out.println("here!!!!");
             thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository, majorRepository);
         } else {
-            System.out.println("here??!!");
             thing = null;
         }
         
