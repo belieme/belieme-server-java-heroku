@@ -690,6 +690,8 @@ public class BetaEventApiController {
     }
     
     private class EventRequestBody {
+        public EventRequestBody(){}
+        
         private String requesterStudentId;
         private String responseManagerStudentId;
         private String returnManagerStudentId;

@@ -605,6 +605,8 @@ public class EventApiController {
         private String returnManagerStudentId;
         private String lostManagerStudentId;
         
+        public EventRequestBody(){}
+        
         public String getRequesterStudentId() {
             return requesterStudentId;
         }
