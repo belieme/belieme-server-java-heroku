@@ -16,7 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.hanyang.belieme.demoserver.common.StringListConverter;
+import com.hanyang.belieme.demoserver.common.IntegerListConverter;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
@@ -33,7 +33,7 @@ public class UserDB {
     
     private int universityId;
     
-    @Convert(converter = StringListConverter.class)
+    @Convert(converter = IntegerListConverter.class)
     private List<Integer> majorIds;
     
     private String token;
