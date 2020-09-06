@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.*;
 
 
@@ -61,7 +62,7 @@ public class ItemDB {
     }
 
     
-    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ThingRepository thingRepository, EventRepository eventRepository) {
+    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, EventRepository eventRepository) {
         Item output = new Item();
         String status;
         ThingNestedToItem thing = null;    
@@ -89,7 +90,7 @@ public class ItemDB {
         System.out.println("now!!!!");
         if(thingDBOptional.isPresent()) {
             System.out.println("here!!!!");
-            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository);
+            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository, majorRepository);
         } else {
             System.out.println("here??!!");
             thing = null;
@@ -138,7 +139,7 @@ public class ItemDB {
         return output;
     }
     
-    public ItemNestedToEvent toItemNestedToEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ThingRepository thingRepository, EventRepository eventRepository) {
+    public ItemNestedToEvent toItemNestedToEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, EventRepository eventRepository) {
         ItemNestedToEvent output = new ItemNestedToEvent();
         
         String status;
@@ -162,7 +163,7 @@ public class ItemDB {
 
         Optional<ThingDB> thingDBOptional = thingRepository.findById(getThingId());
         if(thingDBOptional.isPresent()) {
-            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository);  
+            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository, majorRepository);  
         } else {
             thing = null;
         }

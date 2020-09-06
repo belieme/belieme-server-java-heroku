@@ -9,8 +9,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import com.hanyang.belieme.demoserver.common.*;
+import com.hanyang.belieme.demoserver.department.DepartmentDB;
+import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.Major;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
@@ -18,7 +23,7 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
 
 @RestController
-@RequestMapping(path="") //TODO university 추가하기
+@RequestMapping(path="")
 public class UserApiController {
     private static final String client_id = "a4b1abe746f384c3d43fa82a17f222";
     private static final int HYU_ID = 1;
@@ -26,10 +31,17 @@ public class UserApiController {
     private static final int SNU_ID = 3;
     
     @Autowired
-    private UserRepository userRepository;
+    private UniversityRepository universityRepository;
     
     @Autowired
-    private UniversityRepository universityRepository;
+    private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private MajorRepository majorRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
     
     @GetMapping("/users/all")
     public Iterable<UserDB> getAll(){
@@ -41,7 +53,7 @@ public class UserApiController {
         userRepository.deleteAll();
     }
     
-    @GetMapping("/universities/{univCode}/users") //TODO 무한루프가 있다...
+    @GetMapping("/universities/{univCode}/users")
     public ResponseWrapper<User> getUserInfoFromUnivApi(@PathVariable String univCode, @RequestParam(value = "apiToken") String apiToken) {
         UserDB outputResponse;
         int univId;
@@ -100,7 +112,23 @@ public class UserApiController {
                         newUserInfo.setUniversityId(univId);
                         newUserInfo.permissionSetUser();
                     }
+                     
+                    List<DepartmentDB> departmentsByUnivId = departmentRepository.findByUniversityId(univId);
+                    List<Major> majorsByUnivId = new ArrayList<Major>();
+                    for(int i = 0; i < departmentsByUnivId.size(); i++) {
+                        majorsByUnivId.addAll(majorRepository.findByDepartmentId(departmentsByUnivId.get(i).getId()));
+                    }
                     
+                    String sosokId = (String) tmp.get("sosokId");
+                    for(int i = 0; i < majorsByUnivId.size(); i++) {
+                        if(sosokId.equals(majorsByUnivId.get(i).getMajorCode())) {
+                            int newMajorId = majorsByUnivId.get(i).getId();
+                            if(!newUserInfo.getMajorIds().contains(newMajorId)) {
+                                newUserInfo.getMajorIds().add(newMajorId);
+                            }
+                        }
+                    }
+                     
                     newUserInfo.setStudentId((String) (tmp.get("gaeinNo")));
                     newUserInfo.setName((String) (tmp.get("userNm")));
                     newUserInfo.setEntranceYear(Integer.parseInt(((String) (tmp.get("gaeinNo"))).substring(0,4)));             
@@ -116,7 +144,7 @@ public class UserApiController {
                      return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
                 try {
-                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository));   
+                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUser(universityRepository, departmentRepository, majorRepository));   
                 } catch(NotFoundException e) {
                     return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
                 }
@@ -138,7 +166,7 @@ public class UserApiController {
             UserDB target = userListByToken.get(0);
             if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
                 try {
-                    return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0).toUser(universityRepository));    
+                    return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0).toUser(universityRepository, departmentRepository, majorRepository));    
                 } catch (NotFoundException e) {
                     return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
                 }

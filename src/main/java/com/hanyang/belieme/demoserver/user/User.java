@@ -1,11 +1,19 @@
 package com.hanyang.belieme.demoserver.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.university.University;
 
 public class User {
     private int id;
     
     private University university;
+    
+    private List<String> majorCodes;
+    
+    private List<Department> departments;
     
     private String studentId;
 
@@ -27,6 +35,14 @@ public class User {
     
     public University getUniversity() {
         return university;
+    }
+    
+    public List<String> getMajorCodes() {
+        return new ArrayList<String>(majorCodes);
+    }
+    
+    public List<Department> getDepartments() {
+        return new ArrayList<Department>(departments);
     }
     
     public String getStudentId() {
@@ -63,6 +79,14 @@ public class User {
     
     public void setUniversity(University university) {
         this.university = new University(university);
+    }
+    
+    public void setMajorCodes(List<String> majorCodes) {
+        this.majorCodes = new ArrayList<String>(majorCodes);
+    }
+    
+    public void setDepartments(List<Department> departments) {
+        this.departments = new ArrayList<Department>(departments);
     }
     
     public void setStudentId(String studentId) {

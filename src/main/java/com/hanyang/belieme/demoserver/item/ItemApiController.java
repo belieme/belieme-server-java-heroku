@@ -15,6 +15,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 
 @RestController
@@ -25,6 +26,9 @@ public class ItemApiController {
     
     @Autowired
     private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private MajorRepository majorRepository;
     
     @Autowired
     private ItemRepository itemRepository;
@@ -56,7 +60,7 @@ public class ItemApiController {
         List<Item> output = new ArrayList<>();       
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
         for(int i = 0; i < itemListByThingId.size(); i++) {
-            output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, thingRepository, eventRepository));
+            output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository));
         }
         return new ResponseWrapper<>(ResponseHeader.OK, output);
     }
@@ -84,7 +88,7 @@ public class ItemApiController {
         Item output;
         if(itemList.size() == 1) {
             ItemDB itemDB = itemList.get(0);
-            output = itemDB.toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+            output = itemDB.toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else if(itemList.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -126,7 +130,7 @@ public class ItemApiController {
         ItemDB newItem = new ItemDB(thingId, max+1); 
 
         if(thingOptional.isPresent()) {
-            Item output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+            Item output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
         else {

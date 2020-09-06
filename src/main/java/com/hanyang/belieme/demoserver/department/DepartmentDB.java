@@ -1,5 +1,7 @@
 package com.hanyang.belieme.demoserver.department;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.Entity;
@@ -7,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.hanyang.belieme.demoserver.department.major.Major;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
@@ -82,17 +86,24 @@ public class DepartmentDB {
         available = true;
     }
     
-    public Department toDepartment(UniversityRepository universityRepository) {
+    public Department toDepartment(UniversityRepository universityRepository, MajorRepository majorRepository) {
         Department output = new Department();
         
         Optional<University> universityOptional = universityRepository.findById(universityId);
         if(universityOptional.isPresent()) {
             output.setUniversity(universityOptional.get());
         }
+        
+        List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
+        ArrayList<String> majorCodes = new ArrayList<>();
+        for(int i = 0; i < majorsByDepartmentId.size(); i++) {
+            majorCodes.add(majorsByDepartmentId.get(i).getMajorCode());
+        }
+        
         output.setId(id);
         output.setDepartmentCode(departmentCode);
         output.setDepartmentName(departmentName);
-        // output.setMajorCodes(getMajorCodes());
+        output.setMajorCodes(majorCodes);
         output.setAvailable(isAvailble());
         
         return output;

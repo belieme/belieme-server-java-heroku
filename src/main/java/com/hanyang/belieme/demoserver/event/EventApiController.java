@@ -14,6 +14,7 @@ import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
@@ -26,6 +27,9 @@ public class EventApiController {
     
     @Autowired
     private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private MajorRepository majorRepository;
     
     @Autowired
     private EventRepository eventRepository;
@@ -53,7 +57,7 @@ public class EventApiController {
         List<Event> output = new ArrayList<>();
         while(iterator.hasNext()) {
             EventDB eventDB = iterator.next();
-            Event tmp = eventDB.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event tmp = eventDB.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
                 if(requesterId == null || tmp.getRequesterId() == requesterId) {
                     output.add(tmp);    
@@ -77,7 +81,7 @@ public class EventApiController {
         Optional<EventDB> eventOptional = eventRepository.findById(id);
         Event output;
         if(eventOptional.isPresent()) {
-            output = eventOptional.get().toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(output.getItem().getThing().getDepartment().getId() == departmentId) {
                  return new ResponseWrapper<>(ResponseHeader.OK, output);   
             }
@@ -111,7 +115,7 @@ public class EventApiController {
         List<EventDB> eventListByRequesterId = eventRepository.findByRequesterId(requestBody.getRequesterId());
         int currentEventCount = 0;
         for(int i = 0; i < eventListByRequesterId.size(); i++) {
-            Event tmp = eventListByRequesterId.get(i).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event tmp = eventListByRequesterId.get(i).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
                 if(tmp.getItem().getThing().getId() == thingId) {
@@ -127,7 +131,7 @@ public class EventApiController {
         if(itemNum == null) {
             List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
             for(int i = 0; i < itemListByThingId.size(); i++) {
-                requestedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+                requestedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
                 if (requestedItem.getStatus().equals("USABLE")) {
                     break;
                 }
@@ -148,7 +152,7 @@ public class EventApiController {
             
             Optional<ItemDB> requestItemOptional = itemRepository.findById(itemId);
             if(requestItemOptional.isPresent()) {
-                requestedItem = requestItemOptional.get().toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+                requestedItem = requestItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -175,7 +179,7 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampZero();
             
-        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(requestedItem.getId());
@@ -222,7 +226,7 @@ public class EventApiController {
             
         Optional<ItemDB> requestItemOptional = itemRepository.findById(itemId);
         if(requestItemOptional.isPresent()) {
-            requestedItem = requestItemOptional.get().toItem(universityRepository, departmentRepository, thingRepository, eventRepository);
+            requestedItem = requestItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
@@ -248,7 +252,7 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampNow();
         
-        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(requestedItem.getId());
@@ -276,14 +280,14 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
             
             if(eventToUpdate.getStatus().equals("REQUESTED")) {
                 eventToUpdate.setCancelTimeStampNow();
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -314,7 +318,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -324,7 +328,7 @@ public class EventApiController {
                 eventToUpdate.setResponseManagerId(requestBody.getResponseManagerId());
                 eventToUpdate.setResponseManagerName(requestBody.getResponseManagerName());
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -354,7 +358,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -363,7 +367,7 @@ public class EventApiController {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
                 eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -394,7 +398,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -404,7 +408,7 @@ public class EventApiController {
                 eventToUpdate.setLostManagerId(requestBody.getLostManagerId());
                 eventToUpdate.setLostManagerName(requestBody.getLostManagerName());
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -435,7 +439,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != departmentId) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -445,7 +449,7 @@ public class EventApiController {
                 eventToUpdate.setReturnManagerId(requestBody.getReturnManagerId());
                 eventToUpdate.setReturnManagerName(requestBody.getReturnManagerName());
                 
-                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository);
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {

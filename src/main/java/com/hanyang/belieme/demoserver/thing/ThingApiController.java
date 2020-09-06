@@ -17,6 +17,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 @RestController
 @RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/things")
@@ -26,6 +27,9 @@ public class ThingApiController {
     
     @Autowired
     private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private MajorRepository majorRepository;
     
     @Autowired
     private ThingRepository thingRepository;
@@ -43,7 +47,7 @@ public class ThingApiController {
             Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(departmentId);
             ArrayList<Thing> responseBody = new ArrayList<>();
             for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-                Thing tmp = it.next().toThing(universityRepository, departmentRepository, thingRepository, itemRepository, eventRepository); 
+                Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, thingRepository, itemRepository, eventRepository); 
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
@@ -70,7 +74,7 @@ public class ThingApiController {
             if(departmentId != targetOptional.get().getDepartmentId()) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
             }
-            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository);
+            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -99,7 +103,7 @@ public class ThingApiController {
             ItemDB newItem = new ItemDB(savedThingDB.getId(), i + 1);
             itemRepository.save(newItem);
         }
-        ThingWithItems savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository); 
+        ThingWithItems savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository); 
         
         return new ResponseWrapper<>(ResponseHeader.OK, savedThing);
     }
@@ -137,7 +141,7 @@ public class ThingApiController {
             if(requestBodyDB.getDescription() != null) {
                 target.setDescription(requestBodyDB.getDescription());
             }
-            ThingWithItems output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, itemRepository, eventRepository);
+            ThingWithItems output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, majorRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);

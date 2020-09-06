@@ -5,6 +5,7 @@ import javax.persistence.*;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.EventRepository;
 import com.hanyang.belieme.demoserver.item.ItemDB;
 import com.hanyang.belieme.demoserver.item.ItemNestedToThing;
@@ -97,13 +98,13 @@ public class ThingDB {
         return output;
     }
     
-    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         Thing output = new Thing();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
         Department department = null;
         if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository);
+            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
         }
         
         int amount = 0;
@@ -147,13 +148,13 @@ public class ThingDB {
         return output;
     }
     
-    public ThingNestedToItem toThingNestedToItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository) {
+    public ThingNestedToItem toThingNestedToItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) {
         ThingNestedToItem output = new ThingNestedToItem();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
         Department department = null;
         if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository);
+            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
         }
         
         output.setId(id);
@@ -165,13 +166,13 @@ public class ThingDB {
         return output;
     }
     
-    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         ThingWithItems output = new ThingWithItems();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
         Department department = null;
         if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository);
+            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
         }
         
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(id);

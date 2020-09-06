@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.thing.ThingRepository;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
@@ -240,13 +241,13 @@ public class EventDB {
         return tmp.getTime().getTime()/1000;
     }
     
-    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         Event output = new Event();
         ItemNestedToEvent item;
         
         Optional<ItemDB> itemOptional = itemRepository.findById(itemId);
         if(itemOptional.isPresent()) {
-            item = itemOptional.get().toItemNestedToEvent(universityRepository, departmentRepository, thingRepository, eventRepository);
+            item = itemOptional.get().toItemNestedToEvent(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
         } else {
             item = null;
         }

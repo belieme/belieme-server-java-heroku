@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.common.ResponseHeader;
 import com.hanyang.belieme.demoserver.common.ResponseWrapper;
+import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
@@ -22,13 +23,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("universities/{univCode}/departments")
+@RequestMapping("/universities/{univCode}/departments")
 public class DepartmentApiController {
     @Autowired
-    UniversityRepository universityRepository;
+    private UniversityRepository universityRepository;
     
     @Autowired
-    DepartmentRepository departmentRepository;
+    private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private MajorRepository majorRepository;
     
     @GetMapping("")
     public ResponseWrapper<Iterable<Department>> getDepartments(@PathVariable String univCode) {
@@ -38,7 +42,7 @@ public class DepartmentApiController {
             List<Department> output = new ArrayList<>();
             Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
             while(iterator.hasNext()) {
-                output.add(iterator.next().toDepartment(universityRepository));
+                output.add(iterator.next().toDepartment(universityRepository, majorRepository));
             }
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } catch(NotFoundException e) {
@@ -54,7 +58,7 @@ public class DepartmentApiController {
             int id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
             Optional<DepartmentDB> departmentOptional = departmentRepository.findById(id);
             if(departmentOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get().toDepartment(universityRepository));
+                return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get().toDepartment(universityRepository, majorRepository));
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -89,7 +93,7 @@ public class DepartmentApiController {
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
         newDepartmentDB.able();// TODO default는 무엇인가... -> default : false 그리고 직접 입력 받으려나?
-        Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository);
+        Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository, majorRepository);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
     
@@ -132,7 +136,7 @@ public class DepartmentApiController {
             if(requestBody.getDepartmentName() != null && !target.getDepartmentName().equals(requestBody.getDepartmentName())) {
                target.setDepartmentName(requestBody.getDepartmentName());
             }
-            Department output = departmentRepository.save(target).toDepartment(universityRepository);
+            Department output = departmentRepository.save(target).toDepartment(universityRepository, majorRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
