@@ -599,7 +599,7 @@ public class EventApiController {
         }
     }
     
-    private class EventRequestBody {
+    public class EventRequestBody {
         private String requesterStudentId;
         private String responseManagerStudentId;
         private String returnManagerStudentId;
