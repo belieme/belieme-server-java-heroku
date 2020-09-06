@@ -177,6 +177,14 @@ public class UserDB {
             Major tmp = iter.next();
             majorCodes.add(tmp.getMajorCode());
             
+            if(departments.size() == 0) {
+                Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
+                if(!tmpDepartmentOptional.isPresent()) {
+                    throw new NotFoundException();
+                }
+                departments.add(tmpDepartmentOptional.get().toDepartment(universityRepository, majorRepository));
+                continue;
+            }
             for(int i = 0; i < departments.size(); i++) {
                 if(tmp.getDepartmentId() != departments.get(i).getId()) {
                     Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
@@ -186,7 +194,6 @@ public class UserDB {
                     departments.add(tmpDepartmentOptional.get().toDepartment(universityRepository, majorRepository));
                 }
             }
-            
         }
         
         output.setMajorCodes(majorCodes);
