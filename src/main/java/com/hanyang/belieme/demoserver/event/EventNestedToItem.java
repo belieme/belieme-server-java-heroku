@@ -9,13 +9,13 @@ import com.hanyang.belieme.demoserver.user.UserNestedToEvent;
 public class EventNestedToItem {
     private int id;
 
-    private UserNestedToEvent requester;
-    private UserNestedToEvent responseManager;
+    private UserNestedToEvent user;
+    private UserNestedToEvent approveManager;
     private UserNestedToEvent returnManager;
     private UserNestedToEvent lostManager;
     
-    private long requestTimeStamp;
-    private long responseTimeStamp;
+    private long reserveTimeStamp;
+    private long approveTimeStamp;
     private long returnTimeStamp;
     private long cancelTimeStamp;
     private long lostTimeStamp;
@@ -26,16 +26,16 @@ public class EventNestedToItem {
     public EventNestedToItem(EventNestedToItem oth) {
         id = oth.id;
         
-        requester = null;
-        responseManager = null;
+        user = null;
+        approveManager = null;
         returnManager = null;
         lostManager = null;
         
-        if(oth.requester != null) {
-            requester = new UserNestedToEvent(oth.requester);    
+        if(oth.user != null) {
+            user = new UserNestedToEvent(oth.user);    
         }
-        if(oth.responseManager != null) {
-            responseManager = new UserNestedToEvent(oth.responseManager);    
+        if(oth.approveManager != null) {
+            approveManager = new UserNestedToEvent(oth.approveManager);    
         }
         if(oth.returnManager != null) {
             returnManager = new UserNestedToEvent(oth.returnManager);   
@@ -44,8 +44,8 @@ public class EventNestedToItem {
             lostManager = new UserNestedToEvent(oth.lostManager);    
         }
         
-        requestTimeStamp = oth.requestTimeStamp;
-        responseTimeStamp = oth.responseTimeStamp;
+        reserveTimeStamp = oth.reserveTimeStamp;
+        approveTimeStamp = oth.approveTimeStamp;
         returnTimeStamp = oth.returnTimeStamp;
         cancelTimeStamp = oth.cancelTimeStamp;
         lostTimeStamp = oth.lostTimeStamp;
@@ -55,18 +55,18 @@ public class EventNestedToItem {
         return id;
     }
     
-    public UserNestedToEvent getRequester() {
-        if(requester == null) {
+    public UserNestedToEvent getuser() {
+        if(user == null) {
             return null;
         }
-        return new UserNestedToEvent(requester);
+        return new UserNestedToEvent(user);
     }
     
-    public UserNestedToEvent getResponseManager() {
-        if(responseManager == null) {
+    public UserNestedToEvent getApproveManager() {
+        if(approveManager == null) {
             return null;
         }
-        return new UserNestedToEvent(responseManager);
+        return new UserNestedToEvent(approveManager);
     }
     
     public UserNestedToEvent getReturnManager() {
@@ -83,16 +83,16 @@ public class EventNestedToItem {
         return new UserNestedToEvent(lostManager);
     }
 
-    public long getRequestTimeStamp() {
-        return requestTimeStamp;
+    public long getReserveTimeStamp() {
+        return reserveTimeStamp;
     }
 
-    public long getResponseTimeStamp() {
-        return responseTimeStamp;
+    public long getApproveTimeStamp() {
+        return approveTimeStamp;
     }
 
     public long getReturnTimeStamp() {
-        return requestTimeStamp;
+        return reserveTimeStamp;
     }
 
     public long getCancelTimeStamp() {
@@ -105,7 +105,7 @@ public class EventNestedToItem {
 
     public String getStatus() {
         //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
-        if(requestTimeStamp != 0) {
+        if(reserveTimeStamp != 0) {
             if(returnTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
                     return "FOUNDANDRETURNED";
@@ -115,7 +115,7 @@ public class EventNestedToItem {
             else if(cancelTimeStamp != 0) {
                 return "EXPIRED";
             }
-            else if(responseTimeStamp != 0) {
+            else if(approveTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
                     return "LOST";
                 }
@@ -127,7 +127,7 @@ public class EventNestedToItem {
                 }
             }
             else if(expiredTime() > System.currentTimeMillis()/1000) {
-                return "REQUESTED";
+                return "RESERVED";
             }
             else {
                 return "EXPIRED";
@@ -149,12 +149,12 @@ public class EventNestedToItem {
         this.id = id;
     }
     
-    public void setRequester(UserNestedToEvent requester) {
-        this.requester = requester;
+    public void setUser(UserNestedToEvent user) {
+        this.user = user;
     }
     
-    public void setResponseManager(UserNestedToEvent responseManager) {
-        this.responseManager = responseManager;
+    public void setApproveManager(UserNestedToEvent approveManager) {
+        this.approveManager = approveManager;
     }
     
     public void setReturnManager(UserNestedToEvent returnManager) {
@@ -165,12 +165,12 @@ public class EventNestedToItem {
         this.lostManager = lostManager;
     }
 
-    public void setRequestTimeStamp(long requestTimeStamp) {
-        this.requestTimeStamp = requestTimeStamp;
+    public void setReserveTimeStamp(long reserveTimeStamp) {
+        this.reserveTimeStamp = reserveTimeStamp;
     }
     
-    public void setResponseTimeStamp(long responseTimeStamp) {
-        this.responseTimeStamp = responseTimeStamp;
+    public void setApproveTimeStamp(long approveTimeStamp) {
+        this.approveTimeStamp = approveTimeStamp;
     }
     
     public void setReturnTimeStamp(long returnTimeStamp) {
@@ -186,13 +186,13 @@ public class EventNestedToItem {
     }
     
     public long expiredTime() {
-        return requestTimeStamp + 15*60;
+        return reserveTimeStamp + 15*60;
     }
 
     public long dueTime() {
         TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
         Calendar tmp = Calendar.getInstance();
-        tmp.setTime(new Date(responseTimeStamp*1000));
+        tmp.setTime(new Date(approveTimeStamp*1000));
         tmp.setTimeZone(timeZone);
         tmp.add(Calendar.DATE, 7);
         if(tmp.get(Calendar.HOUR_OF_DAY) > 18 ) {

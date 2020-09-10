@@ -48,13 +48,13 @@ public class UniversityApiController {
     
     @PostMapping("")
     public ResponseWrapper<University> postNewUniverity(@RequestBody University requestBody) {
-        if(requestBody.getName() == null || requestBody.getUniversityCode() == null) {
+        if(requestBody.getName() == null || requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         } else {
             Iterable<University> universityList = universityRepository.findAll();
             Iterator<University> iter = universityList.iterator();
             while(iter.hasNext()) {
-                if(iter.next().getUniversityCode().equals(requestBody.getUniversityCode())) {
+                if(iter.next().getCode().equals(requestBody.getCode())) {
                     return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
                 }
             }
@@ -65,7 +65,7 @@ public class UniversityApiController {
     
     @PatchMapping("/{univCode}")
     public ResponseWrapper<University> updateUniverity(@PathVariable String univCode, @RequestBody University requestBody) {
-        if(requestBody.getName() == null || requestBody.getUniversityCode() == null) { //TODO 하나씩만도 되게 만들기
+        if(requestBody.getName() == null && requestBody.getCode() == null && requestBody.getApiUrl() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         int id;
@@ -79,23 +79,24 @@ public class UniversityApiController {
         Optional<University> targetOptional = universityRepository.findById(id);
         if(targetOptional.isPresent()) {
             University target = targetOptional.get();
-            if(univCode.equals(requestBody.getUniversityCode())) {
-                target.setName(requestBody.getName());
-                University output = universityRepository.save(target);
-                return new ResponseWrapper<>(ResponseHeader.OK, output); 
+            if(requestBody.getName() != null) {
+                target.setName(requestBody.getName()); 
             }
-            
-            Iterable<University> universityList = universityRepository.findAll();
-            Iterator<University> iter = universityList.iterator();
-            while(iter.hasNext()) {
-                if(iter.next().getUniversityCode().equals(requestBody.getUniversityCode())) {
-                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+            if(requestBody.getCode() != null && !univCode.equals(requestBody.getCode())) {
+                Iterable<University> universityList = universityRepository.findAll();
+                Iterator<University> iter = universityList.iterator();
+                while(iter.hasNext()) {
+                    if(iter.next().getCode().equals(requestBody.getCode())) {
+                        return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                    }
                 }
+                target.setCode(requestBody.getCode());
             }
-            target.setUniversityCode(requestBody.getUniversityCode());
-            target.setName(requestBody.getName());
+            if(requestBody.getApiUrl() != null) {
+                target.setApiUrl(requestBody.getApiUrl());
+            }
             University output = universityRepository.save(target);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);    
+            return new ResponseWrapper<>(ResponseHeader.OK, output);  
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }

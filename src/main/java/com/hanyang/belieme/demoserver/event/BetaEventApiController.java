@@ -70,7 +70,7 @@ public class BetaEventApiController {
             }
             
             if(tmp.getItem().getThing().getDepartment().getId() == departmentId) {
-                if(studentId == null || studentId.equals(tmp.getRequester().getStudentId())) {
+                if(studentId == null || studentId.equals(tmp.getUser().getStudentId())) {
                     output.add(tmp);    
                 }
             }
@@ -106,7 +106,7 @@ public class BetaEventApiController {
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
 
-    @PostMapping("/request")
+    @PostMapping("/reserve")
     public ResponseWrapper<PostMappingResponse> createRequestEvent(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum, @RequestBody EventRequestBody requestBody) {
         if(requestBody.getRequesterStudentId() == null) { 
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
@@ -148,7 +148,7 @@ public class BetaEventApiController {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
             
-            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
+            if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
                 if(tmp.getItem().getThing().getId() == thingId) {
                     return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
@@ -372,7 +372,7 @@ public class BetaEventApiController {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
             
-            if(eventToUpdate.getStatus().equals("REQUESTED")) {
+            if(eventToUpdate.getStatus().equals("RESERVED")) {
                 eventToUpdate.setCancelTimeStampNow();
                 eventRepository.save(eventToUpdate);
                 List<Event> output = new ArrayList<>();
@@ -399,7 +399,7 @@ public class BetaEventApiController {
         }
     }
 
-    @PatchMapping("/{id}/response")
+    @PatchMapping("/{id}/approve")
     public ResponseWrapper<Iterable<Event>> responseItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int id, @RequestBody EventRequestBody requestBody) {
         if(requestBody.getResponseManagerStudentId() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
@@ -437,7 +437,7 @@ public class BetaEventApiController {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
             
-            if(eventToUpdate.getStatus().equals("REQUESTED")) {
+            if(eventToUpdate.getStatus().equals("RESERVED")) {
                 eventToUpdate.setResponseTimeStampNow();
                 eventToUpdate.setResponseManagerId(responseManagerId);
                 eventRepository.save(eventToUpdate);

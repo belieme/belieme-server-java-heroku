@@ -167,7 +167,7 @@ public class EventDB {
                 }
             }
             else if(expiredTime() > System.currentTimeMillis()/1000) {
-                return "REQUESTED";
+                return "RESERVED";
             }
             else {
                 return "EXPIRED";
@@ -221,14 +221,14 @@ public class EventDB {
             item = null;
         }
         
-        output.setRequester(null);
-        output.setResponseManager(null);
+        output.setUser(null);
+        output.setApproveManager(null);
         output.setReturnManager(null);
         output.setLostManager(null);
         if(requesterId != 0) {
             Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
             if(tmpOptional.isPresent()) {
-                output.setRequester(tmpOptional.get().toUserNestedToEvent());
+                output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
@@ -236,7 +236,7 @@ public class EventDB {
         if(responseManagerId != 0) {
             Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
             if(tmpOptional.isPresent()) {
-                output.setResponseManager(tmpOptional.get().toUserNestedToEvent());
+                output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
@@ -259,8 +259,8 @@ public class EventDB {
         }
         output.setId(id);
         output.setItem(item);
-        output.setRequestTimeStamp(requestTimeStamp);
-        output.setResponseTimeStamp(responseTimeStamp);
+        output.setReserveTimeStamp(requestTimeStamp);
+        output.setApproveTimeStamp(responseTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);
         output.setCancelTimeStamp(cancelTimeStamp);
         output.setLostTimeStamp(lostTimeStamp);
@@ -271,14 +271,14 @@ public class EventDB {
     public EventNestedToItem toEventNestedToItem(UserRepository userRepository) throws NotFoundException {
         EventNestedToItem output = new EventNestedToItem();
         
-        output.setRequester(null);
-        output.setResponseManager(null);
+        output.setUser(null);
+        output.setApproveManager(null);
         output.setReturnManager(null);
         output.setLostManager(null);
         if(requesterId != 0) {
             Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
             if(tmpOptional.isPresent()) {
-                output.setRequester(tmpOptional.get().toUserNestedToEvent());
+                output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
@@ -286,7 +286,7 @@ public class EventDB {
         if(responseManagerId != 0) {
             Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
             if(tmpOptional.isPresent()) {
-                output.setResponseManager(tmpOptional.get().toUserNestedToEvent());
+                output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
@@ -309,8 +309,8 @@ public class EventDB {
         }
         
         output.setId(id);
-        output.setRequestTimeStamp(requestTimeStamp);
-        output.setResponseTimeStamp(responseTimeStamp);
+        output.setReserveTimeStamp(requestTimeStamp);
+        output.setApproveTimeStamp(responseTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);
         output.setCancelTimeStamp(cancelTimeStamp);
         output.setLostTimeStamp(lostTimeStamp);
