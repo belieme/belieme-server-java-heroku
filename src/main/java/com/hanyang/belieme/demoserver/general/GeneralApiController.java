@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class GeneralApiController {
-    @GetMapping("/updateVer")
+    @GetMapping("/apiVer")
     public String getVer() {
         String result = "1.0";
         return result;

@@ -1,7 +1,7 @@
 package com.hanyang.belieme.demoserver.common;
 
 public class ResponseHeader {
-    public static final ResponseHeader OK = new ResponseHeader(0, "OK.");
+    public static final ResponseHeader OK = new ResponseHeader(0, "OK");
     public static final ResponseHeader NOT_FOUND_EXCEPTION = new ResponseHeader(1, "Can not found it.");
     public static final ResponseHeader LACK_OF_REQUEST_BODY_EXCEPTION = new ResponseHeader(2, "Request body lacks information for request.");
     public static final ResponseHeader OVER_THREE_CURRENT_EVENT_EXCEPTION = new ResponseHeader(3, "This requester have requested more than three items.");
