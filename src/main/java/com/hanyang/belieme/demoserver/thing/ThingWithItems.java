@@ -91,36 +91,6 @@ public class ThingWithItems {
     }
     
     public void setDepartment(Department department) {
-        this.department = new Department(department);
+        this.department = department;
     }
-
-    // public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-    //     amount = 0;
-    //     count = 0;
-    //     List<Item> itemListByThingId = itemRepository.findByThingId(id);
-    //     this.items = new ArrayList<ItemNestedToThing>();
-    //     for(int i = 0; i < itemListByThingId.size(); i++) {
-    //         itemListByThingId.get(i).addInfo(thingRepository, eventRepository);
-    //         this.items.add(itemListByThingId.get(i).toItemNestedToThing());
-    //         if(itemListByThingId.get(i).getStatus().equals("UNUSABLE")) {
-    //             amount++;
-    //         }
-    //         else if(itemListByThingId.get(i).getStatus().equals("USABLE")) {
-    //             amount++;
-    //             count++;
-    //         }
-    //     }
-    //     if(amount == 0) { //TODO deactivate구현할때 바꾸기
-    //         status = "INACTIVE";
-    //     }
-    //     else if(count == 0) {
-    //         status = "UNUSABLE";
-    //     }
-    //     else if(amount >= count) {
-    //         status = "USABLE";
-    //     }
-    //     else {
-    //         status = "ERROR";
-    //     }
-    // }
 }

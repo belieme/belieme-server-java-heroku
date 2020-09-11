@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/universities/{univCode}/departments")
+@RequestMapping("/univs/{univCode}/depts")
 public class DepartmentApiController {
     @Autowired
     private UniversityRepository universityRepository;
@@ -71,7 +71,7 @@ public class DepartmentApiController {
     
     @PostMapping("")
     public ResponseWrapper<Department> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
-        if(requestBody.getDepartmentCode() == null || requestBody.getDepartmentName() == null) {
+        if(requestBody.getCode() == null || requestBody.getName() == null) {
             return new ResponseWrapper<Department>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         int univId;
@@ -85,21 +85,21 @@ public class DepartmentApiController {
         
         List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
         for(int i = 0; i < departmentListByUnivId.size(); i++) {
-            if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
+            if(departmentListByUnivId.get(i).getCode().equals(requestBody.getCode())) {
                 return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
             }
         }
         
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
-        newDepartmentDB.able();// TODO default는 무엇인가... -> default : false 그리고 직접 입력 받으려나?
+        newDepartmentDB.able();// TODO default는 활성화? 비활성화?
         Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository, majorRepository);
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
     
     @PatchMapping("/{departmentCode}")
     public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Department requestBody) {
-        if(requestBody.getDepartmentName() == null && requestBody.getDepartmentCode() == null) { //TODO 하나씩만도 되게 만들기
+        if(requestBody.getName() == null && requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
@@ -124,17 +124,17 @@ public class DepartmentApiController {
         Optional<DepartmentDB> targetOptional = departmentRepository.findById(id);
         if(targetOptional.isPresent()) {
             DepartmentDB target = targetOptional.get();
-            if(requestBody.getDepartmentCode() != null && !departmentCode.equals(requestBody.getDepartmentCode())) {
+            if(requestBody.getCode() != null && !requestBody.getCode().equals(departmentCode)) {
                 List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
                 for(int i = 0; i < departmentListByUnivId.size(); i++) {
-                    if(departmentListByUnivId.get(i).getDepartmentCode().equals(requestBody.getDepartmentCode())) {
+                    if(requestBody.getCode().equals(departmentListByUnivId.get(i).getCode())) {
                         return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
                     }
                 }
-                target.setDepartmentCode(requestBody.getDepartmentCode());
+                target.setCode(requestBody.getCode());
             } 
-            if(requestBody.getDepartmentName() != null && !target.getDepartmentName().equals(requestBody.getDepartmentName())) {
-               target.setDepartmentName(requestBody.getDepartmentName());
+            if(requestBody.getName() != null && !requestBody.getName().equals(target.getName())) {
+               target.setName(requestBody.getName());
             }
             Department output = departmentRepository.save(target).toDepartment(universityRepository, majorRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, output);
@@ -144,6 +144,4 @@ public class DepartmentApiController {
     }
     
     //TODO 활성화/비활성화 patch
-    
-    //TODO majorList 추가/제거
 }

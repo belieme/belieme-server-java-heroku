@@ -53,7 +53,7 @@ public class UserApiController {
         userRepository.deleteAll();
     }
     
-    @GetMapping("/universities/{univCode}/users")
+    @GetMapping("/univs/{univCode}/users")
     public ResponseWrapper<User> getUserInfoFromUnivApi(@PathVariable String univCode, @RequestParam(value = "apiToken") String apiToken) {
         UserDB outputResponse;
         int univId;

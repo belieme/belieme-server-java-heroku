@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface DepartmentRepository extends CrudRepository <DepartmentDB, Integer> {
     public List<DepartmentDB> findByUniversityId(int universityId);
-    public List<DepartmentDB> findByUniversityIdAndDepartmentCode(int universityId, String departmentCode);
+    public List<DepartmentDB> findByUniversityIdAndCode(int universityId, String code);
 }

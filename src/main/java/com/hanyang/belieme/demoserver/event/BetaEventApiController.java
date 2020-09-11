@@ -22,7 +22,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 
 @RestController
-@RequestMapping(path="/beta/universities/{univCode}/departments/{departmentCode}/events")
+@RequestMapping(path="/beta/univs/{univCode}/depts/{departmentCode}/events")
 public class BetaEventApiController {
     @Autowired
     private UniversityRepository universityRepository;
@@ -46,7 +46,7 @@ public class BetaEventApiController {
     private ThingRepository thingRepository;
 
     @GetMapping("")
-    public ResponseWrapper<Iterable<Event>> getItems(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "requesterStudentId", required = false) String studentId) {
+    public ResponseWrapper<Iterable<Event>> getItems(@PathVariable String univCode, @PathVariable String departmentCode, @RequestParam(value = "userStudentId", required = false) String studentId) {//TODO value 바꾸기
         int departmentId;
         try {
             departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);

@@ -22,9 +22,9 @@ public class DepartmentDB {
     
     private int universityId;
     
-    private String departmentCode;
+    private String code;
 
-    private String departmentName;
+    private String name;
     
     private boolean available;
     
@@ -32,9 +32,9 @@ public class DepartmentDB {
         
     }
     
-    public DepartmentDB(String departmentId, String departmentName) {
-        this.departmentCode = departmentId;
-        this.departmentName = departmentName;
+    public DepartmentDB(String code, String name) {
+        this.code = code;
+        this.name = name;
         available = true;
     }
 
@@ -42,12 +42,12 @@ public class DepartmentDB {
         return id;
     }
     
-    public String getDepartmentCode() {
-        return departmentCode;
+    public String getCode() {
+        return code;
     }
     
-    public String getDepartmentName() {
-        return departmentName;
+    public String getName() {
+        return name;
     }
     
     public int getUniversityId() {
@@ -66,12 +66,12 @@ public class DepartmentDB {
         this.universityId = universityId;
     }
     
-    public void setDepartmentCode(String departmentCode) {
-        this.departmentCode = departmentCode;
+    public void setCode(String code) {
+        this.code = code;
     }
     
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setName(String name) {
+        this.name = name;
     }
     
     public void setAvailable(boolean available) {
@@ -101,8 +101,8 @@ public class DepartmentDB {
         }
         
         output.setId(id);
-        output.setDepartmentCode(departmentCode);
-        output.setDepartmentName(departmentName);
+        output.setCode(code);
+        output.setName(name);
         output.setMajorCodes(majorCodes);
         output.setAvailable(isAvailble());
         
@@ -112,8 +112,8 @@ public class DepartmentDB {
     public DepartmentNestedToUser toDepartmentNestedToUser() {
         DepartmentNestedToUser output = new DepartmentNestedToUser();
         output.setId(id);
-        output.setDepartmentCode(departmentCode);
-        output.setDepartmentName(departmentName);
+        output.setCode(code);
+        output.setName(name);
         output.setAvailable(isAvailble());
         return output;
     }

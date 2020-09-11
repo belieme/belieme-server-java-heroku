@@ -21,7 +21,7 @@ import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 @RestController
-@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/things")
+@RequestMapping(path="/univs/{univCode}/depts/{departmentCode}/things")
 public class ThingApiController {
     @Autowired
     private UniversityRepository universityRepository;

@@ -1,5 +1,6 @@
 package com.hanyang.belieme.demoserver.event;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -83,24 +84,44 @@ public class EventNestedToItem {
         return new UserNestedToEvent(lostManager);
     }
 
-    public long getReserveTimeStamp() {
-        return reserveTimeStamp;
+   public String getReserveTimeStamp() {
+        Date date = new Date(reserveTimeStamp*1000);
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        return sdf.format(date);
     }
 
-    public long getApproveTimeStamp() {
-        return approveTimeStamp;
+    public String getApproveTimeStamp() {
+        Date date =  new Date(approveTimeStamp);
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        return sdf.format(date);
     }
 
-    public long getReturnTimeStamp() {
-        return reserveTimeStamp;
+    public String getReturnTimeStamp() {
+        Date date = new Date(returnTimeStamp);
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        return sdf.format(date);
     }
 
-    public long getCancelTimeStamp() {
-        return cancelTimeStamp;
+    public String getCancelTimeStamp() {
+        Date date = new Date(cancelTimeStamp);
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        return sdf.format(date);
     }
     
-    public long getLostTimeStamp() {
-        return lostTimeStamp;
+    public String getLostTimeStamp() {
+        Date date = new Date(lostTimeStamp);
+        SimpleDateFormat sdf;
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        return sdf.format(date);
     }
 
     public String getStatus() {

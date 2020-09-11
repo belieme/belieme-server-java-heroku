@@ -49,8 +49,8 @@ public class Item {
         this.num = num;
     }
     
-    public void setThing(ThingNestedToItem othThing) { // TODO 무엇이 문제인가...
-        this.thing = new ThingNestedToItem(othThing);   
+    public void setThing(ThingNestedToItem thing) {
+        this.thing = thing;  
     }
     
     public void setStatus(String status) {
@@ -58,11 +58,7 @@ public class Item {
     }
     
     public void setLastEvent(EventNestedToItem lastEvent) {
-        if(lastEvent != null) {
-            this.lastEvent = new EventNestedToItem(lastEvent);
-        } else {
-            this.lastEvent = null;
-        }
+        this.lastEvent = lastEvent; // 바꿈!!
     }
     
     public ItemDB toItemDB() {

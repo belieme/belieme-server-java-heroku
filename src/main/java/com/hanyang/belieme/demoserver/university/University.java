@@ -12,7 +12,7 @@ import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 @Entity
-public class University { // TODO api url도 갖고 있게 하기
+public class University {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String code;

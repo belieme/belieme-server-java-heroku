@@ -3,9 +3,9 @@ package com.hanyang.belieme.demoserver.department;
 public class DepartmentNestedToUser {
     private int id;
     
-    private String departmentCode;
+    private String code;
 
-    private String departmentName;
+    private String name;
     
     private boolean available;
     
@@ -16,12 +16,12 @@ public class DepartmentNestedToUser {
         return id;
     }
     
-    public String getDepartmentCode() {
-        return departmentCode;
+    public String getCode() {
+        return code;
     }
     
-    public String getDepartmentName() {
-        return departmentName;
+    public String getName() {
+        return name;
     }
     
     public boolean getAvailble() {
@@ -33,12 +33,12 @@ public class DepartmentNestedToUser {
     }
     
     
-    public void setDepartmentCode(String departmentCode) {
-        this.departmentCode = departmentCode;
+    public void setCode(String code) {
+        this.code = code;
     }
     
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setAvailable(boolean available) {

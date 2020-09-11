@@ -18,7 +18,7 @@ public class ThingNestedToItem {
         this.name = oth.name;
         this.emoji = oth.emoji;
         this.description = oth.description;
-        this.department = new Department(oth.department); // copy constructor로 만들기
+        this.department = new Department(oth.department);
     }
         
     public int getId(){
@@ -61,7 +61,7 @@ public class ThingNestedToItem {
     }
     
     public void setDepartment(Department department) {
-        this.department = new Department(department);  // copy constructor로 만들기
+        this.department = department;
     }
     
     public String toString() {

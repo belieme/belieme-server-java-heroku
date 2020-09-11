@@ -13,9 +13,9 @@ public class Department {
     
     private University university;
     
-    private String departmentCode;
+    private String code;
 
-    private String departmentName;
+    private String name;
     
     private List<String> majorCodes;
     
@@ -27,8 +27,8 @@ public class Department {
     public Department(Department oth) {
         this.id = oth.id;
         this.university = new University(oth.university);
-        this.departmentCode = oth.departmentCode;
-        this.departmentName = oth.departmentName;
+        this.code = oth.code;
+        this.name = oth.name;
         this.majorCodes = new ArrayList<>(oth.majorCodes);
         this.available = oth.available;
     }
@@ -37,12 +37,12 @@ public class Department {
         return id;
     }
     
-    public String getDepartmentCode() {
-        return departmentCode;
+    public String getCode() {
+        return code;
     }
     
-    public String getDepartmentName() {
-        return departmentName;
+    public String getName() {
+        return name;
     }
     
     public University getUniversity() {
@@ -65,12 +65,12 @@ public class Department {
         this.university = new University(university);
     }
     
-    public void setDepartmentCode(String departmentCode) {
-        this.departmentCode = departmentCode;
+    public void setCode(String code) {
+        this.code = code;
     }
     
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setName(String name) {
+        this.name = name;
     }
     
     public void setMajorCodes(List<String> majorCodes) {
@@ -85,8 +85,8 @@ public class Department {
         DepartmentDB output = new DepartmentDB();
         
         output.setId(id);
-        output.setDepartmentCode(departmentCode);
-        output.setDepartmentName(departmentName);
+        output.setCode(code);
+        output.setName(name);
         if(university != null) {
             output.setUniversityId(university.getId());
         } else {
@@ -98,7 +98,7 @@ public class Department {
     }
     
     public static int findIdByUniversityCodeAndDepartmentCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String departmentCode) throws NotFoundException, WrongInDataBaseException {
-        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndDepartmentCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
+        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
         if(tmpList.size() == 0) {
             throw new NotFoundException();
         } else if(tmpList.size() == 1) {
