@@ -183,6 +183,8 @@ public class GeneralApiController {
         private String univCode;
         private String apiToken;
         
+        public LoginInfo() {}
+        
         public String getUnivCode() {
             return univCode;
         }
