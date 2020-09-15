@@ -119,7 +119,7 @@ public class GeneralApiController {
                     
                     String sosokId = (String) tmp.get("sosokId");
                     for(int i = 0; i < majorsByUnivId.size(); i++) {
-                        if(sosokId.equals(majorsByUnivId.get(i).getMajorCode())) {
+                        if(sosokId.equals(majorsByUnivId.get(i).getCode())) {
                             int newMajorId = majorsByUnivId.get(i).getId();
                             if(!newUserInfo.getMajorIds().contains(newMajorId)) {
                                 newUserInfo.getMajorIds().add(newMajorId);
