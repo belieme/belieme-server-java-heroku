@@ -174,7 +174,7 @@ public class UserDB {
         ArrayList<DepartmentNestedToUser> departments = new ArrayList<DepartmentNestedToUser>();
         while(iter.hasNext()) {
             Major tmp = iter.next();
-            majorCodes.add(tmp.getMajorCode());
+            majorCodes.add(tmp.getCode());
             
             if(departments.size() == 0) {
                 Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
@@ -226,7 +226,7 @@ public class UserDB {
         ArrayList<DepartmentNestedToUser> departments = new ArrayList<DepartmentNestedToUser>();
         while(iter.hasNext()) {
             Major tmp = iter.next();
-            majorCodes.add(tmp.getMajorCode());
+            majorCodes.add(tmp.getCode());
             
             if(departments.size() == 0) {
                 Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
