@@ -16,20 +16,19 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 
-
 @Entity
 public class EventDB {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;    
     
     private int itemId;
-    private int requesterId;
-    private int responseManagerId;
+    private int userId;
+    private int approveManagerId;
     private int returnManagerId;
     private int lostManagerId;
     
-    private long requestTimeStamp;
-    private long responseTimeStamp;
+    private long reserveTimeStamp;
+    private long approveTimeStamp;
     private long returnTimeStamp;
     private long cancelTimeStamp;
     private long lostTimeStamp;
@@ -45,12 +44,12 @@ public class EventDB {
         return itemId;
     }
 
-    public int getRequesterId() {
-        return requesterId;
+    public int getUserId() {
+        return userId;
     }
 
-    public int getResponseManagerId() {
-        return responseManagerId;
+    public int getApproveManagerId() {
+        return approveManagerId;
     }
 
 
@@ -63,12 +62,12 @@ public class EventDB {
         return lostManagerId;
     }
 
-    public long getRequestTimeStamp() {
-        return requestTimeStamp;
+    public long getReserveTimeStamp() {
+        return reserveTimeStamp;
     }
 
-    public long getResponseTimeStamp() {
-        return responseTimeStamp;
+    public long getApproveTimeStamp() {
+        return approveTimeStamp;
     }
 
     public long getReturnTimeStamp() {
@@ -87,12 +86,12 @@ public class EventDB {
         this.itemId = itemId;
     }
 
-    public void setRequesterId(int requesterId) {
-        this.requesterId = requesterId;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public void setResponseManagerId(int responseManagerId) {
-        this.responseManagerId = responseManagerId;
+    public void setApproveManagerId(int approveManagerId) {
+        this.approveManagerId = approveManagerId;
     }
 
     public void setReturnManagerId(int returnManagerId) {
@@ -103,12 +102,12 @@ public class EventDB {
         this.lostManagerId = lostManagerId;
     }
 
-    public void setRequestTimeStampZero() {
-        this.requestTimeStamp = 0;
+    public void setReserveTimeStampZero() {
+        this.reserveTimeStamp = 0;
     }
 
-    public void setResponseTimeStampZero() {
-        this.responseTimeStamp = 0;
+    public void setApproveTimeStampZero() {
+        this.approveTimeStamp = 0;
     }
 
     public void setReturnTimeStampZero() {
@@ -123,12 +122,12 @@ public class EventDB {
         this.lostTimeStamp = 0;
     }
 
-    public void setRequestTimeStampNow() {
-        this.requestTimeStamp = System.currentTimeMillis()/1000;
+    public void setReserveTimeStampNow() {
+        this.reserveTimeStamp = System.currentTimeMillis()/1000;
     }
 
-    public void setResponseTimeStampNow() {
-        this.responseTimeStamp = System.currentTimeMillis()/1000;
+    public void setApproveTimeStampNow() {
+        this.approveTimeStamp = System.currentTimeMillis()/1000;
     }
 
     public void setReturnTimeStampNow() {
@@ -145,7 +144,7 @@ public class EventDB {
     
     public String getStatus() {
         //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
-        if(requestTimeStamp != 0) {
+        if(reserveTimeStamp != 0) {
             if(returnTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
                     return "FOUNDANDRETURNED";
@@ -155,7 +154,7 @@ public class EventDB {
             else if(cancelTimeStamp != 0) {
                 return "EXPIRED";
             }
-            else if(responseTimeStamp != 0) {
+            else if(approveTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
                     return "LOST";
                 }
@@ -186,13 +185,13 @@ public class EventDB {
     }
 
     public long expiredTime() {
-        return requestTimeStamp + 15*60;
+        return reserveTimeStamp + 15*60;
     }
 
     public long dueTime() {
         TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
         Calendar tmp = Calendar.getInstance();
-        tmp.setTime(new Date(responseTimeStamp*1000));
+        tmp.setTime(new Date(approveTimeStamp*1000));
         tmp.setTimeZone(timeZone);
         tmp.add(Calendar.DATE, 7);
         if(tmp.get(Calendar.HOUR_OF_DAY) > 18 ) {
@@ -225,16 +224,16 @@ public class EventDB {
         output.setApproveManager(null);
         output.setReturnManager(null);
         output.setLostManager(null);
-        if(requesterId != 0) {
-            Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
+        if(userId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(userId);
             if(tmpOptional.isPresent()) {
                 output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
         }        
-        if(responseManagerId != 0) {
-            Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
+        if(approveManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(approveManagerId);
             if(tmpOptional.isPresent()) {
                 output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
@@ -259,8 +258,8 @@ public class EventDB {
         }
         output.setId(id);
         output.setItem(item);
-        output.setReserveTimeStamp(requestTimeStamp);
-        output.setApproveTimeStamp(responseTimeStamp);
+        output.setReserveTimeStamp(reserveTimeStamp);
+        output.setApproveTimeStamp(approveTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);
         output.setCancelTimeStamp(cancelTimeStamp);
         output.setLostTimeStamp(lostTimeStamp);
@@ -275,16 +274,16 @@ public class EventDB {
         output.setApproveManager(null);
         output.setReturnManager(null);
         output.setLostManager(null);
-        if(requesterId != 0) {
-            Optional<UserDB> tmpOptional = userRepository.findById(requesterId);
+        if(userId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(userId);
             if(tmpOptional.isPresent()) {
                 output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
                 throw new NotFoundException();
             }
         }        
-        if(responseManagerId != 0) {
-            Optional<UserDB> tmpOptional = userRepository.findById(responseManagerId);
+        if(approveManagerId != 0) {
+            Optional<UserDB> tmpOptional = userRepository.findById(approveManagerId);
             if(tmpOptional.isPresent()) {
                 output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
@@ -309,8 +308,8 @@ public class EventDB {
         }
         
         output.setId(id);
-        output.setReserveTimeStamp(requestTimeStamp);
-        output.setApproveTimeStamp(responseTimeStamp);
+        output.setReserveTimeStamp(reserveTimeStamp);
+        output.setApproveTimeStamp(approveTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);
         output.setCancelTimeStamp(cancelTimeStamp);
         output.setLostTimeStamp(lostTimeStamp);

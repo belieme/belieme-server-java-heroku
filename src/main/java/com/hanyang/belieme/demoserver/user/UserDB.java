@@ -26,7 +26,7 @@ import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
-@Entity
+@Entity //TODO user에 permission 어케할까?
 public class UserDB {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -152,6 +152,57 @@ public class UserDB {
     
     public User toUser(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) throws NotFoundException {
         User output = new User();
+        output.setId(id);
+        output.setStudentId(studentId);
+        output.setName(name);
+        output.setEntranceYear(entranceYear);
+        output.setCreateTimeStamp(createTimeStamp);
+        output.setApprovalTimeStamp(approvalTimeStamp);
+        output.setPermission(permission);
+        
+        Optional<University> universityOptional = universityRepository.findById(universityId);
+        if(universityOptional.isPresent()) {
+            output.setUniversity(universityOptional.get());
+        } else {
+            throw new NotFoundException();
+        }
+        
+        Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
+        Iterator<Major> iter = majorListByIdList.iterator();
+        
+        ArrayList<String> majorCodes = new ArrayList<String>();
+        ArrayList<DepartmentNestedToUser> departments = new ArrayList<DepartmentNestedToUser>();
+        while(iter.hasNext()) {
+            Major tmp = iter.next();
+            majorCodes.add(tmp.getMajorCode());
+            
+            if(departments.size() == 0) {
+                Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
+                if(!tmpDepartmentOptional.isPresent()) {
+                    throw new NotFoundException();
+                }
+                departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                continue;
+            }
+            for(int i = 0; i < departments.size(); i++) {
+                if(tmp.getDepartmentId() != departments.get(i).getId()) {
+                    Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
+                    if(!tmpDepartmentOptional.isPresent()) {
+                        throw new NotFoundException();
+                    }
+                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                }
+            }
+        }
+        
+        output.setMajorCodes(majorCodes);
+        output.setDepartments(departments);
+        
+        return output;
+    }
+    
+    public UserWithToken toUserWithToken(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) throws NotFoundException {
+        UserWithToken output = new UserWithToken();
         output.setId(id);
         output.setStudentId(studentId);
         output.setName(name);

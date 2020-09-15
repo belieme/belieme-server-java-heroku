@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
-import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
-public class User {
+public class UserWithToken {
     private int id;
     
     private University university;
@@ -23,6 +20,8 @@ public class User {
     private String name;
     
     private int entranceYear;
+    
+    private String token;
     
     private long createTimeStamp;
     
@@ -56,6 +55,10 @@ public class User {
     
     public int getEntranceYear() {
         return entranceYear;
+    }
+    
+    public String getToken() {
+        return token;
     }
     
     public long getCreateTimeStamp() {
@@ -98,6 +101,10 @@ public class User {
         this.entranceYear = entranceYear;
     }
     
+    public void setToken(String token) {
+        this.token = token;
+    }
+    
     public void setCreateTimeStamp(long createTimeStamp) {
         this.createTimeStamp = createTimeStamp;
     }
@@ -108,18 +115,5 @@ public class User {
     
     public void setPermission(String permission) {
         this.permission = permission;
-    }
-    
-    public static int findIdByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {
-        int univId = University.findIdByUnivCode(universityRepository, univCode);
-        List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
-        
-        if(targetList.size() == 0) {
-            throw new NotFoundException();
-        } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException();
-        } else {
-            return targetList.get(0).getId();
-        }
     }
 }

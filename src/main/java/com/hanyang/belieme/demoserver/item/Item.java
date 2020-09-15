@@ -71,7 +71,7 @@ public class Item {
         return output;
     }
     
-    public static int findItemIdByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
+    public static int findIdByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
         List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
         if(itemListByThingIdAndNum.size() == 0) {
             throw new NotFoundException();

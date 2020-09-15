@@ -97,8 +97,8 @@ public class Department {
         return output;
     }
     
-    public static int findIdByUniversityCodeAndDepartmentCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String departmentCode) throws NotFoundException, WrongInDataBaseException {
-        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findIdByUniversityCode(universityRepository, univCode), departmentCode);
+    public static int findIdByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
+        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findIdByUnivCode(universityRepository, univCode), deptCode);
         if(tmpList.size() == 0) {
             throw new NotFoundException();
         } else if(tmpList.size() == 1) {

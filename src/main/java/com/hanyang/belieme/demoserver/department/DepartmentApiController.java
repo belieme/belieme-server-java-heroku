@@ -37,7 +37,7 @@ public class DepartmentApiController {
     @GetMapping("")
     public ResponseWrapper<Iterable<Department>> getDepartments(@PathVariable String univCode) {
         try {
-            int univId = University.findIdByUniversityCode(universityRepository, univCode);
+            int univId = University.findIdByUnivCode(universityRepository, univCode);
             
             List<Department> output = new ArrayList<>();
             Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
@@ -52,10 +52,10 @@ public class DepartmentApiController {
         }
     }
     
-    @GetMapping("/{departmentCode}")
-    public ResponseWrapper<Department> getDepartment(@PathVariable String univCode, @PathVariable String departmentCode) {
+    @GetMapping("/{deptCode}")
+    public ResponseWrapper<Department> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) {
         try {
-            int id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            int id = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
             Optional<DepartmentDB> departmentOptional = departmentRepository.findById(id);
             if(departmentOptional.isPresent()) {
                 return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get().toDepartment(universityRepository, majorRepository));
@@ -76,7 +76,7 @@ public class DepartmentApiController {
         }
         int univId;
         try {
-            univId = University.findIdByUniversityCode(universityRepository, univCode);
+            univId = University.findIdByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -97,15 +97,15 @@ public class DepartmentApiController {
         return new ResponseWrapper<Department>(ResponseHeader.OK, output);
     }
     
-    @PatchMapping("/{departmentCode}")
-    public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Department requestBody) {
+    @PatchMapping("/{deptCode}")
+    public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
         if(requestBody.getName() == null && requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
         int id;
         try {
-            id = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);    
+            id = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -114,7 +114,7 @@ public class DepartmentApiController {
         
         int univId;
         try {
-            univId = University.findIdByUniversityCode(universityRepository, univCode);
+            univId = University.findIdByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -124,7 +124,7 @@ public class DepartmentApiController {
         Optional<DepartmentDB> targetOptional = departmentRepository.findById(id);
         if(targetOptional.isPresent()) {
             DepartmentDB target = targetOptional.get();
-            if(requestBody.getCode() != null && !requestBody.getCode().equals(departmentCode)) {
+            if(requestBody.getCode() != null && !requestBody.getCode().equals(deptCode)) {
                 List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
                 for(int i = 0; i < departmentListByUnivId.size(); i++) {
                     if(requestBody.getCode().equals(departmentListByUnivId.get(i).getCode())) {

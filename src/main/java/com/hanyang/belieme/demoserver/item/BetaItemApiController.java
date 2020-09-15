@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.User;
+import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
@@ -20,7 +22,7 @@ import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 
 @RestController
-@RequestMapping(path="/beta/univs/{univCode}/depts/{departmentCode}/things/{thingId}/items")
+@RequestMapping(path="/beta/univs/{univCode}/depts/{deptCode}/things/{thingId}/items")
 public class BetaItemApiController {
     @Autowired
     private UniversityRepository universityRepository;
@@ -44,20 +46,55 @@ public class BetaItemApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<List<Item>> getAllItems(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int thingId) {
-        int departmentId;
+    public ResponseWrapper<List<Item>> getAllItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) {
+        if(userToken == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        int deptId;
         try {
-            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        
+        int userId;
+        try {
+            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        UserDB userDB = userRepository.findById(userId).get();
+        User user;
+        if(userDB == null) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else {
+            try {
+                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
+            } catch(NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+        }
+        
+        boolean authorized = false;
+        for(int i = 0; i < user.getDepartments().size(); i++) {
+            if(deptId == user.getDepartments().get(i).getId()) {
+                authorized = true;
+            }
+        }
+        if(!authorized) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(targetThingOptional.get().getDepartmentId() != departmentId) {
+        } else if(targetThingOptional.get().getDepartmentId() != deptId) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
         }
         
@@ -74,21 +111,55 @@ public class BetaItemApiController {
     }
 
     @GetMapping("/{itemNum}") 
-    public ResponseWrapper<Item> getItemByThingIdAndNum(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int thingId, @PathVariable int itemNum) {
-        int departmentId;
-
+    public ResponseWrapper<Item> getItemByThingIdAndNum(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId, @PathVariable int itemNum) {
+        if(userToken == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        int deptId;
         try {
-            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        
+        int userId;
+        try {
+            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        UserDB userDB = userRepository.findById(userId).get();
+        User user;
+        if(userDB == null) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else {
+            try {
+                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
+            } catch(NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+        }
+        
+        boolean authorized = false;
+        for(int i = 0; i < user.getDepartments().size(); i++) {
+            if(deptId == user.getDepartments().get(i).getId()) {
+                authorized = true;
+            }
+        }
+        if(!authorized) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(targetThingOptional.get().getDepartmentId() != departmentId) {
+        } else if(targetThingOptional.get().getDepartmentId() != deptId) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
         }
         
@@ -111,21 +182,55 @@ public class BetaItemApiController {
     }
 
     @PostMapping("")
-    public ResponseWrapper<List<Item>> createNewItem(@PathVariable String univCode, @PathVariable String departmentCode, @PathVariable int thingId) {
-        int departmentId;
-
+    public ResponseWrapper<List<Item>> createNewItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) {
+        if(userToken == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        int deptId;
         try {
-            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        
+        int userId;
+        try {
+            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        
+        UserDB userDB = userRepository.findById(userId).get();
+        User user;
+        if(userDB == null) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } else {
+            try {
+                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
+            } catch(NotFoundException e) {
+                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            }
+        }
+        
+        boolean authorized = false; // TODO permission확인 하게 하기
+        for(int i = 0; i < user.getDepartments().size(); i++) {
+            if(deptId == user.getDepartments().get(i).getId()) {
+                authorized = true;
+            }
+        }
+        if(!authorized) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(targetThingOptional.get().getDepartmentId() != departmentId) {
+        } else if(targetThingOptional.get().getDepartmentId() != deptId) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
         }
         

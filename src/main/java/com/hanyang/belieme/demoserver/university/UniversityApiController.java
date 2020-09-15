@@ -32,7 +32,7 @@ public class UniversityApiController {
     @GetMapping("/{univCode}") 
     public ResponseWrapper<University> getUniversityByUnivCode(@PathVariable String univCode) {
         try {
-            int id = University.findIdByUniversityCode(universityRepository, univCode);
+            int id = University.findIdByUnivCode(universityRepository, univCode);
             Optional<University> univOptional = universityRepository.findById(id);
             if(univOptional.isPresent()) {
                 return new ResponseWrapper<>(ResponseHeader.OK, univOptional.get());    
@@ -70,7 +70,7 @@ public class UniversityApiController {
         }
         int id;
         try {
-            id = University.findIdByUniversityCode(universityRepository, univCode);
+            id = University.findIdByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
