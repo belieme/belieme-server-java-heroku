@@ -41,7 +41,7 @@ public class MajorApiController {
         
         int univId;
         try {
-            univId = University.findIdByUniversityCode(universityRepository, univCode);
+            univId = University.findIdByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -51,7 +51,7 @@ public class MajorApiController {
         
         int departmentId;
         try {
-            departmentId = Department.findIdByUniversityCodeAndDepartmentCode(universityRepository, departmentRepository, univCode, departmentCode);
+            departmentId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, departmentCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
