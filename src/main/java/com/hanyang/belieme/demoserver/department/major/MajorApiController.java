@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path="/universities/{univCode}/departments/{departmentCode}/majors")
+@RequestMapping(path="/univs/{univCode}/depts/{deptCode}/majors")
 public class MajorApiController {
     @Autowired
     UniversityRepository universityRepository;
@@ -34,8 +34,8 @@ public class MajorApiController {
     MajorRepository majorRepository;
     
     @PostMapping("")
-    public ResponseWrapper<Major> postNewMajor(@PathVariable String univCode, @PathVariable String departmentCode, @RequestBody Major requestBody) {
-        if(requestBody.getMajorCode() == null) {
+    public ResponseWrapper<Major> postNewMajor(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Major requestBody) {
+        if(requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
@@ -49,9 +49,9 @@ public class MajorApiController {
         }
         
         
-        int departmentId;
+        int deptId;
         try {
-            departmentId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, departmentCode);
+            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -65,12 +65,12 @@ public class MajorApiController {
         }
         
         for(int i = 0; i < majorsByUnivId.size(); i++) {
-            if(requestBody.getMajorCode().equals(majorsByUnivId.get(i).getMajorCode())) {
+            if(requestBody.getCode().equals(majorsByUnivId.get(i).getCode())) {
                 return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
             }
         }
         
-        requestBody.setDepartmentId(departmentId);
+        requestBody.setDepartmentId(deptId);
         Major output = majorRepository.save(requestBody);
         return new ResponseWrapper<>(ResponseHeader.OK, output);
     }

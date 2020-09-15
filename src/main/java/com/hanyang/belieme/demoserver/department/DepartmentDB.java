@@ -97,7 +97,7 @@ public class DepartmentDB {
         List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
         ArrayList<String> majorCodes = new ArrayList<>();
         for(int i = 0; i < majorsByDepartmentId.size(); i++) {
-            majorCodes.add(majorsByDepartmentId.get(i).getMajorCode());
+            majorCodes.add(majorsByDepartmentId.get(i).getCode());
         }
         
         output.setId(id);

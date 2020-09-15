@@ -17,7 +17,7 @@ public class Major {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     
-    private String majorCode;
+    private String code;
     
     private int departmentId;
     
@@ -28,16 +28,16 @@ public class Major {
         return id;
     }
     
-    public String getMajorCode() {
-        return majorCode;
+    public String getCode() {
+        return code;
     }
     
     public int getDepartmentId() {
         return departmentId;
     }
     
-    public void setMajorCode(String majorCode) {
-        this.majorCode = majorCode;
+    public void setCode(String code) {
+        this.code = code;
     }
     
     public void setDepartmentId(int departmentId) {
