@@ -62,7 +62,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -130,7 +130,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -195,7 +195,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -337,7 +337,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -445,7 +445,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -528,7 +528,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -611,7 +611,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -694,7 +694,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -777,7 +777,7 @@ public class EventApiController {
         
         int userId;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, userToken);    
+            userId = User.findIdByToken(userRepository, userToken);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {

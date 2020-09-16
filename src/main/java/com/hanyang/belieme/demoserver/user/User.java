@@ -122,4 +122,16 @@ public class User {
             return targetList.get(0).getId();
         }
     }
+    
+    public static int findIdByToken(UserRepository userRepository, String token) throws NotFoundException, WrongInDataBaseException {
+        List<UserDB> targetList = userRepository.findByToken(token);
+        
+        if(targetList.size() == 0) {
+            throw new NotFoundException();
+        } else if(targetList.size() != 1) {
+            throw new WrongInDataBaseException();
+        } else {
+            return targetList.get(0).getId();
+        }
+    }
 }
