@@ -83,9 +83,12 @@ public class ThingApiController {
             }
         }
         
+        System.out.println("deptId : " + deptId);
+        
         boolean authorized = false;
         for(int i = 0; i < user.getDepartments().size(); i++) {
             if(deptId == user.getDepartments().get(i).getId()) {
+                System.out.println("deptId(" + i + "): " + user.getDepartments().get(i).getId());
                 authorized = true;
             }
         }
