@@ -71,7 +71,7 @@ public class PermissionApiController {
         User targetUser = userDBOptional.get().toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
         
         PermissionDB newPermissionDB = new PermissionDB();
-        if(targetUser.getPermissions().containsKey(requestBody.getDeptCode())) {
+        if(targetUser.permissionsContainsKey(requestBody.getDeptCode())) {
             List<PermissionDB> tmp = permissionRepository.findByUserIdAndDeptId(userId, deptId);
             if(tmp.size() == 1) {
                 newPermissionDB = tmp.get(0);    
