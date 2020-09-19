@@ -14,6 +14,7 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.User;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
+import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
@@ -33,6 +34,9 @@ public class BetaThingApiController {
     
     @Autowired
     private MajorRepository majorRepository;
+    
+    @Autowired
+    private PermissionRepository permissionRepository;
     
     @Autowired
     private UserRepository userRepository;
@@ -75,11 +79,7 @@ public class BetaThingApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -95,12 +95,7 @@ public class BetaThingApiController {
         Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
         ArrayList<Thing> responseBody = new ArrayList<>();
         for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-            Thing tmp;
-            try {
-                tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-            } catch (NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
             responseBody.add(tmp);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody); 
@@ -135,11 +130,7 @@ public class BetaThingApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
         }
         
         boolean authorized = false;
@@ -157,12 +148,7 @@ public class BetaThingApiController {
             if(deptId != targetOptional.get().getDepartmentId()) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
             }
-            ThingWithItems responseBody;
-            try {
-                responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -201,11 +187,7 @@ public class BetaThingApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false; // TODO permission확인 하게 하기
@@ -232,12 +214,7 @@ public class BetaThingApiController {
 
         ArrayList<Thing> responseBody = new ArrayList<>();
         while(iterator.hasNext()) {
-            Thing tmp;
-            try {
-                tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
             responseBody.add(tmp);
         }
         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
@@ -276,11 +253,7 @@ public class BetaThingApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false; // TODO permission확인 하게 하기
@@ -318,12 +291,7 @@ public class BetaThingApiController {
 
             ArrayList<Thing> responseBody = new ArrayList<>();
             while(iterator.hasNext()) {
-                Thing tmp;
-                try {
-                    tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
                 responseBody.add(tmp);
             }
             return new ResponseWrapper<>(ResponseHeader.OK, responseBody);

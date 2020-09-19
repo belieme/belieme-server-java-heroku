@@ -100,7 +100,7 @@ public class ThingDB {
         return output;
     }
     
-    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
+    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         Thing output = new Thing();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
@@ -168,7 +168,7 @@ public class ThingDB {
         return output;
     }
     
-    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
+    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         ThingWithItems output = new ThingWithItems();
         
         Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);

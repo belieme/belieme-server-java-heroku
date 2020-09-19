@@ -17,7 +17,8 @@ public class ResponseHeader {
     public static final ResponseHeader EXPIRED_USER_TOKEN_EXCEPTION = new ResponseHeader(13, "Given user token has expired.");
     public static final ResponseHeader UNREGISTERED_UNIVERSITY_EXCEPTION = new ResponseHeader(14, "This unversity is not registered.");
     public static final ResponseHeader USER_PERMISSION_DENIED_EXCEPTION = new ResponseHeader(15, "This user doesn't have permission on the endpoint.");
-    public static final ResponseHeader LACK_OF_REQUEST_HEADER_EXCEPTION = new ResponseHeader(15, "Request header lacks information for request.");
+    public static final ResponseHeader LACK_OF_REQUEST_HEADER_EXCEPTION = new ResponseHeader(16, "Request header lacks information for request.");
+    public static final ResponseHeader WRONG_PERMISSION_EXCEPTION = new ResponseHeader(17, "Given permission is wrong.");
 
     private int code;
     private String message;

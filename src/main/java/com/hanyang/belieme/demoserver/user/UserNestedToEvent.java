@@ -9,7 +9,6 @@ public class UserNestedToEvent {
     
     private int entranceYear;
     
-    private String permission;
     
     public UserNestedToEvent() {
         
@@ -20,7 +19,6 @@ public class UserNestedToEvent {
         this.studentId = oth.studentId;
         this.name = oth.name;
         this.entranceYear = oth.entranceYear;
-        this.permission = oth.permission;
     }
     
     public int getId() {
@@ -39,10 +37,6 @@ public class UserNestedToEvent {
         return entranceYear;
     }
     
-    public String getPermission() {
-        return permission;
-    }
-    
     public void setId(int id) {
         this.id = id;
     }
@@ -57,9 +51,5 @@ public class UserNestedToEvent {
     
     public void setEntranceYear(int entranceYear) {
         this.entranceYear = entranceYear;
-    }
-    
-    public void setPermission(String permission) {
-        this.permission = permission;
     }
 }

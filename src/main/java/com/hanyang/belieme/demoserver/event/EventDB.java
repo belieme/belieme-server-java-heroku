@@ -209,7 +209,7 @@ public class EventDB {
         return tmp.getTime().getTime()/1000;
     }
     
-    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
+    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         Event output = new Event();
         ItemNestedToEvent item;
         
@@ -229,7 +229,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setUser(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(approveManagerId != 0) {
@@ -237,7 +237,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setApproveManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(returnManagerId != 0) {
@@ -245,7 +245,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setReturnManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setReturnManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(lostManagerId != 0) {
@@ -253,7 +253,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setLostManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setLostManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }
         output.setId(id);
@@ -267,7 +267,7 @@ public class EventDB {
         return output;
     }
 
-    public EventNestedToItem toEventNestedToItem(UserRepository userRepository) throws NotFoundException {
+    public EventNestedToItem toEventNestedToItem(UserRepository userRepository) {
         EventNestedToItem output = new EventNestedToItem();
         
         output.setUser(null);
@@ -279,7 +279,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setUser(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setUser(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(approveManagerId != 0) {
@@ -287,7 +287,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setApproveManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(returnManagerId != 0) {
@@ -295,7 +295,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setReturnManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setReturnManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
         if(lostManagerId != 0) {
@@ -303,7 +303,7 @@ public class EventDB {
             if(tmpOptional.isPresent()) {
                 output.setLostManager(tmpOptional.get().toUserNestedToEvent());
             } else {
-                throw new NotFoundException();
+                output.setLostManager(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }
         

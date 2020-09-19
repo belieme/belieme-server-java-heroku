@@ -12,6 +12,7 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.User;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
+import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
@@ -31,6 +32,9 @@ public class ItemApiController {
     
     @Autowired
     private MajorRepository majorRepository;
+    
+    @Autowired
+    private PermissionRepository permissionRepository;
     
     @Autowired
     private UserRepository userRepository;
@@ -73,11 +77,7 @@ public class ItemApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -100,11 +100,7 @@ public class ItemApiController {
         List<Item> output = new ArrayList<>();       
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
         for(int i = 0; i < itemListByThingId.size(); i++) {
-            try {
-                output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository));    
-            } catch (NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            output.add(itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository));    
             
         }
         return new ResponseWrapper<>(ResponseHeader.OK, output);
@@ -139,11 +135,7 @@ public class ItemApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -167,11 +159,7 @@ public class ItemApiController {
         Item output;
         if(itemList.size() == 1) {
             ItemDB itemDB = itemList.get(0);
-            try {
-                output = itemDB.toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
-            } catch (NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            output = itemDB.toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
             
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         } else if(itemList.size() == 0) {
@@ -210,11 +198,7 @@ public class ItemApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false; // TODO permission확인 하게 하기
@@ -248,12 +232,7 @@ public class ItemApiController {
         ItemDB newItem = new ItemDB(thingId, max+1); 
 
         if(thingOptional.isPresent()) {
-            Item output;
-            try {
-                output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
-            } catch (NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Item output = itemRepository.save(newItem).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
             
             return new ResponseWrapper<>(ResponseHeader.OK, output);
         }

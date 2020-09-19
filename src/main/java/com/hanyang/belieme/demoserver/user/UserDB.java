@@ -22,9 +22,10 @@ import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
+import com.hanyang.belieme.demoserver.user.permission.PermissionDB;
+import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 
 @Entity //TODO user에 permission 어케할까?
 public class UserDB {
@@ -48,8 +49,6 @@ public class UserDB {
     private String name;
     
     private int entranceYear;
-    
-    private String permission;
     
     public UserDB() {
         majorIds = new ArrayList<Integer>();
@@ -91,10 +90,6 @@ public class UserDB {
         return entranceYear;
     }
     
-    public String getPermission() {
-        return permission;
-    }
-    
     public void setCreateTimeStampNow() {
         createTimeStamp = System.currentTimeMillis()/1000;
     }
@@ -134,23 +129,7 @@ public class UserDB {
         this.entranceYear = entranceYear;
     }
     
-    public void permissionSetUser() {
-        permission = "USER";
-    }
-    
-    public void permissionSetAdmin() {
-        permission = "ADMIN";
-    }
-
-    public void permissionSetMaster() {
-        permission = "MASTER";
-    }
-
-    public void permissionSetDeveloper() {
-        permission = "DEVELOPER";
-    }
-    
-    public User toUser(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) throws NotFoundException {
+    public User toUser(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
         User output = new User();
         output.setId(id);
         output.setStudentId(studentId);
@@ -158,14 +137,9 @@ public class UserDB {
         output.setEntranceYear(entranceYear);
         output.setCreateTimeStamp(createTimeStamp);
         output.setApprovalTimeStamp(approvalTimeStamp);
-        output.setPermission(permission);
         
         Optional<University> universityOptional = universityRepository.findById(universityId);
-        if(universityOptional.isPresent()) {
-            output.setUniversity(universityOptional.get());
-        } else {
-            throw new NotFoundException();
-        }
+        output.setUniversity(universityOptional.get());
         
         Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
         Iterator<Major> iter = majorListByIdList.iterator();
@@ -178,19 +152,21 @@ public class UserDB {
             
             if(departments.size() == 0) {
                 Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
-                if(!tmpDepartmentOptional.isPresent()) {
-                    throw new NotFoundException();
+                if(tmpDepartmentOptional.isPresent()) {
+                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                } else {
+                    // TODO DB에 없음 이라는 Department를 만들기
                 }
-                departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 continue;
             }
             for(int i = 0; i < departments.size(); i++) {
                 if(tmp.getDepartmentId() != departments.get(i).getId()) {
                     Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
-                    if(!tmpDepartmentOptional.isPresent()) {
-                        throw new NotFoundException();
+                    if(tmpDepartmentOptional.isPresent()) {
+                        departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                    } else {
+                        // TODO DB에 없음 이라는 Department를 만들기
                     }
-                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 }
             }
         }
@@ -198,10 +174,15 @@ public class UserDB {
         output.setMajorCodes(majorCodes);
         output.setDepartments(departments);
         
+        List<PermissionDB> permissions = permissionRepository.findByUserId(id);
+        for(int i = 0; i < permissions.size(); i++) {
+            output.addPermission(departmentRepository.findById(permissions.get(i).getDeptId()).get().getCode(), permissions.get(i).getPermission()); // TODO null pointer exception 잡아 줘야하는 것인가...
+        }
+        
         return output;
     }
     
-    public UserWithToken toUserWithToken(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) throws NotFoundException {
+    public UserWithToken toUserWithToken(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
         UserWithToken output = new UserWithToken();
         output.setId(id);
         output.setStudentId(studentId);
@@ -210,14 +191,9 @@ public class UserDB {
         output.setToken(token);
         output.setCreateTimeStamp(createTimeStamp);
         output.setApprovalTimeStamp(approvalTimeStamp);
-        output.setPermission(permission);
         
         Optional<University> universityOptional = universityRepository.findById(universityId);
-        if(universityOptional.isPresent()) {
-            output.setUniversity(universityOptional.get());
-        } else {
-            throw new NotFoundException();
-        }
+        output.setUniversity(universityOptional.get());
         
         Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
         Iterator<Major> iter = majorListByIdList.iterator();
@@ -230,25 +206,32 @@ public class UserDB {
             
             if(departments.size() == 0) {
                 Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
-                if(!tmpDepartmentOptional.isPresent()) {
-                    throw new NotFoundException();
+                if(tmpDepartmentOptional.isPresent()) {
+                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                } else {
+                    // TODO DB에 없음 이라는 Department를 만들기
                 }
-                departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 continue;
             }
             for(int i = 0; i < departments.size(); i++) {
                 if(tmp.getDepartmentId() != departments.get(i).getId()) {
                     Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
-                    if(!tmpDepartmentOptional.isPresent()) {
-                        throw new NotFoundException();
+                    if(tmpDepartmentOptional.isPresent()) {
+                        departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                    } else {
+                        // TODO DB에 없음 이라는 Department를 만들기
                     }
-                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
                 }
             }
         }
         
         output.setMajorCodes(majorCodes);
         output.setDepartments(departments);
+        
+        List<PermissionDB> permissions = permissionRepository.findByUserId(id);
+        for(int i = 0; i < permissions.size(); i++) {
+            output.addPermission(departmentRepository.findById(permissions.get(i).getDeptId()).get().getCode(), permissions.get(i).getPermission()); // TODO null pointer exception 잡아 줘야하는 것인가...
+        }
         
         return output;
     }
@@ -259,7 +242,6 @@ public class UserDB {
         output.setStudentId(studentId);
         output.setName(name);
         output.setEntranceYear(entranceYear);
-        output.setPermission(permission);
         
         return output;
     }

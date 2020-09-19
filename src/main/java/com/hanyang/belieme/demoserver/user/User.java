@@ -1,7 +1,9 @@
 package com.hanyang.belieme.demoserver.user;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
@@ -28,7 +30,11 @@ public class User {
     
     private long approvalTimeStamp;
     
-    private String permission;
+    private Map<String, String> permissions;
+    
+    public User() {
+        permissions = new HashMap<>();
+    }
     
     public int getId() {
         return id;
@@ -66,8 +72,8 @@ public class User {
         return approvalTimeStamp;
     }
 
-    public String getPermission() {
-        return permission;
+    public Map<String, String> getPermissions() {
+        return new HashMap<>(permissions);
     }
     
     public void setId(int id) {
@@ -106,8 +112,8 @@ public class User {
         this.approvalTimeStamp = approvalTimeStamp;
     }
     
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public void addPermission(String deptCode, String permission) {
+        permissions.put(deptCode, permission);
     }
     
     public static int findIdByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {

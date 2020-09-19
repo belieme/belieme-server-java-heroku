@@ -64,7 +64,7 @@ public class ItemDB {
     }
 
     
-    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, EventRepository eventRepository) throws NotFoundException {
+    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, EventRepository eventRepository) {
         Item output = new Item();
         String status;
         ThingNestedToItem thing = null;    
@@ -107,7 +107,7 @@ public class ItemDB {
         return output;
     }
     
-    public ItemNestedToThing toItemNestedToThing(EventRepository eventRepository, UserRepository userRepository) throws NotFoundException {
+    public ItemNestedToThing toItemNestedToThing(EventRepository eventRepository, UserRepository userRepository) {
         ItemNestedToThing output = new ItemNestedToThing();
         
         String status;

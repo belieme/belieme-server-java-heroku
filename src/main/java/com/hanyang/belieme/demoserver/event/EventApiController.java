@@ -13,6 +13,7 @@ import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.User;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
+import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.Department;
@@ -32,6 +33,9 @@ public class EventApiController {
     
     @Autowired
     private MajorRepository majorRepository;
+    
+    @Autowired
+    private PermissionRepository permissionRepository;
     
     @Autowired
     private UserRepository userRepository;
@@ -74,11 +78,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -97,12 +97,7 @@ public class EventApiController {
         List<Event> output = new ArrayList<>();
         while(iterator.hasNext()) {
             EventDB eventDB = iterator.next();
-            Event tmp;
-            try {
-                tmp = eventDB.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event tmp = eventDB.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);    
             
             if(tmp.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 if(studentId == null || studentId.equals(tmp.getUser().getStudentId())) {
@@ -142,11 +137,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -162,11 +153,7 @@ public class EventApiController {
         Optional<EventDB> eventOptional = eventRepository.findById(id);
         Event output;
         if(eventOptional.isPresent()) {
-            try {
-                output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             
             if(output.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                  return new ResponseWrapper<>(ResponseHeader.OK, output);   
@@ -207,11 +194,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);   
         }
         
         boolean authorized = false;
@@ -227,13 +210,7 @@ public class EventApiController {
         List<EventDB> eventListByUserId = eventRepository.findByUserId(userId);
         int currentEventCount = 0;
         for(int i = 0; i < eventListByUserId.size(); i++) {
-            Event tmp;
-            
-            try {
-                tmp = eventListByUserId.get(i).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);   
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event tmp = eventListByUserId.get(i).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);  
             
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
@@ -250,11 +227,7 @@ public class EventApiController {
         if(itemNum == null) {
             List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
             for(int i = 0; i < itemListByThingId.size(); i++) {
-                try {
-                    reservedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                reservedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
                 if (reservedItem.getStatus().equals("USABLE")) {
                     break;
                 }
@@ -275,11 +248,7 @@ public class EventApiController {
             
             Optional<ItemDB> reservedItemOptional = itemRepository.findById(itemId);
             if(reservedItemOptional.isPresent()) {
-                try {
-                    reservedItem = reservedItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                reservedItem = reservedItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -302,12 +271,7 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampZero();
             
-        Event output;
-        try {
-            output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);   
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
+        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);  
         
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(reservedItem.getId());
@@ -349,11 +313,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);   
         }
         
         boolean authorized = false;
@@ -385,11 +345,7 @@ public class EventApiController {
             
         Optional<ItemDB> lostItemOptional = itemRepository.findById(itemId);
         if(lostItemOptional.isPresent()) {
-            try {
-                lostItem = lostItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            lostItem = lostItemOptional.get().toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }   
@@ -410,12 +366,7 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampNow();
         
-        Event output;
-        try {
-            output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);   
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
+        Event output = eventRepository.save(newEventDB).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);   
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(lostItem.getId());
@@ -457,11 +408,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -481,12 +428,8 @@ public class EventApiController {
                 return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
             }
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
+            
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -494,12 +437,8 @@ public class EventApiController {
             if(eventToUpdate.getStatus().equals("RESERVED")) {
                 eventToUpdate.setCancelTimeStampNow();
                 
-                Event output; 
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
+    
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -540,11 +479,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -563,12 +498,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -577,12 +507,7 @@ public class EventApiController {
                 eventToUpdate.setApproveTimeStampNow();
                 eventToUpdate.setApproveManagerId(userId);
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -623,11 +548,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -646,12 +567,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -660,12 +576,7 @@ public class EventApiController {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(userId);
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -706,11 +617,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -729,12 +636,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -743,12 +645,7 @@ public class EventApiController {
                 eventToUpdate.setLostTimeStampNow();
                 eventToUpdate.setLostManagerId(userId);
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {
@@ -789,11 +686,7 @@ public class EventApiController {
         if(userDB == null) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else {
-            try {
-                user = userDB.toUser(universityRepository, departmentRepository, majorRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         boolean authorized = false;
@@ -812,12 +705,7 @@ public class EventApiController {
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             if(eventBeforeUpdate.getItem().getThing().getDepartment().getId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
             }
@@ -826,12 +714,7 @@ public class EventApiController {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(userId);
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                Event output = eventRepository.save(eventToUpdate).toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
                 return new ResponseWrapper<>(ResponseHeader.OK, output);
             }
             else {

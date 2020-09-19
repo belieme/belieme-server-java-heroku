@@ -24,6 +24,10 @@ import com.hanyang.belieme.demoserver.user.User;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.user.UserWithToken;
+import com.hanyang.belieme.demoserver.user.permission.PermissionDB;
+import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
+
+// TODO fix compile error
 
 @RestController
 public class GeneralApiController {
@@ -40,6 +44,9 @@ public class GeneralApiController {
     
     @Autowired
     private MajorRepository majorRepository;
+    
+    @Autowired
+    private PermissionRepository permissionRepository;
     
     @Autowired
     private UserRepository userRepository;
@@ -108,7 +115,6 @@ public class GeneralApiController {
                         newUserInfo = new UserDB();
                         newUserInfo.setCreateTimeStampNow();
                         newUserInfo.setUniversityId(univId);
-                        newUserInfo.permissionSetUser();
                     }
                      
                     List<DepartmentDB> departmentsByUnivId = departmentRepository.findByUniversityId(univId);
@@ -118,11 +124,13 @@ public class GeneralApiController {
                     }
                     
                     String sosokId = (String) tmp.get("sosokId");
+                    int newDeptId = 0;
                     for(int i = 0; i < majorsByUnivId.size(); i++) {
                         if(sosokId.equals(majorsByUnivId.get(i).getCode())) {
                             int newMajorId = majorsByUnivId.get(i).getId();
                             if(!newUserInfo.getMajorIds().contains(newMajorId)) {
                                 newUserInfo.getMajorIds().add(newMajorId);
+                                newDeptId = majorsByUnivId.get(i).getDepartmentId();
                             }
                         }
                     }
@@ -133,20 +141,31 @@ public class GeneralApiController {
             
                     newUserInfo.setNewToken(userRepository);
                     newUserInfo.setApprovalTimeStampNow();
-            
                     outputResponse = userRepository.save(newUserInfo);
-            
+                     
+                    boolean isNew = true; 
+                    if(newDeptId != 0) {
+                        List<PermissionDB> permissionListByUserId = permissionRepository.findByUserId(outputResponse.getId());
+                        for(int i = 0; i < permissionListByUserId.size(); i++) {
+                            if(newDeptId == permissionListByUserId.get(i).getDeptId()) {
+                                isNew = false;                                
+                            }
+                        }
+                        if(isNew) {
+                            PermissionDB newPermissionDB = new PermissionDB();
+                            newPermissionDB.setUserId(outputResponse.getId());
+                            newPermissionDB.setDeptId(newDeptId);
+                            newPermissionDB.setPermissionUser();
+                            permissionRepository.save(newPermissionDB);
+                        }
+                    }
                     if(bos != null) bos.close();
                     if(in != null) in.close();            
                 } catch (Exception e) {
                      e.printStackTrace();
                      return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
-                try {
-                    return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository));
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
+                return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository, permissionRepository));
             }
             default : {
                 return new ResponseWrapper<>(ResponseHeader.UNREGISTERED_UNIVERSITY_EXCEPTION, null);
@@ -164,12 +183,7 @@ public class GeneralApiController {
         } else {
             UserDB target = userListByToken.get(0);
             if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
-                try {
-                    return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0).toUser(universityRepository, departmentRepository, majorRepository));    
-                } catch (NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-                
+                return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository));    
             } else {
                 target.setApprovalTimeStampZero();
                 target.resetToken();
