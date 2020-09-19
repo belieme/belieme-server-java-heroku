@@ -84,6 +84,10 @@ public class User {
         }
     }
     
+    public boolean permissionsContainsKey(String key) {
+        return permissions.containsKey(key);
+    }
+    
     public void setId(int id) {
         this.id = id;
     }
