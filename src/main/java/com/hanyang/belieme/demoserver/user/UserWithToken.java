@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.university.University;
 
@@ -71,8 +73,14 @@ public class UserWithToken {
         return approvalTimeStamp;
     }
 
-    public Map<String, String> getPermissions() {
-        return new HashMap<>(permissions);
+    public String getPermissions() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(permissions);     
+        } catch(JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public void setId(int id) {
