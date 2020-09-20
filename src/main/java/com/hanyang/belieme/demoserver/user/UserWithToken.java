@@ -33,6 +33,10 @@ public class UserWithToken {
     
     private Map<String, String> permissions;
     
+    public UserWithToken() {
+        permissions = new HashMap<>();
+    }
+    
     public int getId() {
         return id;
     }
