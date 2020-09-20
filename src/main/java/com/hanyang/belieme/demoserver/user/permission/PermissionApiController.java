@@ -16,6 +16,7 @@ import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +40,11 @@ public class PermissionApiController {
     
     @Autowired
     private PermissionRepository permissionRepository;
+    
+    @GetMapping("")
+    public Iterable<PermissionDB> getPermissions(@PathVariable String univCode, @PathVariable String studentId) {
+        return permissionRepository.findAll();
+    }
     
     @PostMapping("") //TODO 일단은 user를 output으로 하지만 permission을 output으로 하는 것이 맞지 않을까라는 생각이 든다.
     public ResponseWrapper<User> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionRequestBody requestBody) {
