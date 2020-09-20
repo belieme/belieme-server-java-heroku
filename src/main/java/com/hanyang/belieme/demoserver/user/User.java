@@ -84,8 +84,43 @@ public class User {
         }
     }
     
-    public boolean permissionsContainsKey(String key) {
-        return permissions.containsKey(key);
+    public boolean hasUserPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+            case "STAFF" :
+            case "USER" :
+                return true;
+            default :
+                return false;
+        }
+    }
+    
+    public boolean hasStaffPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+            case "STAFF" :
+                return true;
+            default :
+                return false;
+        }
+    }
+    
+    public boolean hasMasterPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+                return true;
+            default :
+                return false;
+        }
     }
     
     public void setId(int id) {

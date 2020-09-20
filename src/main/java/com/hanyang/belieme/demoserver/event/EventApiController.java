@@ -81,14 +81,8 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && user.getStudentId().equals(studentId)))) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
         
         Iterable<EventDB> allEventList = eventRepository.findAll();
@@ -140,23 +134,18 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
-        
         Optional<EventDB> eventOptional = eventRepository.findById(id);
         Event output;
         if(eventOptional.isPresent()) {
             output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             
             if(output.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                 return new ResponseWrapper<>(ResponseHeader.OK, output);   
+                if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser().getId() == userId)) {
+                    return new ResponseWrapper<>(ResponseHeader.OK, output);       
+                }
+                else {
+                    return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+                }
             }
             //TODO NotFoundException의 종류를 늘려야 하나? Exception바꿀까?
         }
@@ -197,14 +186,8 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);   
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!user.hasUserPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
         
         List<EventDB> eventListByUserId = eventRepository.findByUserId(userId);
@@ -316,14 +299,8 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);   
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
 
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
@@ -379,7 +356,7 @@ public class EventApiController {
         return new ResponseWrapper<>(ResponseHeader.OK, output);
     }
 
-    @PatchMapping("/{id}/cancel")
+    @PatchMapping("/{id}/cancel") //TODO 논의점 cancel manager를 만들어야 하는가?
     public ResponseWrapper<Event> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
@@ -411,20 +388,12 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
+        
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
-            if(eventToUpdate.getUserId() != userId) { //TODO 관리자가 취소할 수 있게 바꾸기
+            if(!(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && eventToUpdate.getUserId() == userId))) {
                 return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
             }
             
@@ -482,17 +451,9 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
-        
-        // TODO permission 확인하기
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
@@ -551,17 +512,9 @@ public class EventApiController {
              user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
-        
-        // TODO permission 확인하기
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
@@ -620,17 +573,9 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
-        
-        // TODO permission 확인하기
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
@@ -689,17 +634,9 @@ public class EventApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
-        }
-        
-        // TODO permission 확인하기
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {

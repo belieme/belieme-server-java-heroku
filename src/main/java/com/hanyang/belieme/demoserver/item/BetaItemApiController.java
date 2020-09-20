@@ -81,14 +81,8 @@ public class BetaItemApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!user.hasUserPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
@@ -138,14 +132,8 @@ public class BetaItemApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false;
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!user.hasUserPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
@@ -201,14 +189,8 @@ public class BetaItemApiController {
             user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
-        boolean authorized = false; // TODO permission확인 하게 하기
-        for(int i = 0; i < user.getDepartments().size(); i++) {
-            if(deptId == user.getDepartments().get(i).getId()) {
-                authorized = true;
-            }
-        }
-        if(!authorized) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);    
+        if(!user.hasStaffPermission(deptCode)) {
+            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
          
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
