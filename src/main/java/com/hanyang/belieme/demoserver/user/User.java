@@ -84,6 +84,10 @@ public class User {
         }
     }
     
+    public boolean permissionsContainsKey(String key) {
+        return permissions.containsKey(key);
+    }
+    
     public boolean hasUserPermission(String deptCode) {
         if(permissions.get(deptCode) == null) {
             return false;
