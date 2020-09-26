@@ -174,7 +174,7 @@ public class GeneralApiController {
     }
     
     @GetMapping("/me")
-    public ResponseWrapper<User> getUserUsingUserToken(@RequestParam(value = "userToken") String userToken) {
+    public ResponseWrapper<User> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) {
         List<UserDB> userListByToken = userRepository.findByToken(userToken);
         if(userListByToken.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);

@@ -50,7 +50,7 @@ public class EventApiController {
     private ThingRepository thingRepository;
 
     @GetMapping("")
-    public ResponseWrapper<List<Event>> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "userStudentId", required = false) String studentId) { //TODO value 바꾸기
+    public ResponseWrapper<List<Event>> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "student-id", required = false) String studentId) { //TODO value 바꾸기
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -155,9 +155,13 @@ public class EventApiController {
     
     //TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
     @PostMapping("/reserve")
-    public ResponseWrapper<Event> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum) {
+    public ResponseWrapper<Event> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        if(requestBody.getThingId() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
         int deptId;
@@ -197,7 +201,7 @@ public class EventApiController {
             
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
-                if(tmp.getItem().getThing().getId() == thingId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
+                if(tmp.getItem().getThing().getId() == requestBody.getThingId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                     return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
                 }
             }
@@ -207,8 +211,8 @@ public class EventApiController {
         }
         
         Item reservedItem = null;
-        if(itemNum == null) {
-            List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
+        if(requestBody.getItemNum() == null) {
+            List<ItemDB> itemListByThingId = itemRepository.findByThingId(requestBody.getThingId());
             for(int i = 0; i < itemListByThingId.size(); i++) {
                 reservedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
                 if (reservedItem.getStatus().equals("USABLE")) {
@@ -222,7 +226,7 @@ public class EventApiController {
         } else {
             int itemId;
             try {
-                itemId = Item.findIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+                itemId = Item.findIdByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum());
             } catch(NotFoundException e) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             } catch(WrongInDataBaseException e) {
@@ -268,9 +272,13 @@ public class EventApiController {
     }
     
     @PostMapping("/lost")
-    public ResponseWrapper<Event> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = true) int itemNum) {
+    public ResponseWrapper<Event> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        if(requestBody.getThingId() == null || requestBody.getItemNum() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
         int deptId;
@@ -303,7 +311,7 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
 
-        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(requestBody.getThingId());
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else if(targetThingOptional.get().getDepartmentId() != deptId) {
@@ -313,7 +321,7 @@ public class EventApiController {
         Item lostItem;
         int itemId;
         try {
-            itemId = Item.findIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+            itemId = Item.findIdByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum());
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
