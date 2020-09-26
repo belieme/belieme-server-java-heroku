@@ -51,7 +51,7 @@ public class BetaEventApiController {
     private ThingRepository thingRepository;
 
     @GetMapping("")
-    public ResponseWrapper<List<Event>> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "userStudentId", required = false) String studentId) { //TODO value 바꾸기
+    public ResponseWrapper<List<Event>> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "student-id", required = false) String studentId) { //TODO value 바꾸기
          if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -95,7 +95,7 @@ public class BetaEventApiController {
             Event tmp = eventDB.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);    
             
             if(tmp.getItem().getThing().getDepartment().getId() == deptId) {
-                if(studentId == null || studentId.equals(tmp.getUser().getStudentId())) {
+                if(studentId == null || (tmp.getUser() != null && studentId.equals(tmp.getUser().getStudentId()))) {
                     output.add(tmp);    
                 }
             }
@@ -141,7 +141,7 @@ public class BetaEventApiController {
             output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             
             if(output.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser().getId() == userId)) {
+                if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser() != null && output.getUser().getId() == userId)) {
                     return new ResponseWrapper<>(ResponseHeader.OK, output);       
                 }
                 else {
@@ -154,9 +154,13 @@ public class BetaEventApiController {
     }
 
 @PostMapping("/reserve")
-    public ResponseWrapper<PostMappingResponse> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = false) Integer itemNum) {
+    public ResponseWrapper<PostMappingResponse> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
          if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+        }
+        
+        if(requestBody.getThingId() == null) {
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
         int deptId;
@@ -189,7 +193,7 @@ public class BetaEventApiController {
             return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
 
-        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(requestBody.getThingId());
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else if(targetThingOptional.get().getDepartmentId() != deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
@@ -204,7 +208,7 @@ public class BetaEventApiController {
             
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
-                if(tmp.getItem().getThing().getId() == thingId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
+                if(tmp.getItem().getThing().getId() == requestBody.getThingId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                     return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
                 }
             }
@@ -214,8 +218,8 @@ public class BetaEventApiController {
         }
         
         Item reservedItem = null;
-        if(itemNum == null) {
-            List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
+        if(requestBody.getItemNum() == null) {
+            List<ItemDB> itemListByThingId = itemRepository.findByThingId(requestBody.getThingId());
             for(int i = 0; i < itemListByThingId.size(); i++) {
                 reservedItem = itemListByThingId.get(i).toItem(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, eventRepository);
 
@@ -230,7 +234,7 @@ public class BetaEventApiController {
         } else {
             int itemId;
             try {
-                itemId = Item.findIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+                itemId = Item.findIdByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum());
             } catch(NotFoundException e) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             } catch(WrongInDataBaseException e) {
@@ -288,7 +292,7 @@ public class BetaEventApiController {
     }
     
     @PostMapping("/lost")
-    public ResponseWrapper<PostMappingResponse> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "thingId", required = true) int thingId, @RequestParam(value = "itemNum", required = true) int itemNum) {
+    public ResponseWrapper<PostMappingResponse> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -323,7 +327,7 @@ public class BetaEventApiController {
             return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
 
-        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(requestBody.getThingId());
         if(!targetThingOptional.isPresent()) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } else if(targetThingOptional.get().getDepartmentId() != deptId) {
@@ -333,7 +337,7 @@ public class BetaEventApiController {
         Item lostItem;
         int itemId;
         try {
-            itemId = Item.findIdByThingIdAndItemNum(itemRepository, thingId, itemNum);
+            itemId = Item.findIdByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum());
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {

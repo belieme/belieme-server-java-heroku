@@ -94,7 +94,7 @@ public class EventApiController {
             Event tmp = eventDB.toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);    
             
             if(tmp.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                if(studentId == null || studentId.equals(tmp.getUser().getStudentId())) {
+                if(studentId == null || (tmp.getUser() != null && studentId.equals(tmp.getUser().getStudentId()))) {
                     output.add(tmp);    
                 }
             }
@@ -140,7 +140,7 @@ public class EventApiController {
             output = eventOptional.get().toEvent(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository);
             
             if(output.getItem().getThing().getDepartment().getId() == deptId) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser().getId() == userId)) {
+                if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser() != null && output.getUser().getId() == userId)) {
                     return new ResponseWrapper<>(ResponseHeader.OK, output);       
                 }
                 else {
