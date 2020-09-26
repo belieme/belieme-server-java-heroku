@@ -84,7 +84,10 @@ public class EventNestedToItem {
         return new UserNestedToEvent(lostManager);
     }
 
-   public String getReserveTimeStamp() {
+    public String getReserveTimeStamp() {
+        if(reserveTimeStamp == 0) {
+            return null;
+        }
         Date date = new Date(reserveTimeStamp*1000);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -93,6 +96,9 @@ public class EventNestedToItem {
     }
 
     public String getApproveTimeStamp() {
+        if(approveTimeStamp == 0) {
+            return null;
+        }
         Date date =  new Date(approveTimeStamp);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -101,6 +107,9 @@ public class EventNestedToItem {
     }
 
     public String getReturnTimeStamp() {
+        if(returnTimeStamp == 0) {
+            return null;
+        }
         Date date = new Date(returnTimeStamp);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -109,6 +118,9 @@ public class EventNestedToItem {
     }
 
     public String getCancelTimeStamp() {
+        if(cancelTimeStamp == 0) {
+            return null;
+        }
         Date date = new Date(cancelTimeStamp);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -117,6 +129,9 @@ public class EventNestedToItem {
     }
     
     public String getLostTimeStamp() {
+        if(lostTimeStamp == 0) {
+            return null;
+        }
         Date date = new Date(lostTimeStamp);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
