@@ -1,7 +1,5 @@
 package com.hanyang.belieme.demoserver.item;
 
-import com.hanyang.belieme.demoserver.thing.*;
-
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.event.*;
@@ -11,20 +9,27 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 public class Item {
     private int id;
     private int num;
-
     private String status;
-
-    private ThingNestedToItem thing;
     
     private EventNestedToItem lastEvent;
+    
+    private int thingId;
 
     public Item() {
+    }
+    
+    public Item(Item oth) {
+        this.id = oth.id;
+        this.num = oth.num;
+        this.status = oth.status;
+        this.lastEvent = new EventNestedToItem(oth.lastEvent);
+        this.thingId = oth.thingId;
     }
     
     public int getId() {
         return id;
     }
-
+    
     public int getNum() {
         return num;
     }
@@ -32,13 +37,13 @@ public class Item {
     public String getStatus() {
         return status;
     }
-
-    public ThingNestedToItem getThing() {
-        return thing;
-    }
     
     public EventNestedToItem getLastEvent() {
-        return lastEvent;
+        return new EventNestedToItem(lastEvent);
+    }
+    
+    public int thingIdGetter() {
+        return thingId;
     }
     
     public void setId(int id) {
@@ -49,35 +54,15 @@ public class Item {
         this.num = num;
     }
     
-    public void setThing(ThingNestedToItem thing) {
-        this.thing = thing;  
-    }
-    
     public void setStatus(String status) {
         this.status = status;
     }
     
     public void setLastEvent(EventNestedToItem lastEvent) {
-        this.lastEvent = lastEvent; // 바꿈!!
+        this.lastEvent = new EventNestedToItem(lastEvent);
     }
     
-    public ItemDB toItemDB() {
-        ItemDB output = new ItemDB();
-        output.setId(id);
-        output.setNum(num);
-        output.setThingId(thing.getId());
-        output.setLastEventId(lastEvent.getId());
-        
-        return output;
-    }
-    
-    public static int findIdByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
-        List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
-        if(itemListByThingIdAndNum.size() == 0) {
-            throw new NotFoundException();
-        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
-            throw new WrongInDataBaseException();
-        }
-        return itemListByThingIdAndNum.get(0).getId();
+    public void setThingId(int thingId) {
+        this.thingId = thingId;
     }
 }

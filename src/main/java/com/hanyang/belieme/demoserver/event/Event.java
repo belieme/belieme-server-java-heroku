@@ -6,11 +6,13 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.thing.ThingNestedToEvent;
 import com.hanyang.belieme.demoserver.user.UserNestedToEvent;
 
 public class Event {
     private int id;
     
+    private ThingNestedToEvent thing;
     private ItemNestedToEvent item;
     
     private UserNestedToEvent user;
@@ -29,12 +31,38 @@ public class Event {
     public Event() {
     }
     
+    public Event(Event oth) {
+        this.id = oth.id;
+        this.thing = new ThingNestedToEvent(oth.thing);
+        this.item = new ItemNestedToEvent(oth.item);
+        this.user = new UserNestedToEvent(oth.user);
+        this.approveManager = new UserNestedToEvent(oth.approveManager);
+        this.returnManager = new UserNestedToEvent(oth.returnManager);
+        this.lostManager = new UserNestedToEvent(oth.lostManager);
+        
+        this.reserveTimeStamp = oth.reserveTimeStamp;
+        this.approveTimeStamp = oth.approveTimeStamp;
+        this.returnTimeStamp = oth.returnTimeStamp;
+        this.cancelTimeStamp = oth.cancelTimeStamp;
+        this.lostTimeStamp = oth.lostTimeStamp;
+    }
+    
     public int getId() {
         return id;
     }
     
     public ItemNestedToEvent getItem() {
-        return item;
+        if(item == null) {
+            return null;
+        }
+        return new ItemNestedToEvent(item);
+    }
+    
+    public ThingNestedToEvent getThing() {
+        if(item == null) {
+            return null;
+        }
+        return new ThingNestedToEvent(thing);
     }
     
     public UserNestedToEvent getUser() {
@@ -125,7 +153,11 @@ public class Event {
     }
     
     public void setItem(ItemNestedToEvent item) {
-        this.item = item;
+        this.item = new ItemNestedToEvent(item);
+    }
+    
+    public void setThing(ThingNestedToEvent thing) {
+        this.thing = new ThingNestedToEvent(thing);
     }
 
     public void setUser(UserNestedToEvent user) {

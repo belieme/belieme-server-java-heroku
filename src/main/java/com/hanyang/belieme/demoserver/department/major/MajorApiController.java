@@ -9,6 +9,7 @@ import com.hanyang.belieme.demoserver.common.ResponseWrapper;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.DepartmentResponse;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
@@ -39,24 +40,25 @@ public class MajorApiController {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        int univId;
+        University univ;
         try {
-            univId = University.findIdByUnivCode(universityRepository, univCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        int univId = univ.getId();
         
-        
-        int deptId;
+        DepartmentDB dept;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        int deptId = dept.getId();
         
         List<DepartmentDB> departmentsByUnivId = departmentRepository.findByUniversityId(univId);
         List<Major> majorsByUnivId = new ArrayList<Major>();
@@ -73,5 +75,38 @@ public class MajorApiController {
         requestBody.setDepartmentId(deptId);
         Major output = majorRepository.save(requestBody);
         return new ResponseWrapper<>(ResponseHeader.OK, output);
+    }
+    
+    public class Response {
+        University university;
+        DepartmentResponse department;
+        MajorResponse major;
+
+        public Response(University university, DepartmentResponse department, MajorResponse major) {
+            this.university = new University(university);
+            this.department = new DepartmentResponse(department);
+            this.major = new MajorResponse(major);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+
+        public DepartmentResponse getDepartment() {
+            if(department == null) {
+                return null;
+            }
+            return new DepartmentResponse(department);
+        }
+        
+        public MajorResponse getMajor() {
+            if(major == null) {
+                return null;
+            }
+            return new MajorResponse(major);
+        }
     }
 }

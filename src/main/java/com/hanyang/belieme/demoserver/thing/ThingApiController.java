@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.item.*;
-
+import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.User;
-import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.event.*;
@@ -21,6 +20,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
+import com.hanyang.belieme.demoserver.department.DepartmentResponse;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 @RestController
@@ -51,35 +51,37 @@ public class ThingApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<List<Thing>> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) {
+    public ResponseWrapper<ListResponse> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
         
-        int deptId;
+        University univ;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        int userId;
+        DepartmentResponse dept;
         try {
-            userId = User.findIdByToken(userRepository, userToken);    
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        int deptId = dept.getId();
+        
+        User user;
+        try {
+            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         if(!user.hasUserPermission(deptCode)) {
@@ -87,44 +89,46 @@ public class ThingApiController {
         }
             
         Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
-        ArrayList<Thing> responseBody = new ArrayList<>();
+        ArrayList<Thing> output = new ArrayList<>();
         for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-            Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-            responseBody.add(tmp);
+            Thing tmp = it.next().toThing(userRepository, itemRepository, eventRepository); 
+            output.add(tmp);
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, responseBody); 
+        return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, dept, output));
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseWrapper<ResponseWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
         
-        int deptId;
+        University univ;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        int userId;
+        DepartmentResponse dept;
         try {
-            userId = User.findIdByToken(userRepository, userToken);    
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        int deptId = dept.getId();
+        
+        User user;
+        try {
+            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         }
         
         if(!user.hasUserPermission(deptCode)) {
@@ -136,14 +140,14 @@ public class ThingApiController {
             if(deptId != targetOptional.get().getDepartmentId()) {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
             }
-            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
+            ThingWithItems output = targetOptional.get().toThingWithItems(userRepository, itemRepository, eventRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithItems(univ, dept, output));
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
     }
 
     @PostMapping("")
-    public ResponseWrapper<ThingWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody Thing requestBody) {
+    public ResponseWrapper<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -152,33 +156,35 @@ public class ThingApiController {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        int deptId;
+        University univ;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        int userId;
+        DepartmentResponse dept;
         try {
-            userId = User.findIdByToken(userRepository, userToken);    
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        int deptId = dept.getId();
+        
+        User user;
+        try {
+            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
-        }
-        
-        if(!user.hasStaffPermission(deptCode)) {
+        if(!user.hasUserPermission(deptCode)) {
             return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
         
@@ -190,12 +196,12 @@ public class ThingApiController {
             ItemDB newItem = new ItemDB(savedThingDB.getId(), i + 1);
             itemRepository.save(newItem);
         }
-        ThingWithItems savedThing = savedThingDB.toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository); 
-        return new ResponseWrapper<>(ResponseHeader.OK, savedThing);
+        ThingWithItems savedThing = savedThingDB.toThingWithItems(userRepository, itemRepository, eventRepository); 
+        return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithItems(univ, dept, savedThing));
     }
 
     @PatchMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id, @RequestBody Thing requestBody){
+    public ResponseWrapper<ResponseWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id, @RequestBody ThingRequestBody requestBody){
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -204,33 +210,35 @@ public class ThingApiController {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        int deptId;
+        University univ;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        int userId;
+        DepartmentResponse dept;
         try {
-            userId = User.findIdByToken(userRepository, userToken);    
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+        } catch(NotFoundException e) {
+            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        } catch(WrongInDataBaseException e) {
+            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        }
+        int deptId = dept.getId();
+        
+        User user;
+        try {
+            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
-        }
-        
-        if(!user.hasStaffPermission(deptCode)) {
+        if(!user.hasUserPermission(deptCode)) {
             return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
         }
         
@@ -252,10 +260,107 @@ public class ThingApiController {
             if(requestBodyDB.getDescription() != null) {
                 target.setDescription(requestBodyDB.getDescription());
             }
-            ThingWithItems output = thingRepository.save(target).toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);
+            ThingWithItems output = thingRepository.save(target).toThingWithItems(userRepository, itemRepository, eventRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithItems(univ, dept, output));
         }
         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);
+    }
+    
+    public class Response {
+        University university;
+        DepartmentResponse department;
+        Thing thing;
+
+        public Response(University university, DepartmentResponse department, Thing thing) {
+            this.university = new University(university);
+            this.department = new DepartmentResponse(department);
+            this.thing = new Thing(thing);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+
+        public DepartmentResponse getDepartment() {
+            if(department == null) {
+                return null;
+            }
+            return new DepartmentResponse(department);
+        }
+        
+        public Thing getThing() {
+            if(thing == null) {
+                return null;
+            }
+            return new Thing(thing);
+        }
+    }
+    
+    public class ResponseWithItems {
+        University university;
+        DepartmentResponse department;
+        ThingWithItems thing;
+
+        public ResponseWithItems(University university, DepartmentResponse department, ThingWithItems thing) {
+            this.university = new University(university);
+            this.department = new DepartmentResponse(department);
+            this.thing = new ThingWithItems(thing);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+
+        public DepartmentResponse getDepartment() {
+            if(department == null) {
+                return null;
+            }
+            return new DepartmentResponse(department);
+        }
+        
+        public ThingWithItems getThing() {
+            if(thing == null) {
+                return null;
+            }
+            return new ThingWithItems(thing);
+        }
+    }
+    
+    
+    public class ListResponse {
+        University university;
+        DepartmentResponse department;
+        List<Thing> things;
+
+        public ListResponse(University university, DepartmentResponse department, List<Thing> things) {
+            this.university = university;
+            this.department = department;
+            this.things = new ArrayList<>(things);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+        
+        public DepartmentResponse getDepartment() {
+            if(department == null) {
+                return null;
+            }
+            return new DepartmentResponse(department);
+        }
+
+        public List<Thing> getThings() {
+            return new ArrayList<>(things);
+        }
     }
 
     // deactivate Thing을 만들긴 해야할 거 같지만 생각좀 해봐야 할 듯

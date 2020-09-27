@@ -97,12 +97,12 @@ public class Department {
         return output;
     }
     
-    public static int findIdByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
-        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findIdByUnivCode(universityRepository, univCode), deptCode);
+    public static DepartmentDB findByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
+        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findByUnivCode(universityRepository, univCode).getId(), deptCode);
         if(tmpList.size() == 0) {
             throw new NotFoundException();
         } else if(tmpList.size() == 1) {
-            return tmpList.get(0).getId();
+            return tmpList.get(0);
         } else {
             throw new WrongInDataBaseException();
         }

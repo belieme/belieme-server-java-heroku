@@ -63,12 +63,12 @@ public class University {
         this.apiUrl = apiUrl;
     }
     
-    public static int findIdByUnivCode(UniversityRepository universityRepository, String univCode) throws NotFoundException, WrongInDataBaseException {
+    public static University findByUnivCode(UniversityRepository universityRepository, String univCode) throws NotFoundException, WrongInDataBaseException {
         List<University> univList = universityRepository.findByCode(univCode);
         if(univList.size() == 0) {
             throw new NotFoundException();
         } else if(univList.size() == 1) {
-            return univList.get(0).getId();
+            return univList.get(0);
         } else {
             throw new WrongInDataBaseException();
         }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hanyang.belieme.demoserver.item.*;
-import com.hanyang.belieme.demoserver.department.Department;
 
 public class ThingWithItems {
     private int id;
@@ -15,12 +14,25 @@ public class ThingWithItems {
     private int count;
     private String status;
     
-    private Department department;
     private List<ItemNestedToThing> items;
+    
+    private int deptId;
 
     
     public ThingWithItems() {
         items = new ArrayList<>();
+    }
+    
+    public ThingWithItems(ThingWithItems oth) {
+        this.id = oth.id;
+        this.name = oth.name;
+        this.emoji = oth.emoji;
+        this.description = oth.description;
+        this.amount = oth.amount;
+        this.count = oth.count;
+        this.status = oth.status;
+        this.items = new ArrayList<>(oth.items);
+        this.deptId = oth.deptId;
     }
 
     public int getId() {
@@ -41,10 +53,6 @@ public class ThingWithItems {
         }
         return "자세한 설명은 생략한다!";
     }
-    
-    public Department getDepartment() {
-        return department;
-    }
 
     public int getAmount() {
         return amount;
@@ -62,6 +70,10 @@ public class ThingWithItems {
         return items;
     }
 
+    public int deptIdGetter() {
+        return deptId;
+    }
+    
     public void setId(int id) {
         this.id = id;
     }
@@ -90,7 +102,7 @@ public class ThingWithItems {
         this.status = status;
     }
     
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setDeptId(int deptId) {
+        this.deptId = deptId;
     }
 }

@@ -31,17 +31,12 @@ public class ThingDB {
     public ThingDB() {
     }
 
-    public ThingDB(int id, String name, int emojiByte, String description) {
+    public ThingDB(int id, String name, int emojiByte, String description, int departmentId) {
         this.id = id;
         this.name = name;
         this.emojiByte = emojiByte;
         this.description = description;
-    }
-
-    public ThingDB(String name, int emojiByte, String description) {
-        this.name = name;
-        this.emojiByte = emojiByte;
-        this.description = description;
+        this.departmentId = departmentId;
     }
 
     public int getId() {
@@ -99,15 +94,9 @@ public class ThingDB {
         }
         return output;
     }
-    
-    public Thing toThing(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+
+    public Thing toThing(UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) {
         Thing output = new Thing();
-        
-        Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
-        Department department = null;
-        if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
-        }
         
         int amount = 0;
         int count = 0;
@@ -143,10 +132,10 @@ public class ThingDB {
             output.setEmoji(new String(getByteArrayFromInt(emojiByte), StandardCharsets.UTF_8));
         }
         output.setDescription(description);
-        output.setDepartment(department);
         output.setAmount(amount);
         output.setCount(count);
         output.setStatus(status);
+        output.setDeptId(departmentId);
         return output;
     }
     
@@ -168,14 +157,20 @@ public class ThingDB {
         return output;
     }
     
-    public ThingWithItems toThingWithItems(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-        ThingWithItems output = new ThingWithItems();
+    public ThingNestedToEvent toThingNestedToEvent() {
+        ThingNestedToEvent output = new ThingNestedToEvent();
         
-        Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
-        Department department = null;
-        if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
-        }
+        output.setId(id);
+        output.setName(name);
+        output.setEmoji(new String(getByteArrayFromInt(emojiByte), StandardCharsets.UTF_8));
+        output.setDescription(description);
+        output.setDeptId(departmentId);
+        
+        return output;
+    }
+    
+    public ThingWithItems toThingWithItems(UserRepository userRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+        ThingWithItems output = new ThingWithItems();
         
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(id);
         int amount = 0;
@@ -213,8 +208,18 @@ public class ThingDB {
         output.setCount(count);
         output.setStatus(status);
         output.setDescription(description);
-        output.setDepartment(department);
+        output.setDeptId(departmentId);
         
         return output;
+    }
+    
+    public static ThingDB findByThingIdAndDeptId(ThingRepository thingRepository, int thingId, int deptId) throws NotFoundException {
+        Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
+        if(!targetThingOptional.isPresent()) {
+            throw new NotFoundException();
+        } else if(targetThingOptional.get().getDepartmentId() != deptId) {
+            throw new NotFoundException(); //TODO Exception바꿀까?
+        }
+        return targetThingOptional.get();
     }
 }

@@ -109,6 +109,24 @@ public class DepartmentDB {
         return output;
     }
     
+    public DepartmentResponse toDepartmentResponse(MajorRepository majorRepository) {
+        DepartmentResponse output = new DepartmentResponse();
+        
+        List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
+        ArrayList<String> majorCodes = new ArrayList<>();
+        for(int i = 0; i < majorsByDepartmentId.size(); i++) {
+            majorCodes.add(majorsByDepartmentId.get(i).getCode());
+        }
+        
+        output.setId(id);
+        output.setCode(code);
+        output.setName(name);
+        output.setMajorCodes(majorCodes);
+        output.setAvailable(isAvailble());
+        
+        return output;
+    }
+    
     public DepartmentNestedToUser toDepartmentNestedToUser() {
         DepartmentNestedToUser output = new DepartmentNestedToUser();
         output.setId(id);

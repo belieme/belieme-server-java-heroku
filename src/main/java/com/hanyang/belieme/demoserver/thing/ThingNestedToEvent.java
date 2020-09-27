@@ -1,24 +1,21 @@
 package com.hanyang.belieme.demoserver.thing;
 
-import com.hanyang.belieme.demoserver.department.Department;
-
-public class ThingNestedToItem {
+public class ThingNestedToEvent {
     private int id;
     private String name;
     private String emoji;
     private String description;
     
-    private Department department;
+    private int deptId;
         
-    public ThingNestedToItem() {
+    public ThingNestedToEvent() {
     }
     
-    public ThingNestedToItem(ThingNestedToItem oth) {
+    public ThingNestedToEvent(ThingNestedToEvent oth) {
         this.id = oth.id;
         this.name = oth.name;
         this.emoji = oth.emoji;
         this.description = oth.description;
-        this.department = new Department(oth.department);
     }
         
     public int getId(){
@@ -39,9 +36,9 @@ public class ThingNestedToItem {
         }
         return "자세한 설명은 생략한다!";
     }
-    
-    public Department getDepartment() {
-        return department;
+        
+    public int deptIdGetter() {
+        return deptId;
     }
     
     public void setId(int id) {
@@ -60,11 +57,8 @@ public class ThingNestedToItem {
         this.description = description;
     }
     
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setDeptId(int deptId) {
+        this.deptId = deptId;
     }
-    
-    public String toString() {
-        return name + " " + emoji + " " + description;  
-    }
+
 }

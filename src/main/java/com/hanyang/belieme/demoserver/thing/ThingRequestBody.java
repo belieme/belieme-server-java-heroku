@@ -2,32 +2,15 @@ package com.hanyang.belieme.demoserver.thing;
 
 import java.io.UnsupportedEncodingException;
 
-
-public class Thing {
+public class ThingRequestBody {
     private int id;
     private String name;
     private String emoji;
     private String description;
-
     private int amount;
-    private int count;
-    private String status;
     
-    private int deptId;
-
-    public Thing() {
-    }
-
-    public Thing(Thing oth) {
-        this.id = oth.id;
-        this.name = oth.name;
-        this.emoji = oth.emoji;
-        this.description = oth.description;
+    public ThingRequestBody() {
         
-        this.amount = oth.amount;
-        this.count = oth.count;
-        this.status = oth.status;
-        this.deptId = oth.deptId;
     }
     
     public int getId() {
@@ -42,29 +25,14 @@ public class Thing {
         return emoji;
     }
     
-    public String getDescription() { //문제가 있누...
-        if(description != null) {
-            return description;    
-        }
-        return "자세한 설명은 생략한다!";
+    public String getDescription() {
+        return description;
     }
     
     public int getAmount() {
         return amount;
     }
-
-    public int getCount() {
-        return count;
-    }
-
-    public String getStatus() {
-        return status;
-    }
     
-    public int deptIdGetter() {
-        return deptId;
-    }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -85,26 +53,14 @@ public class Thing {
         this.amount = amount;
     }
     
-    public void setCount(int count) {
-        this.count = count;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
-    public void setDeptId(int deptId) {
-        this.deptId = deptId;
-    }
-    
     public ThingDB toThingDB() {
         if(emoji == null) {
-            return new ThingDB(id, name, 0, description, deptId);
+            return new ThingDB(id, name, 0, description);
         }
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ThingDB(id, name, getIntFromByteArray(arr), description, deptId);
+            return new ThingDB(id, name, getIntFromByteArray(arr), description);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

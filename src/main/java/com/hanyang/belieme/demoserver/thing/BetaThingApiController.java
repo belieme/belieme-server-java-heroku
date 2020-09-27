@@ -26,254 +26,254 @@ import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 @RestController
 @RequestMapping(path="/beta/univs/{univCode}/depts/{deptCode}/things")
 public class BetaThingApiController {
-    @Autowired
-    private UniversityRepository universityRepository;
+    // @Autowired
+    // private UniversityRepository universityRepository;
     
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    // @Autowired
+    // private DepartmentRepository departmentRepository;
     
-    @Autowired
-    private MajorRepository majorRepository;
+    // @Autowired
+    // private MajorRepository majorRepository;
     
-    @Autowired
-    private PermissionRepository permissionRepository;
+    // @Autowired
+    // private PermissionRepository permissionRepository;
     
-    @Autowired
-    private UserRepository userRepository;
+    // @Autowired
+    // private UserRepository userRepository;
     
-    @Autowired
-    private ThingRepository thingRepository;
+    // @Autowired
+    // private ThingRepository thingRepository;
 
-    @Autowired
-    private ItemRepository itemRepository;
+    // @Autowired
+    // private ItemRepository itemRepository;
 
-    @Autowired
-    private EventRepository eventRepository;
+    // @Autowired
+    // private EventRepository eventRepository;
 
-    @GetMapping("")
-    public ResponseWrapper<List<Thing>> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) {
-        if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
-        }
+    // @GetMapping("")
+    // public ResponseWrapper<List<Thing>> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) {
+    //     if(userToken == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+    //     }
         
-        int deptId;
-        try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int deptId;
+    //     try {
+    //         deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        int userId;
-        try {
-            userId = User.findIdByToken(userRepository, userToken);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int userId;
+    //     try {
+    //         userId = User.findIdByToken(userRepository, userToken);    
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
-        }
+    //     UserDB userDB = userRepository.findById(userId).get();
+    //     User user;
+    //     if(userDB == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } else {
+    //         user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+    //     }
         
-        if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+    //     if(!user.hasUserPermission(deptCode)) {
+    //         return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+    //     }
             
-        Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
-        ArrayList<Thing> responseBody = new ArrayList<>();
-        for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
-            Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-            responseBody.add(tmp);
-        }
-        return new ResponseWrapper<>(ResponseHeader.OK, responseBody); 
-    }
+    //     Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
+    //     ArrayList<Thing> responseBody = new ArrayList<>();
+    //     for (Iterator<ThingDB> it = allThingDBList.iterator(); it.hasNext(); ) {
+    //         Thing tmp = it.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
+    //         responseBody.add(tmp);
+    //     }
+    //     return new ResponseWrapper<>(ResponseHeader.OK, responseBody); 
+    // }
 
-    @GetMapping("/{id}")
-    public ResponseWrapper<ThingWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
-        if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
-        }
+    // @GetMapping("/{id}")
+    // public ResponseWrapper<ThingWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    //     if(userToken == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+    //     }
         
-        int deptId;
-        try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int deptId;
+    //     try {
+    //         deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        int userId;
-        try {
-            userId = User.findIdByToken(userRepository, userToken);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int userId;
+    //     try {
+    //         userId = User.findIdByToken(userRepository, userToken);    
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
-        }
+    //     UserDB userDB = userRepository.findById(userId).get();
+    //     User user;
+    //     if(userDB == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } else {
+    //         user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
+    //     }
         
-        if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+    //     if(!user.hasUserPermission(deptCode)) {
+    //         return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+    //     }
         
-        Optional<ThingDB> targetOptional = thingRepository.findById(id);
-        if(targetOptional.isPresent()) {
-            if(deptId != targetOptional.get().getDepartmentId()) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
-            }
-            ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
-        }
-        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-    }
+    //     Optional<ThingDB> targetOptional = thingRepository.findById(id);
+    //     if(targetOptional.isPresent()) {
+    //         if(deptId != targetOptional.get().getDepartmentId()) {
+    //             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
+    //         }
+    //         ThingWithItems responseBody = targetOptional.get().toThingWithItems(universityRepository, departmentRepository, majorRepository, userRepository, itemRepository, eventRepository);
+    //         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
+    //     }
+    //     return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    // }
 
-    @PostMapping("")
-    public ResponseWrapper<List<Thing>> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody Thing requestBody) {
-        if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
-        }
+    // @PostMapping("")
+    // public ResponseWrapper<List<Thing>> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody Thing requestBody) {
+    //     if(userToken == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+    //     }
         
-        if(requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        }
+    //     if(requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) { //getAmount는 체크 안하는 이유가 amout를 입력 안하면 0으로 자동저장 되어서 item이 0개인 thing이 생성된다.
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+    //     }
         
-        int deptId;
-        try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int deptId;
+    //     try {
+    //         deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        int userId;
-        try {
-            userId = User.findIdByToken(userRepository, userToken);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int userId;
+    //     try {
+    //         userId = User.findIdByToken(userRepository, userToken);    
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
-        }
+    //     UserDB userDB = userRepository.findById(userId).get();
+    //     User user;
+    //     if(userDB == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } else {
+    //         user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+    //     }
         
-        if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+    //     if(!user.hasStaffPermission(deptCode)) {
+    //         return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+    //     }
         
-        ThingDB requestBodyDB = requestBody.toThingDB();
-        requestBodyDB.setDepartmentId(deptId);
+    //     ThingDB requestBodyDB = requestBody.toThingDB();
+    //     requestBodyDB.setDepartmentId(deptId);
         
-        ThingDB savedThing = thingRepository.save(requestBodyDB); 
-        for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
-            ItemDB newItem = new ItemDB(savedThing.getId(), i + 1);
-            itemRepository.save(newItem);
-        }
+    //     ThingDB savedThing = thingRepository.save(requestBodyDB); 
+    //     for(int i = 0; i < requestBody.getAmount(); i++) { // requestBody에 amout값이 주어졌을때 작동 됨
+    //         ItemDB newItem = new ItemDB(savedThing.getId(), i + 1);
+    //         itemRepository.save(newItem);
+    //     }
         
-        Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
-        Iterator<ThingDB> iterator = allThingDBList.iterator();
+    //     Iterable<ThingDB> allThingDBList = thingRepository.findByDepartmentId(deptId);
+    //     Iterator<ThingDB> iterator = allThingDBList.iterator();
 
-        ArrayList<Thing> responseBody = new ArrayList<>();
-        while(iterator.hasNext()) {
-            Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-            responseBody.add(tmp);
-        }
-        return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
-    }
+    //     ArrayList<Thing> responseBody = new ArrayList<>();
+    //     while(iterator.hasNext()) {
+    //         Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
+    //         responseBody.add(tmp);
+    //     }
+    //     return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
+    // }
 
-    @PatchMapping("/{id}")
-    public ResponseWrapper<List<Thing>> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id, @RequestBody Thing requestBody){
-        if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
-        }
+    // @PatchMapping("/{id}")
+    // public ResponseWrapper<List<Thing>> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id, @RequestBody Thing requestBody){
+    //     if(userToken == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+    //     }
         
-        if(requestBody.getName() == null && requestBody.getEmoji() == null && requestBody.getDescription() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
-        }
+    //     if(requestBody.getName() == null && requestBody.getEmoji() == null && requestBody.getDescription() == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+    //     }
         
-        int deptId;
-        try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int deptId;
+    //     try {
+    //         deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        int userId;
-        try {
-            userId = User.findIdByToken(userRepository, userToken);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    //     int userId;
+    //     try {
+    //         userId = User.findIdByToken(userRepository, userToken);    
+    //     } catch(NotFoundException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
+    //     } catch(WrongInDataBaseException e) {
+    //         return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    //     }
         
-        UserDB userDB = userRepository.findById(userId).get();
-        User user;
-        if(userDB == null) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else {
-            user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
-        }
+    //     UserDB userDB = userRepository.findById(userId).get();
+    //     User user;
+    //     if(userDB == null) {
+    //         return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+    //     } else {
+    //         user = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+    //     }
         
-        if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+    //     if(!user.hasStaffPermission(deptCode)) {
+    //         return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+    //     }
         
-        Optional<ThingDB> targetOptional = thingRepository.findById(id);
-        if(targetOptional.isPresent()) {
-            ThingDB target = targetOptional.get();
+    //     Optional<ThingDB> targetOptional = thingRepository.findById(id);
+    //     if(targetOptional.isPresent()) {
+    //         ThingDB target = targetOptional.get();
             
-            if(target.getDepartmentId() != deptId) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
-            }
+    //         if(target.getDepartmentId() != deptId) {
+    //             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); // TODO Exception 바꿀까?
+    //         }
             
-            ThingDB requestBodyDB = requestBody.toThingDB();
-            if(requestBodyDB.getName() != null) {
-                target.setName(requestBodyDB.getName());    
-            }
-            if(requestBodyDB.getEmojiByte() != 0) {
-                target.setEmojiByte(requestBodyDB.getEmojiByte());    
-            }
-            if(requestBodyDB.getDescription() != null) {
-                target.setDescription(requestBodyDB.getDescription());
-            }
-            thingRepository.save(target);
+    //         ThingDB requestBodyDB = requestBody.toThingDB();
+    //         if(requestBodyDB.getName() != null) {
+    //             target.setName(requestBodyDB.getName());    
+    //         }
+    //         if(requestBodyDB.getEmojiByte() != 0) {
+    //             target.setEmojiByte(requestBodyDB.getEmojiByte());    
+    //         }
+    //         if(requestBodyDB.getDescription() != null) {
+    //             target.setDescription(requestBodyDB.getDescription());
+    //         }
+    //         thingRepository.save(target);
 
-            Iterable<ThingDB> allThingsListDB = thingRepository.findByDepartmentId(deptId);
-            Iterator<ThingDB> iterator = allThingsListDB.iterator();
+    //         Iterable<ThingDB> allThingsListDB = thingRepository.findByDepartmentId(deptId);
+    //         Iterator<ThingDB> iterator = allThingsListDB.iterator();
 
-            ArrayList<Thing> responseBody = new ArrayList<>();
-            while(iterator.hasNext()) {
-                Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
-                responseBody.add(tmp);
-            }
-            return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
-        }
-        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);
-    }
+    //         ArrayList<Thing> responseBody = new ArrayList<>();
+    //         while(iterator.hasNext()) {
+    //             Thing tmp = iterator.next().toThing(universityRepository, departmentRepository, majorRepository, userRepository, thingRepository, itemRepository, eventRepository); 
+    //             responseBody.add(tmp);
+    //         }
+    //         return new ResponseWrapper<>(ResponseHeader.OK, responseBody);
+    //     }
+    //     return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION,null);
+    // }
 
     // deactivate Thing을 만들긴 해야할 거 같지만 생각좀 해봐야 할 듯
     // @PutMapping("/deactivate/{id}/")

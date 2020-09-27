@@ -11,6 +11,8 @@ import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.*;
+import com.hanyang.belieme.demoserver.thing.ThingDB;
+import com.hanyang.belieme.demoserver.thing.ThingNestedToEvent;
 import com.hanyang.belieme.demoserver.thing.ThingRepository;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.UserDB;
@@ -209,16 +211,27 @@ public class EventDB {
         return tmp.getTime().getTime()/1000;
     }
     
-    public Event toEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
+    public Event toEvent(UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
         Event output = new Event();
-        ItemNestedToEvent item;
         
+        int thingId;
+        ItemNestedToEvent item;
         Optional<ItemDB> itemOptional = itemRepository.findById(itemId);
         if(itemOptional.isPresent()) {
-            item = itemOptional.get().toItemNestedToEvent(universityRepository, departmentRepository, majorRepository, thingRepository, eventRepository);
+            thingId = itemOptional.get().getThingId();
+            item = itemOptional.get().toItemNestedToEvent(eventRepository);
         } else {
-            item = null;
+            throw new NotFoundException();
         }
+        
+        ThingNestedToEvent thing;
+        Optional<ThingDB> thingDBOptional = thingRepository.findById(thingId);
+        if(thingDBOptional.isPresent()) {
+            thing = thingDBOptional.get().toThingNestedToEvent();
+        } else {
+            throw new NotFoundException();
+        }
+        
         
         output.setUser(null);
         output.setApproveManager(null);
@@ -258,6 +271,7 @@ public class EventDB {
         }
         output.setId(id);
         output.setItem(item);
+        output.setThing(thing);
         output.setReserveTimeStamp(reserveTimeStamp);
         output.setApproveTimeStamp(approveTimeStamp);
         output.setReturnTimeStamp(returnTimeStamp);

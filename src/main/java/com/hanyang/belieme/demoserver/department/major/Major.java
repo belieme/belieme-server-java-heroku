@@ -43,4 +43,11 @@ public class Major {
     public void setDepartmentId(int departmentId) {
         this.departmentId = departmentId;
     }
+    
+    public MajorResponse toMajorResponse() {
+        MajorResponse output = new MajorResponse();
+        output.setId(id);
+        output.setCode(code);
+        return output;
+    }
 }

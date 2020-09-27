@@ -2,15 +2,13 @@ package com.hanyang.belieme.demoserver.item;
 
 import javax.persistence.*;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.hanyang.belieme.demoserver.thing.*;
-import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.UserRepository;
-import com.hanyang.belieme.demoserver.department.DepartmentRepository;
-import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.*;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 
 @Entity
@@ -62,12 +60,10 @@ public class ItemDB {
     public void setLastEventId(int lastEventId) {
         this.lastEventId = lastEventId;
     }
-
     
-    public Item toItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, UserRepository userRepository, ThingRepository thingRepository, EventRepository eventRepository) {
+    public Item toItem(UserRepository userRepository, EventRepository eventRepository) {
         Item output = new Item();
         String status;
-        ThingNestedToItem thing = null;    
         EventNestedToItem lastEvent;
         
         Optional<EventDB> lastEventOptional = eventRepository.findById(lastEventId);
@@ -87,22 +83,12 @@ public class ItemDB {
             status = "USABLE";
             lastEvent = null;
         }
-
-        Optional<ThingDB> thingDBOptional = thingRepository.findById(getThingId());
-        if(thingDBOptional.isPresent()) {
-            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository, majorRepository);
-        } else {
-            thing = null;
-        }
         
         output.setId(id);
         output.setNum(num);
-        output.setThing(thing);
         output.setStatus(status);
         output.setLastEvent(lastEvent);
-        
-        System.out.println(thing);
-        System.out.println(output.getThing().toString());
+        output.setThingId(thingId);
         
         return output;
     }
@@ -138,11 +124,9 @@ public class ItemDB {
         return output;
     }
     
-    public ItemNestedToEvent toItemNestedToEvent(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, ThingRepository thingRepository, EventRepository eventRepository) {
+    public ItemNestedToEvent toItemNestedToEvent(EventRepository eventRepository) {
         ItemNestedToEvent output = new ItemNestedToEvent();
-        
-        String status;
-        ThingNestedToItem thing;    
+        String status;   
         
         Optional<EventDB> lastEventOptional = eventRepository.findById(lastEventId);
         if(lastEventOptional.isPresent()) {
@@ -160,17 +144,20 @@ public class ItemDB {
             status = "USABLE";
         }
 
-        Optional<ThingDB> thingDBOptional = thingRepository.findById(getThingId());
-        if(thingDBOptional.isPresent()) {
-            thing = thingDBOptional.get().toThingNestedToItem(universityRepository, departmentRepository, majorRepository);  
-        } else {
-            thing = null;
-        }
         output.setId(id);
         output.setNum(num);
-        output.setThing(thing);
         output.setCurrentStatus(status);
         
         return output;
+    }
+    
+    public static ItemDB findByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
+        List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
+        if(itemListByThingIdAndNum.size() == 0) {
+            throw new NotFoundException();
+        } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
+            throw new WrongInDataBaseException();
+        }
+        return itemListByThingIdAndNum.get(0);
     }
 }

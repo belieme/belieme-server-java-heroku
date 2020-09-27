@@ -64,9 +64,11 @@ public class GeneralApiController {
         }
         
         UserDB outputResponse;
+        University univ;
         int univId;
         try {
-            univId = University.findIdByUnivCode(universityRepository, requestBody.getUnivCode());    
+            univ = University.findByUnivCode(universityRepository, requestBody.getUnivCode()); 
+            univId = univ.getId();
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {

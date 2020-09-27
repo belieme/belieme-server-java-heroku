@@ -35,16 +35,17 @@ public class DepartmentApiController {
     private MajorRepository majorRepository;
     
     @GetMapping("")
-    public ResponseWrapper<Iterable<Department>> getDepartments(@PathVariable String univCode) {
+    public ResponseWrapper<ListResponse> getDepartments(@PathVariable String univCode) {
         try {
-            int univId = University.findIdByUnivCode(universityRepository, univCode);
+            University univ = University.findByUnivCode(universityRepository, univCode);
+            int univId = univ.getId();
             
-            List<Department> output = new ArrayList<>();
+            List<DepartmentResponse> output = new ArrayList<>();
             Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
             while(iterator.hasNext()) {
-                output.add(iterator.next().toDepartment(universityRepository, majorRepository));
+                output.add(iterator.next().toDepartmentResponse(majorRepository));
             }
-            return new ResponseWrapper<>(ResponseHeader.OK, output);
+            return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, output));
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -53,12 +54,15 @@ public class DepartmentApiController {
     }
     
     @GetMapping("/{deptCode}")
-    public ResponseWrapper<Department> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) {
+    public ResponseWrapper<Response> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) {
         try {
-            int id = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-            Optional<DepartmentDB> departmentOptional = departmentRepository.findById(id);
+            University univ = University.findByUnivCode(universityRepository, univCode);
+            
+            DepartmentDB dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            int deptId = dept.getId();
+            Optional<DepartmentDB> departmentOptional = departmentRepository.findById(deptId);
             if(departmentOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, departmentOptional.get().toDepartment(universityRepository, majorRepository));
+                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, departmentOptional.get().toDepartmentResponse(majorRepository)));
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -70,18 +74,20 @@ public class DepartmentApiController {
     }
     
     @PostMapping("")
-    public ResponseWrapper<Department> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
+    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
         if(requestBody.getCode() == null || requestBody.getName() == null) {
-            return new ResponseWrapper<Department>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        int univId;
+        
+        University univ;
         try {
-            univId = University.findIdByUnivCode(universityRepository, univCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        int univId = univ.getId();
         
         List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
         for(int i = 0; i < departmentListByUnivId.size(); i++) {
@@ -93,35 +99,37 @@ public class DepartmentApiController {
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
         newDepartmentDB.able();// TODO default는 활성화? 비활성화?
-        Department output = departmentRepository.save(newDepartmentDB).toDepartment(universityRepository, majorRepository);
-        return new ResponseWrapper<Department>(ResponseHeader.OK, output);
+        DepartmentResponse output = departmentRepository.save(newDepartmentDB).toDepartmentResponse(majorRepository);
+        return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ,output));
     }
     
     @PatchMapping("/{deptCode}")
-    public ResponseWrapper<Department> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
+    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
         if(requestBody.getName() == null && requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        int id;
+        DepartmentDB dept;
         try {
-            id = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);    
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        int deptId = dept.getId();
         
-        int univId;
+        University univ;
         try {
-            univId = University.findIdByUnivCode(universityRepository, univCode);
+            univ = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
+        int univId = univ.getId();
         
-        Optional<DepartmentDB> targetOptional = departmentRepository.findById(id);
+        Optional<DepartmentDB> targetOptional = departmentRepository.findById(deptId);
         if(targetOptional.isPresent()) {
             DepartmentDB target = targetOptional.get();
             if(requestBody.getCode() != null && !requestBody.getCode().equals(deptCode)) {
@@ -136,12 +144,58 @@ public class DepartmentApiController {
             if(requestBody.getName() != null && !requestBody.getName().equals(target.getName())) {
                target.setName(requestBody.getName());
             }
-            Department output = departmentRepository.save(target).toDepartment(universityRepository, majorRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);
+            DepartmentResponse output = departmentRepository.save(target).toDepartmentResponse(majorRepository);
+            return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, output));
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         }
     }
     
     //TODO 활성화/비활성화 patch
+    
+    public class Response {
+        University university;
+        DepartmentResponse department;
+
+        public Response(University university, DepartmentResponse department) {
+            this.university = new University(university);
+            this.department = new DepartmentResponse(department);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+
+        public DepartmentResponse getDepartment() {
+            if(department == null) {
+                return null;
+            }
+            return new DepartmentResponse(department);
+        }
+    }
+    
+    
+    public class ListResponse {
+        University university;
+        ArrayList<DepartmentResponse> departments;
+
+        public ListResponse(University university, List<DepartmentResponse> departments) {
+            this.university = university;
+            this.departments = new ArrayList<>(departments);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+
+        public List<DepartmentResponse> getDepartments() {
+            return new ArrayList<>(departments);
+        }
+    }
 }
