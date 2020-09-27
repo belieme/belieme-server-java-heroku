@@ -35,10 +35,31 @@ public class Event {
         this.id = oth.id;
         this.thing = new ThingNestedToEvent(oth.thing);
         this.item = new ItemNestedToEvent(oth.item);
-        this.user = new UserNestedToEvent(oth.user);
-        this.approveManager = new UserNestedToEvent(oth.approveManager);
-        this.returnManager = new UserNestedToEvent(oth.returnManager);
-        this.lostManager = new UserNestedToEvent(oth.lostManager);
+        
+        if(oth.user == null) {
+            this.user = null;
+        } else {
+            this.user = new UserNestedToEvent(oth.user);    
+        }
+        
+        if(oth.approveManager == null) {
+            this.approveManager = null;
+        } else {
+            this.approveManager = new UserNestedToEvent(oth.approveManager);
+        }
+        
+        if(oth.returnManager == null) {
+            this.returnManager = null;
+        } else {
+            this.returnManager = new UserNestedToEvent(oth.returnManager);
+        }
+        
+        if(oth.lostManager == null) {
+            this.lostManager = null;
+        } else {
+            this.lostManager = new UserNestedToEvent(oth.lostManager);
+        }
+        
         
         this.reserveTimeStamp = oth.reserveTimeStamp;
         this.approveTimeStamp = oth.approveTimeStamp;
@@ -161,19 +182,35 @@ public class Event {
     }
 
     public void setUser(UserNestedToEvent user) {
-        this.user = user;
+        if(user == null) {
+            this.user = null;
+        } else {
+            this.user = new UserNestedToEvent(user);    
+        }
     }
     
     public void setApproveManager(UserNestedToEvent approveManager) {
-        this.approveManager = approveManager;
+        if(approveManager == null) {
+            this.approveManager = null;
+        } else {
+            this.approveManager = new UserNestedToEvent(approveManager);
+        }
     }
     
     public void setReturnManager(UserNestedToEvent returnManager) {
-        this.returnManager = returnManager;
+        if(returnManager == null) {
+            this.returnManager = null;
+        } else {
+            this.returnManager = new UserNestedToEvent(returnManager);
+        }
     }
     
     public void setLostManager(UserNestedToEvent lostManager) {
-        this.lostManager = lostManager;
+        if(lostManager == null) {
+            this.lostManager = null;
+        } else {
+            this.lostManager = new UserNestedToEvent(lostManager);
+        }
     }
 
     public void setReserveTimeStamp(long reserveTimeStamp) {
