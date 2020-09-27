@@ -32,8 +32,8 @@ public class UniversityApiController {
     @GetMapping("/{univCode}") 
     public ResponseWrapper<University> getUniversityByUnivCode(@PathVariable String univCode) {
         try {
-            int id = University.findIdByUnivCode(universityRepository, univCode);
-            Optional<University> univOptional = universityRepository.findById(id);
+            University univ = University.findByUnivCode(universityRepository, univCode);
+            Optional<University> univOptional = universityRepository.findById(univ.getId());
             if(univOptional.isPresent()) {
                 return new ResponseWrapper<>(ResponseHeader.OK, univOptional.get());    
             } else {
@@ -68,38 +68,31 @@ public class UniversityApiController {
         if(requestBody.getName() == null && requestBody.getCode() == null && requestBody.getApiUrl() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
-        int id;
+        University target;
         try {
-            id = University.findIdByUnivCode(universityRepository, univCode);
+            target = University.findByUnivCode(universityRepository, univCode);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
-        Optional<University> targetOptional = universityRepository.findById(id);
-        if(targetOptional.isPresent()) {
-            University target = targetOptional.get();
-            if(requestBody.getName() != null) {
-                target.setName(requestBody.getName()); 
-            }
-            if(requestBody.getCode() != null && !univCode.equals(requestBody.getCode())) {
-                Iterable<University> universityList = universityRepository.findAll();
-                Iterator<University> iter = universityList.iterator();
-                while(iter.hasNext()) {
-                    if(iter.next().getCode().equals(requestBody.getCode())) {
-                        return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
-                    }
-                }
-                target.setCode(requestBody.getCode());
-            }
-            if(requestBody.getApiUrl() != null) {
-                target.setApiUrl(requestBody.getApiUrl());
-            }
-            University output = universityRepository.save(target);
-            return new ResponseWrapper<>(ResponseHeader.OK, output);  
-        } else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        if(requestBody.getName() != null) {
+            target.setName(requestBody.getName()); 
         }
+        if(requestBody.getCode() != null && !univCode.equals(requestBody.getCode())) {
+            Iterable<University> universityList = universityRepository.findAll();
+            Iterator<University> iter = universityList.iterator();
+            while(iter.hasNext()) {
+                if(iter.next().getCode().equals(requestBody.getCode())) {
+                    return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                }
+            }
+            target.setCode(requestBody.getCode());
+        }
+        if(requestBody.getApiUrl() != null) {
+            target.setApiUrl(requestBody.getApiUrl());
+        }
+        University output = universityRepository.save(target);
+        return new ResponseWrapper<>(ResponseHeader.OK, output);  
     }
-    
 }
