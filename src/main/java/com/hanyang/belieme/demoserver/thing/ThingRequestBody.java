@@ -55,12 +55,12 @@ public class ThingRequestBody {
     
     public ThingDB toThingDB() {
         if(emoji == null) {
-            return new ThingDB(id, name, 0, description);
+            return new ThingDB(id, name, 0, description, 0);
         }
         byte arr[];
         try {
             arr = emoji.getBytes("UTF-8");
-            return new ThingDB(id, name, getIntFromByteArray(arr), description);
+            return new ThingDB(id, name, getIntFromByteArray(arr), description, 0);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
