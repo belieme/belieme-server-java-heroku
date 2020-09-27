@@ -39,6 +39,9 @@ public class Item {
     }
     
     public EventNestedToItem getLastEvent() {
+        if(lastEvent == null) {
+            return null;
+        }
         return new EventNestedToItem(lastEvent);
     }
     
@@ -59,6 +62,9 @@ public class Item {
     }
     
     public void setLastEvent(EventNestedToItem lastEvent) {
+        if(lastEvent == null) {
+            this.lastEvent = null;
+        }
         this.lastEvent = new EventNestedToItem(lastEvent);
     }
     

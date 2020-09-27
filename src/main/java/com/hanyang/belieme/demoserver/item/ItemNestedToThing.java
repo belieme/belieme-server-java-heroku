@@ -20,7 +20,10 @@ public class ItemNestedToThing {
     }
     
     public EventNestedToItem getLastEvent() {
-        return lastEvent;
+        if(lastEvent == null) {
+            return null;
+        }
+        return new EventNestedToItem(lastEvent);
     }
     
     public String getStatus() {
@@ -36,7 +39,10 @@ public class ItemNestedToThing {
     }
     
     public void setLastEvent(EventNestedToItem lastEvent) {
-        this.lastEvent = lastEvent; // 바꿈!!
+        if(lastEvent == null) {
+            this.lastEvent = null;
+        }
+        this.lastEvent = new EventNestedToItem(lastEvent);
     }
     
     public void setStatus(String status) {
