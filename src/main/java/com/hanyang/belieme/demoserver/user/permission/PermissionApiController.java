@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.hanyang.belieme.demoserver.common.ResponseHeader;
 import com.hanyang.belieme.demoserver.common.ResponseWrapper;
 import com.hanyang.belieme.demoserver.department.Department;
+import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
@@ -52,41 +53,37 @@ public class PermissionApiController {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        int deptId;
+        DepartmentDB dept;
         try {
-            deptId = Department.findIdByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
+            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        int userId;
+        UserDB userDB;
         try {
-            userId = User.findIdByUnivCodeAndStudentId(universityRepository, userRepository, univCode, studentId);    
+            userDB = User.findByUnivCodeAndStudentId(universityRepository, userRepository, univCode, studentId);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        Optional<UserDB> userDBOptional = userRepository.findById(userId);
-        if(!userDBOptional.isPresent()) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); 
-        }
-        User targetUser = userDBOptional.get().toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
+        User targetUser = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
         
         PermissionDB newPermissionDB = new PermissionDB();
         if(targetUser.permissionsContainsKey(requestBody.getDeptCode())) {
-            List<PermissionDB> tmp = permissionRepository.findByUserIdAndDeptId(userId, deptId);
+            List<PermissionDB> tmp = permissionRepository.findByUserIdAndDeptId(userDB.getId(), dept.getId());
             if(tmp.size() == 1) {
                 newPermissionDB = tmp.get(0);    
             } else {
                 return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
             }
         }
-        newPermissionDB.setUserId(userId);
-        newPermissionDB.setDeptId(deptId);
+        newPermissionDB.setUserId(userDB.getId());
+        newPermissionDB.setDeptId(dept.getId());
         
         switch(requestBody.getPermission()) {
             case "USER" : {
@@ -108,7 +105,7 @@ public class PermissionApiController {
                 return new ResponseWrapper<>(ResponseHeader.WRONG_PERMISSION_EXCEPTION, null);
         }
         
-        User output = userDBOptional.get().toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
+        User output = userDB.toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);
         return new ResponseWrapper<>(ResponseHeader.OK, output);
         
     }

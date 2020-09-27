@@ -139,24 +139,6 @@ public class ThingDB {
         return output;
     }
     
-    public ThingNestedToItem toThingNestedToItem(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository) {
-        ThingNestedToItem output = new ThingNestedToItem();
-        
-        Optional<DepartmentDB> departmentOptional = departmentRepository.findById(departmentId);
-        Department department = null;
-        if(departmentOptional.isPresent()) {
-            department = departmentOptional.get().toDepartment(universityRepository, majorRepository);
-        }
-        
-        output.setId(id);
-        output.setName(name);
-        output.setEmoji(new String(getByteArrayFromInt(emojiByte), StandardCharsets.UTF_8));
-        output.setDescription(description);
-        output.setDepartment(department);
-        
-        return output;
-    }
-    
     public ThingNestedToEvent toThingNestedToEvent() {
         ThingNestedToEvent output = new ThingNestedToEvent();
         
