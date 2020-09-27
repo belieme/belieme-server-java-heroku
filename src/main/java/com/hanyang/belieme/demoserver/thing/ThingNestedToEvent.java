@@ -16,6 +16,7 @@ public class ThingNestedToEvent {
         this.name = oth.name;
         this.emoji = oth.emoji;
         this.description = oth.description;
+        this.deptId = oth.deptId;
     }
         
     public int getId(){

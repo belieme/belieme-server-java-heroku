@@ -42,7 +42,6 @@ public class ItemNestedToThing {
         if(lastEvent == null) {
             this.lastEvent = null;
         } else {
-            System.out.println(lastEvent.getId());
             this.lastEvent = new EventNestedToItem(lastEvent);    
         }
     }
