@@ -13,11 +13,11 @@ public class Permission { //TODO 어떠한 형식의 POST PERMISSION의 output�
         return id;
     }
     
-    public User getUserId() {
+    public User getUser() {
         return user;
     }
     
-    public Department getDeptId() {
+    public Department getDept() {
         return dept;
     }
     
@@ -25,11 +25,11 @@ public class Permission { //TODO 어떠한 형식의 POST PERMISSION의 output�
         return permission;
     }
     
-    public void setUserId(User user) {
+    public void setUser(User user) {
         this.user = user;
     }
     
-    public void setDepartmentId(Department dept) {
+    public void setDepartment(Department dept) {
         this.dept = dept;
     }
     

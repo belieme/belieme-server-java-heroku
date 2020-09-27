@@ -1,10 +1,6 @@
 package com.hanyang.belieme.demoserver.item;
 
-import java.util.List;
-
 import com.hanyang.belieme.demoserver.event.*;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 public class Item {
     private int id;
@@ -64,8 +60,9 @@ public class Item {
     public void setLastEvent(EventNestedToItem lastEvent) {
         if(lastEvent == null) {
             this.lastEvent = null;
+        } else {
+            this.lastEvent = new EventNestedToItem(lastEvent);    
         }
-        this.lastEvent = new EventNestedToItem(lastEvent);
     }
     
     public void setThingId(int thingId) {
