@@ -108,7 +108,7 @@ public class Event {
         if(approveTimeStamp == 0) {
             return null;
         }
-        Date date =  new Date(approveTimeStamp);
+        Date date =  new Date(approveTimeStamp*1000);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -119,7 +119,7 @@ public class Event {
         if(returnTimeStamp == 0) {
             return null;
         }
-        Date date = new Date(returnTimeStamp);
+        Date date = new Date(returnTimeStamp*1000);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -130,7 +130,7 @@ public class Event {
         if(cancelTimeStamp == 0) {
             return null;
         }
-        Date date = new Date(cancelTimeStamp);
+        Date date = new Date(cancelTimeStamp*1000);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -141,7 +141,7 @@ public class Event {
         if(lostTimeStamp == 0) {
             return null;
         }
-        Date date = new Date(lostTimeStamp);
+        Date date = new Date(lostTimeStamp*1000);
         SimpleDateFormat sdf;
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
