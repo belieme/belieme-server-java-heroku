@@ -51,7 +51,7 @@ public class GeneralApiController {
     
     @GetMapping("/apiVer")
     public String getVer() {
-        String result = "1.0";
+        String result = "1.1";
         return result;
     }
     
@@ -165,7 +165,7 @@ public class GeneralApiController {
                      e.printStackTrace();
                      return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
-                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithToken(univ, outputResponse.toUserWithToken(departmentRepository, majorRepository, permissionRepository)));
+                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithToken(univ, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository, permissionRepository)));
             }
             default : {
                 return new ResponseWrapper<>(ResponseHeader.UNREGISTERED_UNIVERSITY_EXCEPTION, null);
@@ -213,28 +213,14 @@ public class GeneralApiController {
     }
     
     public class ResponseWithToken {
-        University university;
         UserWithToken user;
 
         public ResponseWithToken(University university, UserWithToken user) {
-            if(university == null) {
-                this.university = null;
-            } else {
-                this.university = new University(university);    
-            }
-            
             if(user == null) {
                 this.user = null;
             } else {
                 this.user = user;    
             }
-        }
-
-        public University getUniversity() {
-            if(university == null) {
-                return null;
-            }
-            return new University(university);
         }
         
         public UserWithToken getUser() {

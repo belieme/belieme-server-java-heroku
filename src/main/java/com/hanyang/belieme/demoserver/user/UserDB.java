@@ -235,16 +235,18 @@ public class UserDB {
         return output;
     }
     
-    public UserWithToken toUserWithToken(DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
+    public UserWithToken toUserWithToken(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
         UserWithToken output = new UserWithToken();
         output.setId(id);
-        output.setUnivId(universityId);
         output.setStudentId(studentId);
         output.setName(name);
         output.setEntranceYear(entranceYear);
         output.setToken(token);
         output.setCreateTimeStamp(createTimeStamp);
         output.setApprovalTimeStamp(approvalTimeStamp);
+        
+        Optional<University> universityOptional = universityRepository.findById(universityId);
+        output.setUniversity(universityOptional.get());
         
         Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
         Iterator<Major> iter = majorListByIdList.iterator();

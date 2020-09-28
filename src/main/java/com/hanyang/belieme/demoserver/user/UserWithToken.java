@@ -13,7 +13,7 @@ import com.hanyang.belieme.demoserver.university.University;
 public class UserWithToken {
     private int id;
     
-    private int univId;
+    private University university;
     
     private List<String> majorCodes;
     
@@ -39,6 +39,10 @@ public class UserWithToken {
     
     public int getId() {
         return id;
+    }
+    
+    public University getUniversity() {
+        return university;
     }
     
     public List<String> getMajorCodes() {
@@ -83,16 +87,12 @@ public class UserWithToken {
         }
     }
     
-    public int univIdGetter() {
-        return univId;
-    }
-    
     public void setId(int id) {
         this.id = id;
     }
     
-    public void setUnivId(int univId) {
-        this.univId = univId;
+    public void setUniversity(University university) {
+        this.university = university;
     }
     
     public void setMajorCodes(List<String> majorCodes) {
