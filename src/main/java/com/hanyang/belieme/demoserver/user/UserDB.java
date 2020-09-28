@@ -22,6 +22,8 @@ import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.permission.PermissionDB;
@@ -129,8 +131,59 @@ public class UserDB {
         this.entranceYear = entranceYear;
     }
     
-    public User toUser(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
+    public User toUser(DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
         User output = new User();
+        output.setId(id);
+        output.setUnivId(universityId);
+        output.setStudentId(studentId);
+        output.setName(name);
+        output.setEntranceYear(entranceYear);
+        output.setCreateTimeStamp(createTimeStamp);
+        output.setApprovalTimeStamp(approvalTimeStamp);
+        
+        Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
+        Iterator<Major> iter = majorListByIdList.iterator();
+        
+        ArrayList<String> majorCodes = new ArrayList<String>();
+        ArrayList<DepartmentNestedToUser> departments = new ArrayList<DepartmentNestedToUser>();
+        while(iter.hasNext()) {
+            Major tmp = iter.next();
+            majorCodes.add(tmp.getCode());
+            
+            if(departments.size() == 0) {
+                Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
+                if(tmpDepartmentOptional.isPresent()) {
+                    departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                } else {
+                    // TODO DB에 없음 이라는 Department를 만들기
+                }
+                continue;
+            }
+            for(int i = 0; i < departments.size(); i++) {
+                if(tmp.getDepartmentId() != departments.get(i).getId()) {
+                    Optional<DepartmentDB> tmpDepartmentOptional = departmentRepository.findById(tmp.getDepartmentId());
+                    if(tmpDepartmentOptional.isPresent()) {
+                        departments.add(tmpDepartmentOptional.get().toDepartmentNestedToUser());
+                    } else {
+                        // TODO DB에 없음 이라는 Department를 만들기
+                    }
+                }
+            }
+        }
+        
+        output.setMajorCodes(majorCodes);
+        output.setDepartments(departments);
+        
+        List<PermissionDB> permissions = permissionRepository.findByUserId(id);
+        for(int i = 0; i < permissions.size(); i++) {
+            output.addPermission(departmentRepository.findById(permissions.get(i).getDeptId()).get().getCode(), permissions.get(i).getPermission()); // TODO null pointer exception 잡아 줘야하는 것인가...
+        }
+        
+        return output;
+    }
+    
+    public UserWithUniversity toUserWithUniversity(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
+        UserWithUniversity output = new UserWithUniversity();
         output.setId(id);
         output.setStudentId(studentId);
         output.setName(name);
@@ -182,18 +235,16 @@ public class UserDB {
         return output;
     }
     
-    public UserWithToken toUserWithToken(UniversityRepository universityRepository, DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
+    public UserWithToken toUserWithToken(DepartmentRepository departmentRepository, MajorRepository majorRepository, PermissionRepository permissionRepository) {
         UserWithToken output = new UserWithToken();
         output.setId(id);
+        output.setUnivId(universityId);
         output.setStudentId(studentId);
         output.setName(name);
         output.setEntranceYear(entranceYear);
         output.setToken(token);
         output.setCreateTimeStamp(createTimeStamp);
         output.setApprovalTimeStamp(approvalTimeStamp);
-        
-        Optional<University> universityOptional = universityRepository.findById(universityId);
-        output.setUniversity(universityOptional.get());
         
         Iterable<Major> majorListByIdList = majorRepository.findAllById(majorIds);
         Iterator<Major> iter = majorListByIdList.iterator();
@@ -276,5 +327,30 @@ public class UserDB {
             // return approvalTimeStamp + 60;
         }
         return 0;
+    }
+    
+    public static UserDB findByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {
+        int univId = University.findByUnivCode(universityRepository, univCode).getId();
+        List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
+        
+        if(targetList.size() == 0) {
+            throw new NotFoundException();
+        } else if(targetList.size() != 1) {
+            throw new WrongInDataBaseException();
+        } else {
+            return targetList.get(0);
+        }
+    }
+    
+    public static UserDB findByToken(UserRepository userRepository, String token) throws NotFoundException, WrongInDataBaseException {
+        List<UserDB> targetList = userRepository.findByToken(token);
+        
+        if(targetList.size() == 0) {
+            throw new NotFoundException();
+        } else if(targetList.size() != 1) {
+            throw new WrongInDataBaseException();
+        } else {
+            return targetList.get(0);
+        }
     }
 }

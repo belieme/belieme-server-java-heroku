@@ -10,10 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.university.University;
 
-public class UserWithToken {
+
+public class UserWithUniversity {
     private int id;
     
-    private int univId;
+    private University university;
     
     private List<String> majorCodes;
     
@@ -25,20 +26,22 @@ public class UserWithToken {
     
     private int entranceYear;
     
-    private String token;
-    
     private long createTimeStamp;
     
     private long approvalTimeStamp;
     
     private Map<String, String> permissions;
     
-    public UserWithToken() {
+    public UserWithUniversity() {
         permissions = new HashMap<>();
     }
     
     public int getId() {
         return id;
+    }
+    
+    public University getUniversity() {
+        return university;
     }
     
     public List<String> getMajorCodes() {
@@ -61,10 +64,6 @@ public class UserWithToken {
         return entranceYear;
     }
     
-    public String getToken() {
-        return token;
-    }
-    
     public long getCreateTimeStamp() {
         return createTimeStamp;
     }
@@ -83,16 +82,55 @@ public class UserWithToken {
         }
     }
     
-    public int univIdGetter() {
-        return univId;
+    public boolean permissionsContainsKey(String key) {
+        return permissions.containsKey(key);
+    }
+    
+    public boolean hasUserPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+            case "STAFF" :
+            case "USER" :
+                return true;
+            default :
+                return false;
+        }
+    }
+    
+    public boolean hasStaffPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+            case "STAFF" :
+                return true;
+            default :
+                return false;
+        }
+    }
+    
+    public boolean hasMasterPermission(String deptCode) {
+        if(permissions.get(deptCode) == null) {
+            return false;
+        }
+        switch(permissions.get(deptCode)) {
+            case "MASTER" :
+                return true;
+            default :
+                return false;
+        }
     }
     
     public void setId(int id) {
         this.id = id;
     }
     
-    public void setUnivId(int univId) {
-        this.univId = univId;
+    public void setUniversity(University university) {
+        this.university = university;
     }
     
     public void setMajorCodes(List<String> majorCodes) {
@@ -113,10 +151,6 @@ public class UserWithToken {
     
     public void setEntranceYear(int entranceYear) {
         this.entranceYear = entranceYear;
-    }
-    
-    public void setToken(String token) {
-        this.token = token;
     }
     
     public void setCreateTimeStamp(long createTimeStamp) {

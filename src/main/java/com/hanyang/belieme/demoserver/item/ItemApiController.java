@@ -11,6 +11,7 @@ import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.User;
+import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.event.*;
@@ -84,7 +85,7 @@ public class ItemApiController {
         
         User user;
         try {
-            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -138,7 +139,7 @@ public class ItemApiController {
         
         User user;
         try {
-            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -197,7 +198,7 @@ public class ItemApiController {
         
         User user;
         try {
-            user = User.findByToken(userRepository, userToken).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository);    
+            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {

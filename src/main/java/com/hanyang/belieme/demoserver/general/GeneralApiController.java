@@ -20,14 +20,12 @@ import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
-import com.hanyang.belieme.demoserver.user.User;
 import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.user.UserWithToken;
+import com.hanyang.belieme.demoserver.user.UserWithUniversity;
 import com.hanyang.belieme.demoserver.user.permission.PermissionDB;
 import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
-
-// TODO fix compile error
 
 @RestController
 public class GeneralApiController {
@@ -58,7 +56,7 @@ public class GeneralApiController {
     }
     
     @GetMapping("/login")
-    public ResponseWrapper<UserWithToken> getUserInfoFromUnivApi(@RequestBody LoginInfo requestBody) {
+    public ResponseWrapper<ResponseWithToken> getUserInfoFromUnivApi(@RequestBody LoginInfo requestBody) {
         if(requestBody.getUnivCode() == null || requestBody.getApiToken() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -167,7 +165,7 @@ public class GeneralApiController {
                      e.printStackTrace();
                      return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
                 }
-                return new ResponseWrapper<>(ResponseHeader.OK, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository, permissionRepository));
+                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithToken(univ, outputResponse.toUserWithToken(departmentRepository, majorRepository, permissionRepository)));
             }
             default : {
                 return new ResponseWrapper<>(ResponseHeader.UNREGISTERED_UNIVERSITY_EXCEPTION, null);
@@ -176,7 +174,7 @@ public class GeneralApiController {
     }
     
     @GetMapping("/me")
-    public ResponseWrapper<User> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) {
+    public ResponseWrapper<ResponseWithUniversity> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) {
         List<UserDB> userListByToken = userRepository.findByToken(userToken);
         if(userListByToken.size() == 0) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -185,7 +183,7 @@ public class GeneralApiController {
         } else {
             UserDB target = userListByToken.get(0);
             if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, userListByToken.get(0).toUser(universityRepository, departmentRepository, majorRepository, permissionRepository));    
+                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithUniversity(userListByToken.get(0).toUserWithUniversity(universityRepository, departmentRepository, majorRepository, permissionRepository)));    
             } else {
                 target.setApprovalTimeStampZero();
                 target.resetToken();
@@ -194,4 +192,56 @@ public class GeneralApiController {
             }
         }
     }
+    
+    public class ResponseWithUniversity {
+        UserWithUniversity user;
+
+        public ResponseWithUniversity(UserWithUniversity user) {
+            if(user == null) {
+                this.user = null;
+            } else {
+                this.user = user;    
+            }
+        }
+        
+        public UserWithUniversity getUser() {
+            if(user == null) {
+                return null;
+            }
+            return user;
+        }
+    }
+    
+    public class ResponseWithToken {
+        University university;
+        UserWithToken user;
+
+        public ResponseWithToken(University university, UserWithToken user) {
+            if(university == null) {
+                this.university = null;
+            } else {
+                this.university = new University(university);    
+            }
+            
+            if(user == null) {
+                this.user = null;
+            } else {
+                this.user = user;    
+            }
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+        
+        public UserWithToken getUser() {
+            if(user == null) {
+                return null;
+            }
+            return user;
+        }
+    } 
 }

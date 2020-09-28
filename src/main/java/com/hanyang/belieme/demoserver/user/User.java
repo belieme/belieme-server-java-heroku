@@ -8,15 +8,12 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
-import com.hanyang.belieme.demoserver.university.University;
-import com.hanyang.belieme.demoserver.university.UniversityRepository;
+
 
 public class User {
     private int id;
     
-    private University university;
+    private int univId;
     
     private List<String> majorCodes;
     
@@ -40,10 +37,6 @@ public class User {
     
     public int getId() {
         return id;
-    }
-    
-    public University getUniversity() {
-        return university;
     }
     
     public List<String> getMajorCodes() {
@@ -82,6 +75,10 @@ public class User {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public int univIdGetter() {
+        return univId;
     }
     
     public boolean permissionsContainsKey(String key) {
@@ -131,8 +128,8 @@ public class User {
         this.id = id;
     }
     
-    public void setUniversity(University university) {
-        this.university = new University(university);
+    public void setUnivId(int univId) {
+        this.univId = univId;
     }
     
     public void setMajorCodes(List<String> majorCodes) {
@@ -165,30 +162,5 @@ public class User {
     
     public void addPermission(String deptCode, String permission) {
         permissions.put(deptCode, permission);
-    }
-    
-    public static UserDB findByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {
-        int univId = University.findByUnivCode(universityRepository, univCode).getId();
-        List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
-        
-        if(targetList.size() == 0) {
-            throw new NotFoundException();
-        } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException();
-        } else {
-            return targetList.get(0);
-        }
-    }
-    
-    public static UserDB findByToken(UserRepository userRepository, String token) throws NotFoundException, WrongInDataBaseException {
-        List<UserDB> targetList = userRepository.findByToken(token);
-        
-        if(targetList.size() == 0) {
-            throw new NotFoundException();
-        } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException();
-        } else {
-            return targetList.get(0);
-        }
     }
 }
