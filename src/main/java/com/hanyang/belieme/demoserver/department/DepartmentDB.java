@@ -11,6 +11,8 @@ import javax.persistence.Id;
 
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
@@ -134,6 +136,17 @@ public class DepartmentDB {
         output.setName(name);
         output.setAvailable(isAvailble());
         return output;
+    }
+    
+    public static DepartmentDB findByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
+        List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findByUnivCode(universityRepository, univCode).getId(), deptCode);
+        if(tmpList.size() == 0) {
+            throw new NotFoundException();
+        } else if(tmpList.size() == 1) {
+            return tmpList.get(0);
+        } else {
+            throw new WrongInDataBaseException();
+        }
     }
     
 }

@@ -233,16 +233,6 @@ public class Event {
         this.lostTimeStamp = lostTimeStamp;
     }
 
-    // public void addInfo(ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) {
-    //     Optional<Item> itemOptional = itemRepository.findById(itemId);
-    //     if(itemOptional.isPresent()) {
-    //         itemOptional.get().addInfo(thingRepository, eventRepository);
-    //         setItem(itemOptional.get());
-    //     } else {
-    //         setItem(null);
-    //     }        
-    // }
-
     public String getStatus() {
         //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
         if(reserveTimeStamp != 0) {

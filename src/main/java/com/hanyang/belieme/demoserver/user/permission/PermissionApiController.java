@@ -55,7 +55,7 @@ public class PermissionApiController {
         
         DepartmentDB dept;
         try {
-            dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
