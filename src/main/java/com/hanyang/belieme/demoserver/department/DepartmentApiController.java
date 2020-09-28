@@ -58,7 +58,7 @@ public class DepartmentApiController {
         try {
             University univ = University.findByUnivCode(universityRepository, univCode);
             
-            DepartmentDB dept = Department.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+            DepartmentDB dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
             int deptId = dept.getId();
             Optional<DepartmentDB> departmentOptional = departmentRepository.findById(deptId);
             if(departmentOptional.isPresent()) {
