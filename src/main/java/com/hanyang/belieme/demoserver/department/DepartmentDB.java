@@ -88,28 +88,28 @@ public class DepartmentDB {
         available = true;
     }
     
-    public Department toDepartment(UniversityRepository universityRepository, MajorRepository majorRepository) {
-        Department output = new Department();
+    // public Department toDepartment(UniversityRepository universityRepository, MajorRepository majorRepository) {
+    //     Department output = new Department();
         
-        Optional<University> universityOptional = universityRepository.findById(universityId);
-        if(universityOptional.isPresent()) {
-            output.setUniversity(universityOptional.get());
-        }
+    //     Optional<University> universityOptional = universityRepository.findById(universityId);
+    //     if(universityOptional.isPresent()) {
+    //         output.setUniversity(universityOptional.get());
+    //     }
         
-        List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
-        ArrayList<String> majorCodes = new ArrayList<>();
-        for(int i = 0; i < majorsByDepartmentId.size(); i++) {
-            majorCodes.add(majorsByDepartmentId.get(i).getCode());
-        }
+    //     List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
+    //     ArrayList<String> majorCodes = new ArrayList<>();
+    //     for(int i = 0; i < majorsByDepartmentId.size(); i++) {
+    //         majorCodes.add(majorsByDepartmentId.get(i).getCode());
+    //     }
         
-        output.setId(id);
-        output.setCode(code);
-        output.setName(name);
-        output.setMajorCodes(majorCodes);
-        output.setAvailable(isAvailble());
+    //     output.setId(id);
+    //     output.setCode(code);
+    //     output.setName(name);
+    //     output.setMajorCodes(majorCodes);
+    //     output.setAvailable(isAvailble());
         
-        return output;
-    }
+    //     return output;
+    // }
     
     public DepartmentResponse toDepartmentResponse(MajorRepository majorRepository) {
         DepartmentResponse output = new DepartmentResponse();

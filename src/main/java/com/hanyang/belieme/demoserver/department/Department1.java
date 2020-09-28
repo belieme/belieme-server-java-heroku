@@ -8,7 +8,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
-public class Department {
+public class Department1 {
     private int id;
     
     private University university;
@@ -21,10 +21,10 @@ public class Department {
     
     private boolean available;
     
-    public Department() {
+    public Department1() {
     }
     
-    public Department(Department oth) {
+    public Department1(Department1 oth) {
         this.id = oth.id;
         this.university = new University(oth.university);
         this.code = oth.code;
