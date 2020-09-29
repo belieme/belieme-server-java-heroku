@@ -111,8 +111,8 @@ public class DepartmentDB {
     //     return output;
     // }
     
-    public DepartmentResponse toDepartmentResponse(MajorRepository majorRepository) {
-        DepartmentResponse output = new DepartmentResponse();
+    public Department toDepartment(MajorRepository majorRepository) {
+        Department output = new Department();
         
         List<Major> majorsByDepartmentId = majorRepository.findByDepartmentId(id);
         ArrayList<String> majorCodes = new ArrayList<>();

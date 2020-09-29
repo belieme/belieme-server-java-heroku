@@ -20,7 +20,7 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
-import com.hanyang.belieme.demoserver.department.DepartmentResponse;
+import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 
 @RestController
@@ -65,9 +65,9 @@ public class ItemApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -119,9 +119,9 @@ public class ItemApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -178,9 +178,9 @@ public class ItemApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -233,13 +233,13 @@ public class ItemApiController {
     
     public class Response {
         University university;
-        DepartmentResponse department;
+        Department department;
         Thing thing;
         Item item;
 
-        public Response(University university, DepartmentResponse department, Thing thing, Item item) {
+        public Response(University university, Department department, Thing thing, Item item) {
             this.university = new University(university);
-            this.department = new DepartmentResponse(department);
+            this.department = new Department(department);
             this.thing = new Thing(thing);
             this.item = new Item(item);
         }
@@ -251,11 +251,11 @@ public class ItemApiController {
             return new University(university);
         }
 
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
         
         public Thing getThing() {
@@ -275,11 +275,11 @@ public class ItemApiController {
     
     public class ListResponse {
         University university;
-        DepartmentResponse department;
+        Department department;
         Thing thing;
         List<Item> items;
 
-        public ListResponse(University university, DepartmentResponse department, Thing thing, List<Item> items) {
+        public ListResponse(University university, Department department, Thing thing, List<Item> items) {
             this.university = university;
             this.department = department;
             this.thing = thing;
@@ -293,11 +293,11 @@ public class ItemApiController {
             return new University(university);
         }
         
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
         
         public Thing getThing() {

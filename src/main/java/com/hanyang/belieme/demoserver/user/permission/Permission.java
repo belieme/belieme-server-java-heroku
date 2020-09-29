@@ -1,12 +1,12 @@
 package com.hanyang.belieme.demoserver.user.permission;
 
-import com.hanyang.belieme.demoserver.department.DepartmentResponse;
+import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.user.User;
 
 public class Permission { //TODO 어떠한 형식의 POST PERMISSION의 output으로 할 것인가...
     private int id;
     private User user;
-    private DepartmentResponse dept;
+    private Department dept;
     private String permission;
     
     public int getId() {
@@ -17,7 +17,7 @@ public class Permission { //TODO 어떠한 형식의 POST PERMISSION의 output�
         return user;
     }
     
-    public DepartmentResponse getDept() {
+    public Department getDept() {
         return dept;
     }
     
@@ -29,7 +29,7 @@ public class Permission { //TODO 어떠한 형식의 POST PERMISSION의 output�
         this.user = user;
     }
     
-    public void setDepartment(DepartmentResponse dept) {
+    public void setDepartment(Department dept) {
         this.dept = dept;
     }
     

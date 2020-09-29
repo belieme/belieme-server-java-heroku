@@ -2,15 +2,11 @@ package com.hanyang.belieme.demoserver.thing;
 
 import javax.persistence.*;
 
-import com.hanyang.belieme.demoserver.department.DepartmentDB;
-import com.hanyang.belieme.demoserver.department.DepartmentRepository;
-import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.event.EventRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.ItemDB;
 import com.hanyang.belieme.demoserver.item.ItemNestedToThing;
 import com.hanyang.belieme.demoserver.item.ItemRepository;
-import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 
 import java.nio.charset.StandardCharsets;

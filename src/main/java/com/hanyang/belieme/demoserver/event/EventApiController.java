@@ -19,7 +19,7 @@ import com.hanyang.belieme.demoserver.item.*;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
-import com.hanyang.belieme.demoserver.department.DepartmentResponse;
+import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
@@ -66,9 +66,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -125,9 +125,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -186,9 +186,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -306,9 +306,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -394,9 +394,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -466,9 +466,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -540,9 +540,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -614,9 +614,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -688,9 +688,9 @@ public class EventApiController {
             return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
         }
         
-        DepartmentResponse dept;
+        Department dept;
         try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartmentResponse(majorRepository);
+            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         } catch(NotFoundException e) {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
         } catch(WrongInDataBaseException e) {
@@ -749,12 +749,12 @@ public class EventApiController {
     
     public class Response {
         University university;
-        DepartmentResponse department;
+        Department department;
         Event event;
 
-        public Response(University university, DepartmentResponse department, Event event) {
+        public Response(University university, Department department, Event event) {
             this.university = new University(university);
-            this.department = new DepartmentResponse(department);
+            this.department = new Department(department);
             this.event = new Event(event);
         }
 
@@ -765,11 +765,11 @@ public class EventApiController {
             return new University(university);
         }
 
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
         
         public Event getEvent() {
@@ -782,10 +782,10 @@ public class EventApiController {
     
     public class ListResponse {
         University university;
-        DepartmentResponse department;
+        Department department;
         List<Event> events;
 
-        public ListResponse(University university, DepartmentResponse department, List<Event> events) {
+        public ListResponse(University university, Department department, List<Event> events) {
             this.university = university;
             this.department = department;
             this.events = new ArrayList<>(events);
@@ -798,11 +798,11 @@ public class EventApiController {
             return new University(university);
         }
         
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
 
         public List<Event> getEvents() {

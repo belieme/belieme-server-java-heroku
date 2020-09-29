@@ -7,7 +7,7 @@ import com.hanyang.belieme.demoserver.common.ResponseHeader;
 import com.hanyang.belieme.demoserver.common.ResponseWrapper;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
-import com.hanyang.belieme.demoserver.department.DepartmentResponse;
+import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
@@ -77,12 +77,12 @@ public class MajorApiController {
     
     public class Response {
         University university;
-        DepartmentResponse department;
+        Department department;
         MajorResponse major;
 
-        public Response(University university, DepartmentResponse department, MajorResponse major) {
+        public Response(University university, Department department, MajorResponse major) {
             this.university = new University(university);
-            this.department = new DepartmentResponse(department);
+            this.department = new Department(department);
             this.major = new MajorResponse(major);
         }
 
@@ -93,11 +93,11 @@ public class MajorApiController {
             return new University(university);
         }
 
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
         
         public MajorResponse getMajor() {

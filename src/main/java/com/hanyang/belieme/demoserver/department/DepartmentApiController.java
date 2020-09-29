@@ -40,10 +40,10 @@ public class DepartmentApiController {
             University univ = University.findByUnivCode(universityRepository, univCode);
             int univId = univ.getId();
             
-            List<DepartmentResponse> output = new ArrayList<>();
+            List<Department> output = new ArrayList<>();
             Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
             while(iterator.hasNext()) {
-                output.add(iterator.next().toDepartmentResponse(majorRepository));
+                output.add(iterator.next().toDepartment(majorRepository));
             }
             return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, output));
         } catch(NotFoundException e) {
@@ -62,7 +62,7 @@ public class DepartmentApiController {
             int deptId = dept.getId();
             Optional<DepartmentDB> departmentOptional = departmentRepository.findById(deptId);
             if(departmentOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, departmentOptional.get().toDepartmentResponse(majorRepository)));
+                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, departmentOptional.get().toDepartment(majorRepository)));
             } else {
                 return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
             }
@@ -74,7 +74,7 @@ public class DepartmentApiController {
     }
     
     @PostMapping("")
-    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody DepartmentResponse requestBody) {
+    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
         if(requestBody.getCode() == null || requestBody.getName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -99,12 +99,12 @@ public class DepartmentApiController {
         DepartmentDB newDepartmentDB = requestBody.toDepartmentDB();
         newDepartmentDB.setUniversityId(univId);
         newDepartmentDB.able();// TODO default는 활성화? 비활성화?
-        DepartmentResponse output = departmentRepository.save(newDepartmentDB).toDepartmentResponse(majorRepository);
+        Department output = departmentRepository.save(newDepartmentDB).toDepartment(majorRepository);
         return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ,output));
     }
     
     @PatchMapping("/{deptCode}")
-    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody DepartmentResponse requestBody) {
+    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
         if(requestBody.getName() == null && requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -144,7 +144,7 @@ public class DepartmentApiController {
             if(requestBody.getName() != null && !requestBody.getName().equals(target.getName())) {
                target.setName(requestBody.getName());
             }
-            DepartmentResponse output = departmentRepository.save(target).toDepartmentResponse(majorRepository);
+            Department output = departmentRepository.save(target).toDepartment(majorRepository);
             return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, output));
         } else {
             return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
@@ -155,11 +155,11 @@ public class DepartmentApiController {
     
     public class Response {
         University university;
-        DepartmentResponse department;
+        Department department;
 
-        public Response(University university, DepartmentResponse department) {
+        public Response(University university, Department department) {
             this.university = new University(university);
-            this.department = new DepartmentResponse(department);
+            this.department = new Department(department);
         }
 
         public University getUniversity() {
@@ -169,20 +169,20 @@ public class DepartmentApiController {
             return new University(university);
         }
 
-        public DepartmentResponse getDepartment() {
+        public Department getDepartment() {
             if(department == null) {
                 return null;
             }
-            return new DepartmentResponse(department);
+            return new Department(department);
         }
     }
     
     
     public class ListResponse {
         University university;
-        ArrayList<DepartmentResponse> departments;
+        ArrayList<Department> departments;
 
-        public ListResponse(University university, List<DepartmentResponse> departments) {
+        public ListResponse(University university, List<Department> departments) {
             this.university = university;
             this.departments = new ArrayList<>(departments);
         }
@@ -194,7 +194,7 @@ public class DepartmentApiController {
             return new University(university);
         }
 
-        public List<DepartmentResponse> getDepartments() {
+        public List<Department> getDepartments() {
             return new ArrayList<>(departments);
         }
     }
