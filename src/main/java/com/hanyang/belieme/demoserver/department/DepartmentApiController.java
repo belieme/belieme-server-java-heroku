@@ -74,7 +74,7 @@ public class DepartmentApiController {
     }
     
     @PostMapping("")
-    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
+    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody DepartmentResponse requestBody) {
         if(requestBody.getCode() == null || requestBody.getName() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
@@ -104,7 +104,7 @@ public class DepartmentApiController {
     }
     
     @PatchMapping("/{deptCode}")
-    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
+    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody DepartmentResponse requestBody) {
         if(requestBody.getName() == null && requestBody.getCode() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }

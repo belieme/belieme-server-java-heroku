@@ -8,6 +8,8 @@ import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
+//TODO 이거 없애기 안전하게
+
 public class Department1 {
     private int id;
     

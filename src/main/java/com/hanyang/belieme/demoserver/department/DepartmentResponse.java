@@ -6,6 +6,8 @@ import java.util.List;
 public class DepartmentResponse {
     private int id;
     
+    private int univId;
+    
     private String code;
 
     private String name;
@@ -45,6 +47,10 @@ public class DepartmentResponse {
         return available;
     }
     
+    public int univIdGetter() {
+        return univId;
+    }
+    
     public void setId(int id) {
         this.id = id;
     }
@@ -63,5 +69,21 @@ public class DepartmentResponse {
     
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+    
+    public void setUnivId(int univId) {
+        this.univId = univId;
+    }
+    
+    public DepartmentDB toDepartmentDB() {
+        DepartmentDB output = new DepartmentDB();
+        
+        output.setId(id);
+        output.setCode(code);
+        output.setName(name);
+        output.setUniversityId(univId);
+        output.setAvailable(getAvailble());
+        
+        return output;
     }
 }

@@ -2,11 +2,9 @@ package com.hanyang.belieme.demoserver.department.major;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.common.ResponseHeader;
 import com.hanyang.belieme.demoserver.common.ResponseWrapper;
-import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.DepartmentResponse;

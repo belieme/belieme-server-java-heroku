@@ -125,6 +125,7 @@ public class DepartmentDB {
         output.setName(name);
         output.setMajorCodes(majorCodes);
         output.setAvailable(isAvailble());
+        output.setUnivId(universityId);
         
         return output;
     }
