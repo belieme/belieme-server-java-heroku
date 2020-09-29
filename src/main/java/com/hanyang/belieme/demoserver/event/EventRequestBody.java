@@ -1,26 +1,22 @@
 package com.hanyang.belieme.demoserver.event;
 
 public class EventRequestBody {
-    private String requesterStudentId;
-    private String responseManagerStudentId;
-    private String returnManagerStudentId;
-    private String lostManagerStudentId;
-        
-    public EventRequestBody(){}
-        
-    public String getRequesterStudentId() {
-        return requesterStudentId;
+    private Integer thingId;
+    private Integer itemNum;
+    
+    public Integer getThingId() {
+        return thingId;
     }
-        
-    public String getResponseManagerStudentId() {
-        return responseManagerStudentId;
+    
+    public Integer getItemNum() {
+        return itemNum;
     }
-        
-    public String getReturnManagerStudentId() {
-        return returnManagerStudentId; 
+    
+    public void setThingId(Integer thingId) {
+        this.thingId = thingId;
     }
-        
-    public String getLostManagerStudentId() {
-        return lostManagerStudentId;
+    
+    public void setItemNum(Integer itemNum) {
+        this.itemNum = itemNum;
     }
 }

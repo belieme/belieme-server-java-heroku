@@ -168,7 +168,7 @@ public class EventApiController {
     
     //TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
     @PostMapping("/reserve")
-    public ResponseWrapper<Response> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
+    public ResponseWrapper<Response> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
@@ -288,7 +288,7 @@ public class EventApiController {
     }
     
     @PostMapping("/lost")
-    public ResponseWrapper<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventPostRequestBody requestBody) {
+    public ResponseWrapper<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) {
         if(userToken == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
         }
