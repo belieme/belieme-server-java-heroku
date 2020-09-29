@@ -2,7 +2,6 @@ package com.hanyang.belieme.demoserver.thing;
 
 import javax.persistence.*;
 
-import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
