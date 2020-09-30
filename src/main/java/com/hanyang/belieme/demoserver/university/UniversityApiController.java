@@ -1,6 +1,8 @@
 package com.hanyang.belieme.demoserver.university;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.common.ResponseHeader;
@@ -9,12 +11,15 @@ import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -25,25 +30,19 @@ public class UniversityApiController {
     UniversityRepository universityRepository;
     
     @GetMapping("") 
-    public ResponseWrapper<Iterable<University>> getUniversities() {
-        return new ResponseWrapper<>(ResponseHeader.OK, universityRepository.findAll());
+    public ListResponseBody getUniversities() {
+        return new ListResponseBody(universityRepository.findAll());
     }
     
     @GetMapping("/{univCode}") 
-    public ResponseWrapper<University> getUniversityByUnivCode(@PathVariable String univCode) {
-        try {
-            University univ = University.findByUnivCode(universityRepository, univCode);
-            Optional<University> univOptional = universityRepository.findById(univ.getId());
-            if(univOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, univOptional.get());    
-            } else {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+    public ResponseBody getUniversityByUnivCode(@PathVariable String univCode) {
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Optional<University> univOptional = universityRepository.findById(univ.getId());
+        if(univOptional.isPresent()) {
+            return new ResponseBody(univOptional.get());    
+        } else {
+            throw new NotFoundException();
+        }    
     }
     
     @PostMapping("")
@@ -95,4 +94,32 @@ public class UniversityApiController {
         University output = universityRepository.save(target);
         return new ResponseWrapper<>(ResponseHeader.OK, output);  
     }
+    
+    public class ResponseBody {
+        private University university;
+        
+        public ResponseBody(University university) {
+            this.university = new University(university);
+        }
+
+        public University getUniversity() {
+            if(university == null) {
+                return null;
+            }
+            return new University(university);
+        }
+    }
+    
+    public class ListResponseBody {
+        Iterable<University> univs;
+
+        public ListResponseBody(Iterable<University> univs) {
+            this.univs = univs;
+        }
+
+        public Iterable<University> getUniversity() {
+            return univs;
+        }
+    }
+    
 }
