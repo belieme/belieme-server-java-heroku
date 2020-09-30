@@ -35,7 +35,7 @@ public class UniversityApiController {
     }
     
     @GetMapping("/{univCode}") 
-    public ResponseBody getUniversityByUnivCode(@PathVariable String univCode) {
+    public ResponseBody getUniversityByUnivCode(@PathVariable String univCode) throws NotFoundException, WrongInDataBaseException {
         University univ = University.findByUnivCode(universityRepository, univCode);
         Optional<University> univOptional = universityRepository.findById(univ.getId());
         if(univOptional.isPresent()) {
