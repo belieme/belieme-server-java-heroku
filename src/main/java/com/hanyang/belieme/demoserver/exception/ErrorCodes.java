@@ -1,7 +1,10 @@
-package com.hanyang.belieme.demoserver.common;
+package com.hanyang.belieme.demoserver.exception;
 
-public class ResponseHeader { //TODO enum으로 바꾸고 code랑 name(?)을 갖는 변수로 ㄱㄱ
-    public static final ResponseHeader OK = new ResponseHeader(0, "OK");
+public class ErrorCodes {
+    public static final int NOT_FOUND_EXCEPTION = 1;
+    public static final int WRONG_IN_DATA_BASE_EXCEPTION = 2;
+    
+    /*
     public static final ResponseHeader NOT_FOUND_EXCEPTION = new ResponseHeader(1, "Can not found it.");
     public static final ResponseHeader LACK_OF_REQUEST_BODY_EXCEPTION = new ResponseHeader(2, "Request body lacks information for request.");
     public static final ResponseHeader OVER_THREE_CURRENT_EVENT_EXCEPTION = new ResponseHeader(3, "This requester have requested more than three items.");
@@ -19,20 +22,5 @@ public class ResponseHeader { //TODO enum으로 바꾸고 code랑 name(?)을 갖
     public static final ResponseHeader USER_PERMISSION_DENIED_EXCEPTION = new ResponseHeader(15, "This user doesn't have permission on the endpoint.");
     public static final ResponseHeader LACK_OF_REQUEST_HEADER_EXCEPTION = new ResponseHeader(16, "Request header lacks information for request.");
     public static final ResponseHeader WRONG_PERMISSION_EXCEPTION = new ResponseHeader(17, "Given permission is wrong.");
-
-    private int code;
-    private String message;
-
-    public ResponseHeader(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
+    */
 }

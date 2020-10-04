@@ -66,11 +66,11 @@ public class University {
     public static University findByUnivCode(UniversityRepository universityRepository, String univCode) throws NotFoundException, WrongInDataBaseException {
         List<University> univList = universityRepository.findByCode(univCode);
         if(univList.size() == 0) {
-            throw new NotFoundException();
+            throw new NotFoundException(univCode + "를 갖는 학교를 찾을 수 없습니다.");
         } else if(univList.size() == 1) {
             return univList.get(0);
         } else {
-            throw new WrongInDataBaseException();
+            throw new WrongInDataBaseException("서버에 " + univCode + "를 code로 갖는 학교가 2개 이상입니다.");
         }
     }
 }

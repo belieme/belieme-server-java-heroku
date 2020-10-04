@@ -193,9 +193,9 @@ public class ThingDB {
     public static ThingDB findByThingIdAndDeptId(ThingRepository thingRepository, int thingId, int deptId) throws NotFoundException {
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
-            throw new NotFoundException();
+            throw new NotFoundException(thingId + "를 id로 갖는 물건이 존재하지 않습니다.");
         } else if(targetThingOptional.get().getDepartmentId() != deptId) {
-            throw new NotFoundException(); //TODO Exception바꿀까?
+            throw new NotFoundException(thingId + "를 id로 갖는 물건은 이 학과의 물건이 아닙니다."); //TODO Exception바꿀까?
         }
         return targetThingOptional.get();
     }

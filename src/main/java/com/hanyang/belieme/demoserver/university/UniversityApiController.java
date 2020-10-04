@@ -41,7 +41,7 @@ public class UniversityApiController {
         if(univOptional.isPresent()) {
             return new ResponseBody(univOptional.get());    
         } else {
-            throw new NotFoundException();
+            throw new NotFoundException(univCode + "를 갖는 학교를 찾을 수 없습니다.");
         }    
     }
     

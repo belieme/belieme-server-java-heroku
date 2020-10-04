@@ -211,7 +211,7 @@ public class EventDB {
         return tmp.getTime().getTime()/1000;
     }
     
-    public Event toEvent(UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException {
+    public Event toEvent(UserRepository userRepository, ThingRepository thingRepository, ItemRepository itemRepository, EventRepository eventRepository) throws NotFoundException { //TODO deptId도 비교해야 할 것인가?
         Event output = new Event();
         
         int thingId;
@@ -221,7 +221,7 @@ public class EventDB {
             thingId = itemOptional.get().getThingId();
             item = itemOptional.get().toItemNestedToEvent(eventRepository);
         } else {
-            throw new NotFoundException();
+            throw new NotFoundException(itemId + "를 id로 갖는 물건이 존재하지 않습니다.");
         }
         
         ThingNestedToEvent thing;
@@ -229,7 +229,7 @@ public class EventDB {
         if(thingDBOptional.isPresent()) {
             thing = thingDBOptional.get().toThingNestedToEvent();
         } else {
-            throw new NotFoundException();
+            throw new NotFoundException(thingId + "를 id로 갖는 물품이 존재하지 않습니다.");
         }
         
         
@@ -245,7 +245,7 @@ public class EventDB {
                 output.setUser(null); // TODO DB에 없음 이라는 User를 만들기
             }
         }        
-        if(approveManagerId != 0) {
+        if(approveManagerId != 0) {    
             Optional<UserDB> tmpOptional = userRepository.findById(approveManagerId);
             if(tmpOptional.isPresent()) {
                 output.setApproveManager(tmpOptional.get().toUserNestedToEvent());
