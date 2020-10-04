@@ -336,9 +336,9 @@ public class UserDB {
         List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
         
         if(targetList.size() == 0) {
-            throw new NotFoundException();
+            throw new NotFoundException("학번이 " + studentId + "인 학생정보는 " + univCode + "를 학교 코드로 갖는 학교에 존재하지 않습니다.");
         } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException();
+            throw new WrongInDataBaseException("학번이 " + studentId + "인 학생정보가 " + univCode + "를 학교 코드로 갖는 학교에 2개 이상 존재합니다.");
         } else {
             return targetList.get(0);
         }
@@ -348,9 +348,9 @@ public class UserDB {
         List<UserDB> targetList = userRepository.findByToken(token);
         
         if(targetList.size() == 0) {
-            throw new NotFoundException();
+            throw new NotFoundException("토큰이 " + token + "인 학생정보가 존재하지 않습니다.");
         } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException();
+            throw new WrongInDataBaseException("토큰이 " + token + "인 학생정보가 2개 이상 존재합니다.");
         } else {
             return targetList.get(0);
         }
