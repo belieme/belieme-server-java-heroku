@@ -154,7 +154,7 @@ public class ItemDB {
     public static ItemDB findByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
         List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
         if(itemListByThingIdAndNum.size() == 0) {
-            throw new NotFoundException("물품 id가 " + thingId + "이고, 물건 번호가 " + itemNum + "인 물건이 존재하지 않습니다.");
+            throw new NotFoundException("물품 id가 " + thingId + "이고, 물건 번호가 " + itemNum + "인 물건을 찾을 수 없습니다.");
         } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
             throw new WrongInDataBaseException("물품 id가 " + thingId + "이고, 물건 번호가 " + itemNum + "인 물건이 서버에 2개 이상 존재합니다.");
         }

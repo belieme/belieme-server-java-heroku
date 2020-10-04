@@ -142,7 +142,7 @@ public class DepartmentDB {
     public static DepartmentDB findByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
         List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findByUnivCode(universityRepository, univCode).getId(), deptCode);
         if(tmpList.size() == 0) {
-            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교에 존재하지 않습니다.");
+            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교를 찾을 수 없습니다.");
         } else if(tmpList.size() == 1) {
             return tmpList.get(0);
         } else {
