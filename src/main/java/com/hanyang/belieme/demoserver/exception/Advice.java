@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @ControllerAdvice  
 @RestController 
 public class Advice { 
-    @ExceptionHandler(InternalServerException.class) 
-    public ResponseEntity<ExceptionResponse> exceptionResponse(InternalServerException e) {
+    @ExceptionHandler(HttpException.class) 
+    public ResponseEntity<ExceptionResponse> exceptionResponse(HttpException e) {
         return e.toResponseEntity();
     }
 }

@@ -41,37 +41,16 @@ public class PermissionApiController {
     private PermissionRepository permissionRepository;
     
     @PostMapping("") //TODO 일단은 user를 output으로 하지만 permission을 output으로 하는 것이 맞지 않을까라는 생각이 든다.
-    public ResponseWrapper<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionRequestBody requestBody) {
+    public ResponseWrapper<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionRequestBody requestBody) throws NotFoundException, WrongInDataBaseException {
         if(requestBody.getDeptCode() == null || requestBody.getPermission() == null) {
             return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
         
-        DepartmentDB dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        DepartmentDB dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, requestBody.getDeptCode());
         
-        UserDB userDB;
-        try {
-            userDB = UserDB.findByUnivCodeAndStudentId(universityRepository, userRepository, univCode, studentId);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        UserDB userDB = UserDB.findByUnivCodeAndStudentId(universityRepository, userRepository, univCode, studentId);
         
         User targetUser = userDB.toUser(departmentRepository, majorRepository, permissionRepository);
         

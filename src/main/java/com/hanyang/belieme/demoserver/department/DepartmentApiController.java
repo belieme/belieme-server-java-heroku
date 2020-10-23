@@ -1,19 +1,24 @@
 package com.hanyang.belieme.demoserver.department;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.hanyang.belieme.demoserver.common.ResponseHeader;
-import com.hanyang.belieme.demoserver.common.ResponseWrapper;
+import com.hanyang.belieme.demoserver.common.Globals;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.BadRequestException;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
+import com.hanyang.belieme.demoserver.exception.MethodNotAllowedException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,64 +40,45 @@ public class DepartmentApiController {
     private MajorRepository majorRepository;
     
     @GetMapping("")
-    public ResponseWrapper<ListResponse> getDepartments(@PathVariable String univCode) {
-        try {
-            University univ = University.findByUnivCode(universityRepository, univCode);
-            int univId = univ.getId();
-            
-            List<Department> output = new ArrayList<>();
-            Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
-            while(iterator.hasNext()) {
-                output.add(iterator.next().toDepartment(majorRepository));
-            }
-            return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, output));
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    public ResponseEntity<ListResponse> getDepartments(@PathVariable String univCode) throws HttpException {
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        int univId = univ.getId();
+        
+        List<Department> output = new ArrayList<>();
+        Iterator<DepartmentDB> iterator = departmentRepository.findByUniversityId(univId).iterator();
+        while(iterator.hasNext()) {
+            output.add(iterator.next().toDepartment(majorRepository));
         }
+        return ResponseEntity.ok(new ListResponse(univ, output));
     }
     
     @GetMapping("/{deptCode}")
-    public ResponseWrapper<Response> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) {
-        try {
-            University univ = University.findByUnivCode(universityRepository, univCode);
+    public ResponseEntity<Response> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) throws HttpException {
+        University univ = University.findByUnivCode(universityRepository, univCode);
             
-            DepartmentDB dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
-            int deptId = dept.getId();
-            Optional<DepartmentDB> departmentOptional = departmentRepository.findById(deptId);
-            if(departmentOptional.isPresent()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, departmentOptional.get().toDepartment(majorRepository)));
-            } else {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        DepartmentDB dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);
+        int deptId = dept.getId();
+        Optional<DepartmentDB> departmentOptional = departmentRepository.findById(deptId);
+        if(departmentOptional.isPresent()) {
+            return ResponseEntity.ok(new Response(univ, departmentOptional.get().toDepartment(majorRepository)));
+        } else {
+            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교에서 찾을 수 없습니다.");
         }
     }
     
     @PostMapping("")
-    public ResponseWrapper<Response> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) {
+    public ResponseEntity<Response> postNewDepartment(@PathVariable String univCode, @RequestBody Department requestBody) throws HttpException {
         if(requestBody.getCode() == null || requestBody.getName() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : code(String), name(String)");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
         int univId = univ.getId();
         
         List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
         for(int i = 0; i < departmentListByUnivId.size(); i++) {
             if(departmentListByUnivId.get(i).getCode().equals(requestBody.getCode())) {
-                return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                throw new MethodNotAllowedException("학과 코드가 " + requestBody.getCode() + "인 학과가 " + univCode + "를 학교 코드로 갖는 학교에 이미 존재합니다.");
             }
         }
         
@@ -100,33 +86,28 @@ public class DepartmentApiController {
         newDepartmentDB.setUniversityId(univId);
         newDepartmentDB.able();// TODO default는 활성화? 비활성화?
         Department output = departmentRepository.save(newDepartmentDB).toDepartment(majorRepository);
-        return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ,output));
+        
+        URI location;
+        try {
+            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/depts/" + requestBody.getCode());    
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
+        }
+        
+        return ResponseEntity.created(location).body(new Response(univ,output));
     }
     
     @PatchMapping("/{deptCode}")
-    public ResponseWrapper<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) {
+    public ResponseEntity<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody Department requestBody) throws HttpException {
         if(requestBody.getName() == null && requestBody.getCode() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : code(String), name(String) 중 최소 하나");
         }
         
-        DepartmentDB dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        DepartmentDB dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode);    
         int deptId = dept.getId();
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
         int univId = univ.getId();
         
         Optional<DepartmentDB> targetOptional = departmentRepository.findById(deptId);
@@ -136,7 +117,7 @@ public class DepartmentApiController {
                 List<DepartmentDB> departmentListByUnivId = departmentRepository.findByUniversityId(univId);
                 for(int i = 0; i < departmentListByUnivId.size(); i++) {
                     if(requestBody.getCode().equals(departmentListByUnivId.get(i).getCode())) {
-                        return new ResponseWrapper<>(ResponseHeader.DUPLICATE_CODE_EXCEPTION, null);
+                        throw new MethodNotAllowedException("학과 코드가 " + requestBody.getCode() + "인 학과가 " + univCode + "를 학교 코드로 갖는 학교에 이미 존재합니다.");
                     }
                 }
                 target.setCode(requestBody.getCode());
@@ -145,9 +126,9 @@ public class DepartmentApiController {
                target.setName(requestBody.getName());
             }
             Department output = departmentRepository.save(target).toDepartment(majorRepository);
-            return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, output));
+            return ResponseEntity.ok().body(new Response(univ, output));
         } else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교에서 찾을 수 없습니다.");
         }
     }
     

@@ -3,21 +3,31 @@ package com.hanyang.belieme.demoserver.general;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.BadRequestException;
+import com.hanyang.belieme.demoserver.exception.GateWayTimeOutException;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
+import com.hanyang.belieme.demoserver.exception.MethodNotAllowedException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
+import com.hanyang.belieme.demoserver.exception.UnauthorizedException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.UserDB;
@@ -56,22 +66,17 @@ public class GeneralApiController {
     }
     
     @GetMapping("/login")
-    public ResponseWrapper<ResponseWithToken> getUserInfoFromUnivApi(@RequestBody LoginInfo requestBody) {
+    public ResponseEntity<ResponseWithToken> getUserInfoFromUnivApi(@RequestBody LoginInfo requestBody) throws HttpException {
         if(requestBody.getUnivCode() == null || requestBody.getApiToken() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : univCode(String), apiToken(String)");
         }
         
+        ResponseEntity.BodyBuilder responseBodyBuilder = ResponseEntity.ok();
+
+        
         UserDB outputResponse;
-        University univ;
-        int univId;
-        try {
-            univ = University.findByUnivCode(universityRepository, requestBody.getUnivCode()); 
-            univId = univ.getId();
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, requestBody.getUnivCode()); 
+        int univId = univ.getId();
         switch(univId) {
             case HYU_ID : {
                  try {
@@ -102,19 +107,25 @@ public class GeneralApiController {
                     JSONObject tmp = (JSONObject) response.get("item");
     
                     List<UserDB> existUserList = userRepository.findByUniversityIdAndStudentId(univId, (String) (tmp.get("gaeinNo")));
+                     
+                    URI location;
+                    try {
+                        location = new URI(Globals.serverUrl + "/univs/" + requestBody.getUnivCode() + "/users/" + (String) (tmp.get("gaeinNo")));    
+                    } catch(URISyntaxException e) {
+                        e.printStackTrace();
+                        throw new InternalServerErrorException("안알랴줌");
+                    }
             
                     UserDB newUserInfo = null;
-                    for(int i = 0; i < existUserList.size(); i++) {
-                        if(newUserInfo == null) {
-                            newUserInfo = existUserList.get(i);
-                        } else {
-                            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-                        }
-                    }
-                    if(newUserInfo == null) {                   
+                    try {
+                        newUserInfo = UserDB.findByUnivCodeAndStudentId(universityRepository, userRepository, requestBody.getUnivCode(), (String) (tmp.get("gaeinNo")));    
+                    } catch (NotFoundException e) {
                         newUserInfo = new UserDB();
                         newUserInfo.setCreateTimeStampNow();
                         newUserInfo.setUniversityId(univId);
+                        responseBodyBuilder = ResponseEntity.created(location);
+                    } catch (InternalServerErrorException e) {
+                        throw e;
                     }
                      
                     List<DepartmentDB> departmentsByUnivId = departmentRepository.findByUniversityId(univId);
@@ -163,33 +174,26 @@ public class GeneralApiController {
                     if(in != null) in.close();            
                 } catch (Exception e) {
                      e.printStackTrace();
-                     return new ResponseWrapper<>(ResponseHeader.WRONG_IN_CONNECTION_EXCEPTION, null);
+                     throw new GateWayTimeOutException("서버 내부에서 https://api.hanyang.ac.kr과 통신하는데 문제가 발생하였습니다.");
                 }
-                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithToken(univ, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository, permissionRepository)));
+                return responseBodyBuilder.body(new ResponseWithToken(univ, outputResponse.toUserWithToken(universityRepository, departmentRepository, majorRepository, permissionRepository)));
             }
             default : {
-                return new ResponseWrapper<>(ResponseHeader.UNREGISTERED_UNIVERSITY_EXCEPTION, null);
+                throw new MethodNotAllowedException("등록되어있지 않은 학교에 대한 요청입니다."); // TODO 새로운 exception으로 바꾸기
             }
         }
     }
     
     @GetMapping("/me")
-    public ResponseWrapper<ResponseWithUniversity> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) {
-        List<UserDB> userListByToken = userRepository.findByToken(userToken);
-        if(userListByToken.size() == 0) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(userListByToken.size() != 1) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+    public ResponseEntity<ResponseWithUniversity> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws HttpException {
+        UserDB target = UserDB.findByToken(userRepository, userToken);
+        if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
+            return ResponseEntity.ok().body(new ResponseWithUniversity(target.toUserWithUniversity(universityRepository, departmentRepository, majorRepository, permissionRepository)));    
         } else {
-            UserDB target = userListByToken.get(0);
-            if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
-                return new ResponseWrapper<>(ResponseHeader.OK, new ResponseWithUniversity(userListByToken.get(0).toUserWithUniversity(universityRepository, departmentRepository, majorRepository, permissionRepository)));    
-            } else {
-                target.setApprovalTimeStampZero();
-                target.resetToken();
-                userRepository.save(target);
-                return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-            }
+            target.setApprovalTimeStampZero();
+            target.resetToken();
+            userRepository.save(target);
+            throw new UnauthorizedException("토큰이 만료되었습니다.");
         }
     }
     

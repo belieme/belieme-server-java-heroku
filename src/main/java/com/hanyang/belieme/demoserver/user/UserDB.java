@@ -22,7 +22,10 @@ import com.hanyang.belieme.demoserver.department.DepartmentNestedToUser;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
+import com.hanyang.belieme.demoserver.exception.UnauthorizedException;
 import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
@@ -331,26 +334,26 @@ public class UserDB {
         return 0;
     }
     
-    public static UserDB findByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws NotFoundException, WrongInDataBaseException {
+    public static UserDB findByUnivCodeAndStudentId(UniversityRepository universityRepository, UserRepository userRepository, String univCode, String studentId) throws HttpException {
         int univId = University.findByUnivCode(universityRepository, univCode).getId();
         List<UserDB> targetList = userRepository.findByUniversityIdAndStudentId(univId, studentId);
         
         if(targetList.size() == 0) {
             throw new NotFoundException("학번이 " + studentId + "인 학생정보는 " + univCode + "를 학교 코드로 갖는 학교에서 찾을 수 없습니다.");
         } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException("학번이 " + studentId + "인 학생정보가 " + univCode + "를 학교 코드로 갖는 학교에 2개 이상 존재합니다.");
+            throw new InternalServerErrorException("학번이 " + studentId + "인 학생정보가 " + univCode + "를 학교 코드로 갖는 학교에 2개 이상 존재합니다.");
         } else {
             return targetList.get(0);
         }
     }
     
-    public static UserDB findByToken(UserRepository userRepository, String token) throws NotFoundException, WrongInDataBaseException {
+    public static UserDB findByToken(UserRepository userRepository, String token) throws HttpException {
         List<UserDB> targetList = userRepository.findByToken(token);
         
         if(targetList.size() == 0) {
-            throw new NotFoundException("토큰이 " + token + "인 학생정보를 찾을 수 없습니다.");
+            throw new UnauthorizedException("서버에 존재하지 않는 토큰입니다.");
         } else if(targetList.size() != 1) {
-            throw new WrongInDataBaseException("토큰이 " + token + "인 학생정보가 2개 이상 존재합니다.");
+            throw new InternalServerErrorException("서버에 같은 토큰을 공유하는 학생정보가 2개 이상 존재합니다.");
         } else {
             return targetList.get(0);
         }

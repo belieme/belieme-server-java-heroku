@@ -11,8 +11,9 @@ import javax.persistence.Id;
 
 import com.hanyang.belieme.demoserver.department.major.Major;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 
@@ -139,14 +140,14 @@ public class DepartmentDB {
         return output;
     }
     
-    public static DepartmentDB findByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws NotFoundException, WrongInDataBaseException {
+    public static DepartmentDB findByUnivCodeAndDeptCode(UniversityRepository universityRepository, DepartmentRepository departmentRepository, String univCode, String deptCode) throws HttpException {
         List<DepartmentDB> tmpList = departmentRepository.findByUniversityIdAndCode(University.findByUnivCode(universityRepository, univCode).getId(), deptCode);
         if(tmpList.size() == 0) {
-            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교를 찾을 수 없습니다.");
+            throw new NotFoundException("학과 코드가 " + deptCode + "인 학과는 " + univCode + "를 학교 코드로 갖는 학교에서 찾을 수 없습니다.");
         } else if(tmpList.size() == 1) {
             return tmpList.get(0);
         } else {
-            throw new WrongInDataBaseException("학과 코드가 " + deptCode + "인 학과가 " + univCode + "를 학교 코드로 갖는 학교에 2개 이상 존재합니다.");
+            throw new InternalServerErrorException("학과 코드가 " + deptCode + "인 학과가 " + univCode + "를 학교 코드로 갖는 학교에 2개 이상 존재합니다.");
         }
     }
     

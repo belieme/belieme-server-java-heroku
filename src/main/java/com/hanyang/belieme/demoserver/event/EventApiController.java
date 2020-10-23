@@ -1,8 +1,11 @@
 package com.hanyang.belieme.demoserver.event;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,8 +24,13 @@ import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
 import com.hanyang.belieme.demoserver.department.Department;
 import com.hanyang.belieme.demoserver.department.major.MajorRepository;
+import com.hanyang.belieme.demoserver.exception.BadRequestException;
+import com.hanyang.belieme.demoserver.exception.ForbiddenException;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
+import com.hanyang.belieme.demoserver.exception.MethodNotAllowedException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
+import com.hanyang.belieme.demoserver.exception.UnauthorizedException;
 
 @RestController
 @RequestMapping(path="/univs/{univCode}/depts/{deptCode}/events")
@@ -52,41 +60,18 @@ public class EventApiController {
     private ThingRepository thingRepository;
 
     @GetMapping("")
-    public ResponseWrapper<ListResponse> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) { //TODO value 바꾸기
+    public ResponseEntity<ListResponse> getItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) throws HttpException { //TODO value 바꾸기
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         if(!(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && user.getStudentId().equals(studentId)))) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
+        
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         
         Iterable<EventDB> allEventList = eventRepository.findAll();
         Iterator<EventDB> iterator = allEventList.iterator();
@@ -94,139 +79,79 @@ public class EventApiController {
         List<Event> output = new ArrayList<>();
         while(iterator.hasNext()) {
             EventDB eventDB = iterator.next();
-            Event tmp;
-            try {
-                tmp = eventDB.toEvent(userRepository, thingRepository, itemRepository, eventRepository);    
-            } catch (NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }            
-            
+            Event tmp = eventDB.toEvent(userRepository, thingRepository, itemRepository, eventRepository);    
+          
             if(tmp.getThing().deptIdGetter() == dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 if(studentId == null || (tmp.getUser() != null && studentId.equals(tmp.getUser().getStudentId()))) {
                     output.add(tmp);    
                 }
             }
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, dept, output));
+        return ResponseEntity.ok().body(new ListResponse(univ, dept, output));
     }
 
     @GetMapping("/{id}")
-    public ResponseWrapper<Response> getItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> getItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         
         Optional<EventDB> eventOptional = eventRepository.findById(id);
         Event output;
         if(eventOptional.isPresent()) {
-            try {
-                output = eventOptional.get().toEvent(userRepository, thingRepository, itemRepository, eventRepository);    
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            output = eventOptional.get().toEvent(userRepository, thingRepository, itemRepository, eventRepository);    
             
             if(output.getThing().deptIdGetter() == dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                 if(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && output.getUser() != null && output.getUser().getId() == user.getId())) {
-                    return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));       
+                    return ResponseEntity.ok().body(new Response(univ, dept, output));       
                 }
                 else {
-                    return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+                    throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
                 }
             }
-            //TODO NotFoundException의 종류를 늘려야 하나? Exception바꿀까?
         }
-        return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+        throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
     }
 
     
     //TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
     @PostMapping("/reserve")
-    public ResponseWrapper<Response> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) {
+    public ResponseEntity<Response> createRequestEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
+        }
+        
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);
+        if(!user.hasUserPermission(deptCode)) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         if(requestBody.getThingId() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : thingId(int), itemNum(int)(optional)");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         
         List<EventDB> eventListByUserId = eventRepository.findByUserId(user.getId());
         int currentEventCount = 0;
         for(int i = 0; i < eventListByUserId.size(); i++) {
             Event tmp;
-            try {
-                tmp = eventListByUserId.get(i).toEvent(userRepository, thingRepository, itemRepository, eventRepository);  
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            tmp = eventListByUserId.get(i).toEvent(userRepository, thingRepository, itemRepository, eventRepository);  
             
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
                 if(tmp.getThing().getId() == requestBody.getThingId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                    return new ResponseWrapper<>(ResponseHeader.EVENT_FOR_SAME_THING_EXCEPTION, null);
+                    throw new MethodNotAllowedException("빌리려고 하는 물품종류에 대한 열린 기록이 있습니다."); //TODO 이 exception은 없애던가 메세지를 바꾸기
                 }
             }
         }
         if(currentEventCount >= 3) {
-            return new ResponseWrapper<>(ResponseHeader.OVER_THREE_CURRENT_EVENT_EXCEPTION, null);
+            throw new MethodNotAllowedException("사용자가 이미 3개의 물품을 사용 또는 예약하였습니다.");
         }
         
         Item reservedItem = null;
@@ -240,19 +165,13 @@ public class EventApiController {
                 reservedItem = null;
             }
             if(reservedItem == null) {
-                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+                throw new MethodNotAllowedException("이 item은 사용할 수 없습니다.");
             }
         } else {
-            try {
-                reservedItem = ItemDB.findByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum()).toItem(userRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            } catch(WrongInDataBaseException e) {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-            }
+            reservedItem = ItemDB.findByThingIdAndNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum()).toItem(userRepository, eventRepository);
             
             if(!reservedItem.getStatus().equals("USABLE")) {
-                return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+                throw new MethodNotAllowedException("이 item은 사용할 수 없습니다.");
             }
         }
 
@@ -270,11 +189,7 @@ public class EventApiController {
         newEventDB.setLostTimeStampZero();
             
         Event output;
-        try {
-            output = eventRepository.save(newEventDB).toEvent(userRepository, thingRepository, itemRepository, eventRepository);  
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
+        output = eventRepository.save(newEventDB).toEvent(userRepository, thingRepository, itemRepository, eventRepository);  
         
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(reservedItem.getId());
@@ -284,68 +199,39 @@ public class EventApiController {
         
         itemRepository.save(updatedItemDB);
         
-        return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+        URI location;
+        try {
+            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/events/" + output.getId());    
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
+        }
+        
+        return ResponseEntity.created(location).body(new Response(univ, dept, output));
     }
     
     @PostMapping("/lost")
-    public ResponseWrapper<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) {
+    public ResponseEntity<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody EventRequestBody requestBody) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
+        }
+        
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);
+        if(!user.hasStaffPermission(deptCode)) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         if(requestBody.getThingId() == null || requestBody.getItemNum() == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_BODY_EXCEPTION, null);
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : thingId(int), itemNum(int)");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
 
-        Optional<ThingDB> targetThingOptional = thingRepository.findById(requestBody.getThingId());
-        if(!targetThingOptional.isPresent()) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else if(targetThingOptional.get().getDepartmentId() != dept.getId()) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
-        }
-        
-        Item lostItem;
-        try {
-            lostItem = ItemDB.findByThingIdAndItemNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum()).toItem(userRepository, eventRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        Item lostItem = ItemDB.findByThingIdAndNum(itemRepository, requestBody.getThingId(), requestBody.getItemNum()).toItem(userRepository, eventRepository);
             
         if(!lostItem.getStatus().equals("USABLE")) {
-            return new ResponseWrapper<>(ResponseHeader.ITEM_NOT_AVAILABLE_EXCEPTION, null);
+            throw new MethodNotAllowedException("이 item은 사용할 수 없습니다.");
         }
         
         EventDB newEventDB = new EventDB();
@@ -361,12 +247,7 @@ public class EventApiController {
         newEventDB.setCancelTimeStampZero();
         newEventDB.setLostTimeStampNow();
         
-        Event output;
-        try {
-            output = eventRepository.save(newEventDB).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
+        Event output = eventRepository.save(newEventDB).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
             
         ItemDB updatedItemDB = new ItemDB();
         updatedItemDB.setId(lostItem.getId());
@@ -376,374 +257,212 @@ public class EventApiController {
         
         itemRepository.save(updatedItemDB);
         
-        return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+        URI location;
+        try {
+            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/events/" + output.getId());    
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
+        }
+        
+        return ResponseEntity.created(location).body(new Response(univ, dept, output));
     }
 
     @PatchMapping("/{id}/cancel") //TODO 논의점 cancel manager를 만들어야 하는가?
-    public ResponseWrapper<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             if(!(user.hasStaffPermission(deptCode) || (user.hasUserPermission(deptCode) && eventToUpdate.getUserId() == user.getId()))) {
-                return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+                throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
             }
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
             
             if(eventBeforeUpdate.getThing().deptIdGetter() != dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+               throw new NotFoundException(id + "를 기록 id로 갖는 기록이 이 학과의 물건이 아닙니다."); 
             }
             
             if(eventToUpdate.getStatus().equals("RESERVED")) {
                 eventToUpdate.setCancelTimeStampNow();
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-    
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+                Event output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+                return ResponseEntity.ok().body(new Response(univ, dept, output));
             }
             else {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_EVENT_STATUS_EXCEPTION, null);
+                throw new MethodNotAllowedException("'예약됨'기록이 아닌 기록을 취소할 수 없습니다.");
             }
         }
         else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
         }
     }
 
     @PatchMapping("/{id}/approve")
-    public ResponseWrapper<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         
         if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
             
             if(eventBeforeUpdate.getThing().deptIdGetter() != dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+                throw new NotFoundException(id + "를 기록 id로 갖는 기록이 이 학과의 물건이 아닙니다."); 
             }
             
             if(eventToUpdate.getStatus().equals("RESERVED")) {
                 eventToUpdate.setApproveTimeStampNow();
                 eventToUpdate.setApproveManagerId(user.getId());
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-    
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+                Event output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+                return ResponseEntity.ok().body(new Response(univ, dept, output));
             }
             else {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_EVENT_STATUS_EXCEPTION, null);
+                throw new MethodNotAllowedException("'예약됨'기록이 아닌 기록을 승인할 수 없습니다.");
             }
         }
         else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
         }
     }
 
     @PatchMapping("/{id}/return")
-    public ResponseWrapper<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);  
         
         if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
+            Event eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
             
             if(eventBeforeUpdate.getThing().deptIdGetter() != dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+                throw new NotFoundException(id + "를 기록 id로 갖는 기록이 이 학과의 물건이 아닙니다."); 
             }
             
             if(eventToUpdate.getStatus().equals("USING") || eventToUpdate.getStatus().equals("DELAYED")) {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(user.getId());
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-    
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+                Event output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+                return ResponseEntity.ok().body(new Response(univ, dept, output));
             }
             else {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_EVENT_STATUS_EXCEPTION, null);
+                throw new MethodNotAllowedException("'사용중' 또는 '연체됨' 기록이 아닌 기록을 반납 처리할 수 없습니다.");
             }
         }
         else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
         }
     }
     
     @PatchMapping("{id}/lost")
-    public ResponseWrapper<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);  
         
         if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
-            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+
             if(eventBeforeUpdate.getThing().deptIdGetter() != dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+                throw new NotFoundException(id + "를 기록 id로 갖는 기록이 이 학과의 물건이 아닙니다.");
             }
             
             if(eventToUpdate.getStatus().equals("USING") || eventToUpdate.getStatus().equals("DELAYED")) {
                 eventToUpdate.setLostTimeStampNow();
                 eventToUpdate.setLostManagerId(user.getId());
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-    
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+                Event output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+                return ResponseEntity.ok().body(new Response(univ, dept, output));
             }
             else {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_EVENT_STATUS_EXCEPTION, null);
+                throw new MethodNotAllowedException("'사용중' 또는 '연체됨' 기록이 아닌 기록을 분실 처리할 수 없습니다.");
             }
         }
         else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
         }
     }
     
     @PatchMapping("/{id}/found")
-    public ResponseWrapper<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) {
+    public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int id) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);  
         
         if(!user.hasStaffPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         Optional<EventDB> eventBeforeUpdateOptional = eventRepository.findById(id);
         if(eventBeforeUpdateOptional.isPresent()) {
             EventDB eventToUpdate = eventBeforeUpdateOptional.get();
             
-            Event eventBeforeUpdate;
-            try {
-                eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-            } catch(NotFoundException e) {
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-            }
-            
+            Event eventBeforeUpdate = eventToUpdate.toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+
             if(eventBeforeUpdate.getThing().deptIdGetter() != dept.getId()) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null); //TODO Exception바꿀까?
+                throw new NotFoundException(id + "를 기록 id로 갖는 기록이 이 학과의 물건이 아닙니다."); 
             }
             
             if(eventToUpdate.getStatus().equals("LOST")) {
                 eventToUpdate.setReturnTimeStampNow();
                 eventToUpdate.setReturnManagerId(user.getId());
                 
-                Event output;
-                try {
-                    output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
-                } catch(NotFoundException e) {
-                    return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-                }
-    
-                return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, output));
+                Event output = eventRepository.save(eventToUpdate).toEvent(userRepository, thingRepository, itemRepository, eventRepository);
+                return ResponseEntity.ok().body(new Response(univ, dept, output));
             }
             else {
-                return new ResponseWrapper<>(ResponseHeader.WRONG_EVENT_STATUS_EXCEPTION, null);
+                throw new MethodNotAllowedException("'분실됨' 기록이 아닌 기록을 찾음 처리할 수 없습니다."); // TODO message가 구리네...
             }
         }
         else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
+            throw new NotFoundException("기록 id가 " + id + "인 기록을 찾을 수 없습니다.");
         }
     }
     

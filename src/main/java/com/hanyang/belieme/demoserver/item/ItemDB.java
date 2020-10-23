@@ -7,8 +7,9 @@ import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.event.*;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 
 @Entity
@@ -151,12 +152,12 @@ public class ItemDB {
         return output;
     }
     
-    public static ItemDB findByThingIdAndItemNum(ItemRepository itemRepository, int thingId, int itemNum) throws NotFoundException, WrongInDataBaseException {
-        List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, itemNum);
+    public static ItemDB findByThingIdAndNum(ItemRepository itemRepository, int thingId, int num) throws HttpException {
+        List<ItemDB> itemListByThingIdAndNum = itemRepository.findByThingIdAndNum(thingId, num);
         if(itemListByThingIdAndNum.size() == 0) {
-            throw new NotFoundException("물품 id가 " + thingId + "이고, 물건 번호가 " + itemNum + "인 물건을 찾을 수 없습니다.");
+            throw new NotFoundException("물품 id가 " + thingId + "이고, 물건 번호가 " + num + "인 물건을 찾을 수 없습니다.");
         } else if(itemListByThingIdAndNum.size() != 1) { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
-            throw new WrongInDataBaseException("물품 id가 " + thingId + "이고, 물건 번호가 " + itemNum + "인 물건이 서버에 2개 이상 존재합니다.");
+            throw new InternalServerErrorException("물품 id가 " + thingId + "이고, 물건 번호가 " + num + "인 물건이 서버에 2개 이상 존재합니다.");
         }
         return itemListByThingIdAndNum.get(0);
     }

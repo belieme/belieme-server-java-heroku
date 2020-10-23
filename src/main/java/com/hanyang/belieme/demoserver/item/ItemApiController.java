@@ -1,11 +1,13 @@
 package com.hanyang.belieme.demoserver.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.hanyang.belieme.demoserver.thing.*;
 import com.hanyang.belieme.demoserver.university.University;
@@ -15,8 +17,10 @@ import com.hanyang.belieme.demoserver.user.UserDB;
 import com.hanyang.belieme.demoserver.user.UserRepository;
 import com.hanyang.belieme.demoserver.user.permission.PermissionRepository;
 import com.hanyang.belieme.demoserver.event.*;
-import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
+import com.hanyang.belieme.demoserver.exception.ForbiddenException;
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
+import com.hanyang.belieme.demoserver.exception.UnauthorizedException;
 import com.hanyang.belieme.demoserver.common.*;
 import com.hanyang.belieme.demoserver.department.DepartmentDB;
 import com.hanyang.belieme.demoserver.department.DepartmentRepository;
@@ -51,49 +55,21 @@ public class ItemApiController {
     private EventRepository eventRepository;
 
     @GetMapping("")
-    public ResponseWrapper<ListResponse> getAllItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) {
+    public ResponseEntity<ListResponse> getAllItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        int deptId = dept.getId();
-        
-        Thing thing;
-        try {
-            thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
+        
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        int deptId = dept.getId();
+        Thing thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
+        
         
         List<Item> output = new ArrayList<>();       
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
@@ -101,112 +77,44 @@ public class ItemApiController {
             output.add(itemListByThingId.get(i).toItem(userRepository, eventRepository));    
             
         }
-        return new ResponseWrapper<>(ResponseHeader.OK, new ListResponse(univ, dept, thing, output));
+        return ResponseEntity.ok().body(new ListResponse(univ, dept, thing, output));
     }
 
     @GetMapping("/{itemNum}") 
-    public ResponseWrapper<Response> getItemByThingIdAndNum(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId, @PathVariable int itemNum) {
-        if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+    public ResponseEntity<Response> getItemByThingIdAndNum(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId, @PathVariable int itemNum) throws HttpException {
+                if(userToken == null) {
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        int deptId = dept.getId();
-        
-        Thing thing;
-        try {
-            thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
         if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        List<ItemDB> itemList = itemRepository.findByThingIdAndNum(thingId, itemNum);
-        Item output;
-        if(itemList.size() == 1) {
-            ItemDB itemDB = itemList.get(0);
-            output = itemDB.toItem(userRepository, eventRepository);
-            
-            return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, thing, output));
-        } else if(itemList.size() == 0) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } else { //Warning 으로 바꿀까?? 그건 좀 귀찮긴 할 듯
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
+        int deptId = dept.getId();
+        Thing thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
+        
+        Item output = ItemDB.findByThingIdAndNum(itemRepository, thingId, itemNum).toItem(userRepository, eventRepository);    
+        return ResponseEntity.ok().body(new Response(univ, dept, thing, output));
     }
 
     @PostMapping("")
-    public ResponseWrapper<Response> createNewItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) {
+    public ResponseEntity<Response> createNewItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable int thingId) throws HttpException {
         if(userToken == null) {
-            return new ResponseWrapper<>(ResponseHeader.LACK_OF_REQUEST_HEADER_EXCEPTION, null);
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        University univ;
-        try {
-            univ = University.findByUnivCode(universityRepository, univCode);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
+        User user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
+        if(!user.hasStaffPermission(deptCode)) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        Department dept;
-        try {
-            dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
+        University univ = University.findByUnivCode(universityRepository, univCode);
+        Department dept = DepartmentDB.findByUnivCodeAndDeptCode(universityRepository, departmentRepository, univCode, deptCode).toDepartment(majorRepository);
         int deptId = dept.getId();
-        
-        Thing thing;
-        try {
-            thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
-        
-        User user;
-        try {
-            user = UserDB.findByToken(userRepository, userToken).toUser(departmentRepository, majorRepository, permissionRepository);    
-        } catch(NotFoundException e) {
-            return new ResponseWrapper<>(ResponseHeader.EXPIRED_USER_TOKEN_EXCEPTION, null);
-        } catch(WrongInDataBaseException e) {
-            return new ResponseWrapper<>(ResponseHeader.WRONG_IN_DATABASE_EXCEPTION, null);
-        }
-        
-        if(!user.hasUserPermission(deptCode)) {
-            return new ResponseWrapper<>(ResponseHeader.USER_PERMISSION_DENIED_EXCEPTION, null);
-        }
+        Thing thing = ThingDB.findByThingIdAndDeptId(thingRepository, thingId, deptId).toThing(userRepository, itemRepository, eventRepository);
         
         List<ItemDB> itemListByThingId = itemRepository.findByThingId(thingId);
 
@@ -219,16 +127,17 @@ public class ItemApiController {
         }
         ItemDB newItem = new ItemDB(thingId, max+1); 
         
-        Optional<ThingDB> thingOptional = thingRepository.findById(thingId);
-        if(thingOptional.isPresent()) {
-            Item output = itemRepository.save(newItem).toItem(userRepository, eventRepository);
-            thing = thingOptional.get().toThing(userRepository, itemRepository, eventRepository);
-            
-            return new ResponseWrapper<>(ResponseHeader.OK, new Response(univ, dept, thing, output));
+        Item output = itemRepository.save(newItem).toItem(userRepository, eventRepository);
+        
+        URI location;
+        try {
+            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/things/" + thingId + "/items/" + max + 1);    
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
         }
-        else {
-            return new ResponseWrapper<>(ResponseHeader.NOT_FOUND_EXCEPTION, null);
-        }
+        
+        return ResponseEntity.created(location).body(new Response(univ, dept, thing, output));
     }
     
     public class Response {

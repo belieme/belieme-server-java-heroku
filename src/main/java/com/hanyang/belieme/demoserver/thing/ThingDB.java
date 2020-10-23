@@ -3,6 +3,7 @@ package com.hanyang.belieme.demoserver.thing;
 import javax.persistence.*;
 
 import com.hanyang.belieme.demoserver.event.EventRepository;
+import com.hanyang.belieme.demoserver.exception.HttpException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.item.ItemDB;
 import com.hanyang.belieme.demoserver.item.ItemNestedToThing;
@@ -190,7 +191,7 @@ public class ThingDB {
         return output;
     }
     
-    public static ThingDB findByThingIdAndDeptId(ThingRepository thingRepository, int thingId, int deptId) throws NotFoundException {
+    public static ThingDB findByThingIdAndDeptId(ThingRepository thingRepository, int thingId, int deptId) throws HttpException {
         Optional<ThingDB> targetThingOptional = thingRepository.findById(thingId);
         if(!targetThingOptional.isPresent()) {
             throw new NotFoundException(thingId + "를 id로 갖는 물건을 찾을 수 없습니다.");

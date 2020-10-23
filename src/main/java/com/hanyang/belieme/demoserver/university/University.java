@@ -8,8 +8,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.hanyang.belieme.demoserver.exception.HttpException;
+import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 
 @Entity
 public class University {
@@ -63,14 +64,14 @@ public class University {
         this.apiUrl = apiUrl;
     }
     
-    public static University findByUnivCode(UniversityRepository universityRepository, String univCode) throws NotFoundException, WrongInDataBaseException {
+    public static University findByUnivCode(UniversityRepository universityRepository, String univCode) throws HttpException {
         List<University> univList = universityRepository.findByCode(univCode);
         if(univList.size() == 0) {
             throw new NotFoundException("학교 코드가 " + univCode + "인 학교를 찾을 수 없습니다.");
         } else if(univList.size() == 1) {
             return univList.get(0);
         } else {
-            throw new WrongInDataBaseException("서버에 학교 코드가 " + univCode + "인 학교가 2개 이상입니다.");
+            throw new InternalServerErrorException("서버에 학교 코드가 " + univCode + "인 학교가 2개 이상입니다.");
         }
     }
 }
