@@ -26,7 +26,6 @@ import com.hanyang.belieme.demoserver.exception.HttpException;
 import com.hanyang.belieme.demoserver.exception.InternalServerErrorException;
 import com.hanyang.belieme.demoserver.exception.NotFoundException;
 import com.hanyang.belieme.demoserver.exception.UnauthorizedException;
-import com.hanyang.belieme.demoserver.exception.WrongInDataBaseException;
 import com.hanyang.belieme.demoserver.university.University;
 import com.hanyang.belieme.demoserver.university.UniversityRepository;
 import com.hanyang.belieme.demoserver.user.permission.PermissionDB;
