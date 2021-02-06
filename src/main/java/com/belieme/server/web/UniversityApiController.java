@@ -3,12 +3,29 @@ package com.belieme.server.web;
 import java.net.URI;
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.belieme.server.domain.exception.*;
-import com.belieme.server.domain.university.*;
+import com.belieme.server.data.RepositoryManager;
+import com.belieme.server.data.department.*;
+import com.belieme.server.data.event.*;
+import com.belieme.server.data.item.*;
+import com.belieme.server.data.major.*;
+import com.belieme.server.data.permission.*;
+import com.belieme.server.data.thing.*;
+import com.belieme.server.data.university.*;
+import com.belieme.server.data.user.*;
 
+import com.belieme.server.domain.department.DepartmentDao;
+import com.belieme.server.domain.event.EventDao;
+import com.belieme.server.domain.exception.*;
+import com.belieme.server.domain.item.ItemDao;
+import com.belieme.server.domain.major.MajorDao;
+import com.belieme.server.domain.permission.PermissionDao;
+import com.belieme.server.domain.thing.ThingDao;
+import com.belieme.server.domain.university.*;
+import com.belieme.server.domain.user.UserDao;
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
@@ -16,9 +33,77 @@ import com.belieme.server.web.jsonbody.*;
 
 @RestController
 @RequestMapping("/univs")
-public class UniversityApiController extends ApiController {
+public class UniversityApiController {
+    @Autowired
+    protected UniversityRepository univRepo;
+    
+    @Autowired
+    protected DepartmentRepository deptRepo;
+    
+    @Autowired
+    protected MajorRepository majorRepo;
+    
+    @Autowired
+    protected UserRepository userRepo;
+    
+    @Autowired
+    protected PermissionRepository permissionRepo;
+    
+    @Autowired
+    protected ThingRepository thingRepo;
+    
+    @Autowired
+    protected ItemRepository itemRepo;
+    
+    @Autowired
+    protected EventRepository eventRepo;
+    
+    protected UniversityDao univDao = null;
+    protected DepartmentDao deptDao = null;
+    protected MajorDao majorDao = null;
+    protected UserDao userDao = null;
+    protected PermissionDao permissionDao = null;
+    protected ThingDao thingDao = null;
+    protected ItemDao itemDao = null;
+    protected EventDao eventDao = null;
+    
+    protected JsonBodyProjector jsonBodyProjector;
+    
+    private void setControllers() {
+        RepositoryManager repoManager = new RepositoryManager(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+        if(univDao == null) {
+            this.univDao = new UniversityDaoImpl(repoManager);
+        }
+        if(deptDao == null) {
+            this.deptDao = new DepartmentDaoImpl(repoManager);
+        }
+        if(majorDao == null) {
+            this.majorDao = new MajorDaoImpl(repoManager);
+        }
+        if(userDao == null) {
+            this.userDao = new UserDaoImpl(repoManager);
+        }
+        if(permissionDao == null) {
+            this.permissionDao = new PermissionDaoImpl(repoManager);
+        }
+        if(thingDao == null) {
+            this.thingDao = new ThingDaoImpl(repoManager);
+        }
+        if(itemDao == null) {
+            this.itemDao = new ItemDaoImpl(repoManager);
+        }
+        if(eventDao == null) {
+            this.eventDao = new EventDaoImpl(repoManager);
+        }
+    }
+    
+    private void setControllersAndJsonBodyProjector() {
+        setControllers();
+        jsonBodyProjector = new JsonBodyProjector(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, eventDao);
+    }
+    
     public UniversityApiController() {
-        super();
+        setControllersAndJsonBodyProjector();
     }
     
     private UniversityDto toUniversityDto(UniversityJsonBody univJsonBody) {
