@@ -30,7 +30,7 @@ public class ThingDaoImpl implements ThingDao {
         ThingDto output = new ThingDto();
         
         try {
-            DepartmentEntity dept = repositoryManager.getDeptEntityById(thingEntity.getDepartmentId());    
+            DepartmentEntity dept = repositoryManager.getDeptEntityById(thingEntity.getDeptId());    
             int univId = dept.getUnivId();
             String deptCode = dept.getCode();
             
@@ -59,7 +59,7 @@ public class ThingDaoImpl implements ThingDao {
         ThingEntity newThing = new ThingEntity();
         
         int deptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(thing.getUnivCode(), thing.getDeptCode()).getId();
-        newThing.setDepartmentId(deptId);
+        newThing.setDeptId(deptId);
         newThing.setCode(thing.getCode());
         newThing.setDescription(thing.getDescription());
         newThing.setEmoji(thing.getEmoji());
@@ -74,7 +74,7 @@ public class ThingDaoImpl implements ThingDao {
         if(univCode != thing.getUnivCode() || deptCode != thing.getDeptCode() || code != thing.getCode()) {
             repositoryManager.checkThingDuplication(thing.getUnivCode(), thing.getDeptCode(), thing.getCode());
             int newDeptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(thing.getUnivCode(), thing.getDeptCode()).getId();
-            target.setDepartmentId(newDeptId);
+            target.setDeptId(newDeptId);
         }
         
         target.setCode(thing.getCode());

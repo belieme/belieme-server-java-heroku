@@ -24,7 +24,7 @@ public class EventDaoImpl implements EventDao {
         
         ItemEntity itemEntity = repositoryManager.getItemEntityById(eventEntity.getItemId());
         ThingEntity thingEntity = repositoryManager.getThingEntity(itemEntity.getThingId());
-        DepartmentEntity deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDepartmentId());
+        DepartmentEntity deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
         UniversityEntity univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
         
         output.setUnivCode(univEntity.getCode());

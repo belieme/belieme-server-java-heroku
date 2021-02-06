@@ -23,7 +23,7 @@ public class ItemDaoImpl implements ItemDao{
         
         try {
             ThingEntity thing = repositoryManager.getThingEntity(itemEntity.getThingId());
-            int deptId = thing.getDepartmentId();
+            int deptId = thing.getDeptId();
             String thingCode = thing.getCode();
             
             DepartmentEntity dept = repositoryManager.getDeptEntityById(deptId);    
