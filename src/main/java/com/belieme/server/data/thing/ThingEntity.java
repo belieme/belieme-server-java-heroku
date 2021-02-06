@@ -14,7 +14,7 @@ public class ThingEntity {
     private int emojiByte;
     private String description;
     
-    private int departmentId; 
+    private int deptId; 
 
     public ThingEntity() {
     }
@@ -39,8 +39,8 @@ public class ThingEntity {
         return description;
     }
     
-    public int getDepartmentId() {
-        return departmentId;
+    public int getDeptId() {
+        return deptId;
     }
     
     public void setCode(String code) {
@@ -66,8 +66,8 @@ public class ThingEntity {
         this.description = description;
     }
     
-    public void setDepartmentId(int departmentId) {
-        this.departmentId = departmentId;
+    public void setDeptId(int deptId) {
+        this.deptId = deptId;
     }
 
     private byte[] getByteArrayFromInt(int value) {
