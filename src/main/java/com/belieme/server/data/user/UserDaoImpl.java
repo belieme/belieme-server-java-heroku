@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
         UserEntity newUser = new UserEntity();
         
         int univId = repositoryManager.getUnivEntityByUnivCode(univCode).getId();
-        newUser.setUniversityId(univId);
+        newUser.setUnivId(univId);
         newUser.setStudentId(userDto.getStudentId());
         newUser.setName(userDto.getName());
         newUser.setEntranceYear(userDto.getEntranceYear());
@@ -80,7 +80,7 @@ public class UserDaoImpl implements UserDao {
                 int userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(univCode, studentId).getId();
                 int deptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(univCode, deptCode).getId();    
                 output.setUserId(userId);
-                output.setDepartmentId(deptId);
+                output.setDeptId(deptId);
             } catch(NotFoundOnDataBaseException e2) {
                 throw new InternalDataBaseException();
             }
@@ -93,7 +93,7 @@ public class UserDaoImpl implements UserDao {
         
         UniversityEntity univ;
         try{
-            univ = repositoryManager.getUnivEntityById(userEntity.getUniversityId());
+            univ = repositoryManager.getUnivEntityById(userEntity.getUnivId());
             output.setUnivCode(univ.getCode());
         } catch(NotFoundOnDataBaseException e) {
             throw new InternalDataBaseException();
@@ -111,7 +111,7 @@ public class UserDaoImpl implements UserDao {
             PermissionEntity permission = permissionList.get(i);
             
             try {
-                DepartmentEntity dept = repositoryManager.getDeptEntityById(permission.getDepartmentId());
+                DepartmentEntity dept = repositoryManager.getDeptEntityById(permission.getDeptId());
                 output.addPermission(dept.getCode(), Permissions.valueOf(permission.getPermission()));
                 // TODO 같은 dept code를 갖는 permissions가 있을 시 예외처리는 안함. db에 저장하는 것을 제대로 만들면 딱히 필요없을 듯
             } catch(NotFoundOnDataBaseException e) {
@@ -128,7 +128,7 @@ public class UserDaoImpl implements UserDao {
         if(univCode != user.getUnivCode() || studentId != user.getStudentId()) {
             repositoryManager.checkUserDuplicationByUnivCodeAndStudentId(user.getUnivCode(), user.getStudentId());
             int newUnivId = repositoryManager.getUnivEntityByUnivCode(user.getUnivCode()).getId();
-            target.setUniversityId(newUnivId);
+            target.setUnivId(newUnivId);
             target.setStudentId(user.getStudentId());
         }
         

@@ -22,7 +22,7 @@ public class PermissionDaoImpl implements PermissionDao {
     private PermissionDto toPermissionDto(PermissionEntity permissionEntity) throws InternalDataBaseException {
         PermissionDto output = new PermissionDto();
         try {
-            DepartmentEntity dept = repositoryManager.getDeptEntityById(permissionEntity.getDepartmentId());
+            DepartmentEntity dept = repositoryManager.getDeptEntityById(permissionEntity.getDeptId());
             UniversityEntity univ = repositoryManager.getUnivEntityById(dept.getUnivId());
             UserEntity user = repositoryManager.getUserEntityById(permissionEntity.getUserId());
             output.setUnivCode(univ.getCode());
@@ -58,7 +58,7 @@ public class PermissionDaoImpl implements PermissionDao {
         
         PermissionEntity newPermissionEntity = new PermissionEntity();
         newPermissionEntity.setUserId(userId);
-        newPermissionEntity.setDepartmentId(deptId);
+        newPermissionEntity.setDeptId(deptId);
         newPermissionEntity.setPermission(permission.getPermission().name());
         
         PermissionDto output = toPermissionDto(repositoryManager.savePermission(newPermissionEntity));
@@ -73,7 +73,7 @@ public class PermissionDaoImpl implements PermissionDao {
             int userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(permission.getUnivCode(), permission.getStudentId()).getId();
             int deptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(permission.getUnivCode(), permission.getDeptCode()).getId();
             target.setUserId(userId);
-            target.setDepartmentId(deptId);
+            target.setDeptId(deptId);
         }
         target.setPermission(permission.getPermission().name());
         
