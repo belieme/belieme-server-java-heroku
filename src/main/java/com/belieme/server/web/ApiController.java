@@ -1,6 +1,7 @@
 package com.belieme.server.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.belieme.server.web.jsonbody.JsonBodyProjector;
 
@@ -23,6 +24,7 @@ import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
+@RestController
 public class ApiController {
     @Autowired
     protected UniversityRepository univRepo;
