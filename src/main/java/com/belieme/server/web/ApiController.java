@@ -94,5 +94,6 @@ public class ApiController {
     
     protected ApiController() {
         setControllersAndJsonBodyProjector();
+        System.out.println("만들어짐?");
     }
 }
