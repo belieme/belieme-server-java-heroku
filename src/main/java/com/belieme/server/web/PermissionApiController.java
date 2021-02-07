@@ -42,6 +42,7 @@ public class PermissionApiController extends ApiController {
         PermissionDto permission = new PermissionDto();
         permission.setUnivCode(univCode);
         permission.setDeptCode(requestBody.getDeptCode());
+        permission.setStudentId(studentId);
         permission.setPermission(Permissions.valueOf(requestBody.getPermission()));
         if(permission.getPermission() == null) { //TODO 헤더로 token받아서 permission 확인하고 줄 수 있는 권한자만 가능하게 하기
             throw new BadRequestException("RequestBody의 permission은 USER, STAFF, MASTER 중 하나여야 합니다.");
@@ -52,7 +53,7 @@ public class PermissionApiController extends ApiController {
         
     }
     
-    // TODO Patch 만들기(권환 늘리기 / 줄이기)
+    // TODO Patch 만들기(권한 늘리기 / 줄이기)
     
     private Response createResponse(UniversityDto univ, UserDto user, PermissionDto permission) throws ServerDomainException {
         UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
