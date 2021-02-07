@@ -1,12 +1,23 @@
 package com.belieme.server.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.belieme.server.data.university.*;
+import com.belieme.server.data.department.*;
+import com.belieme.server.data.major.*;
+import com.belieme.server.data.user.*;
+import com.belieme.server.data.permission.*;
+import com.belieme.server.data.thing.*;
+import com.belieme.server.data.item.*;
+import com.belieme.server.data.event.*;
 
 @RestController
 @RequestMapping(path="/univs/{univCode}")
 public class UserApiController extends ApiController { //TODO 코드 정독하면서 정리하기
-    public UserApiController() {
-        super();
+    @Autowired
+    public UserApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
     // TODO 특정 department의 모든 user불러오는 api
