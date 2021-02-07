@@ -29,7 +29,7 @@ public class PermissionApiController extends ApiController {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
-    @PostMapping("")
+    @PostMapping("") // TODO 권한 수정도 이걸로 하기 (현재 있는 권한 변경은 duplicateException걸려서 안된다. -> 권한 제거는 Permissions에 추가적으로 BAN이라는 걸 만들어서 USER를 BAN만들어서 제거 하기로)
     public ResponseEntity<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionInfoJsonBody requestBody) throws HttpException, ServerDomainException {
         if(requestBody.getDeptCode() == null || requestBody.getPermission() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : deptCode(String), permission(String)");
@@ -45,15 +45,18 @@ public class PermissionApiController extends ApiController {
         permission.setStudentId(studentId);
         permission.setPermission(Permissions.valueOf(requestBody.getPermission()));
         if(permission.getPermission() == null) { //TODO 헤더로 token받아서 permission 확인하고 줄 수 있는 권한자만 가능하게 하기
-            throw new BadRequestException("RequestBody의 permission은 USER, STAFF, MASTER 중 하나여야 합니다.");
+            throw new BadRequestException("RequestBody의 permission은 BANNED, USER, STAFF, MASTER 중 하나여야 합니다.");
         }
         
-        PermissionDto savedPermission = permissionDao.save(permission);
-        return ResponseEntity.ok().body(createResponse(univ, user, savedPermission));
+        PermissionDto savedPermission;
+        try {
+            savedPermission = permissionDao.save(permission);
+        } catch(CodeDuplicationException e) {
+            savedPermission = permissionDao.update(univCode, studentId, requestBody.getDeptCode(), permission);
+        }
         
+        return ResponseEntity.ok().body(createResponse(univ, user, savedPermission));
     }
-    
-    // TODO Patch 만들기(권한 늘리기 / 줄이기)
     
     private Response createResponse(UniversityDto univ, UserDto user, PermissionDto permission) throws ServerDomainException {
         UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);

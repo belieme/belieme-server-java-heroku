@@ -78,6 +78,7 @@ public class UserDto {
             case STAFF :
             case USER :
                 return true;
+            case BANNED :
             default :
                 return false;
         }
@@ -91,6 +92,8 @@ public class UserDto {
             case MASTER :
             case STAFF :
                 return true;
+            case USER :
+            case BANNED :
             default :
                 return false;
         }
@@ -103,6 +106,9 @@ public class UserDto {
         switch(permissions.get(deptCode)) {
             case MASTER :
                 return true;
+            case STAFF :
+            case USER:
+            case BANNED :
             default :
                 return false;
         }
