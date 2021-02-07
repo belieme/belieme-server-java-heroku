@@ -1,7 +1,5 @@
 package com.belieme.server.web;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.belieme.server.web.jsonbody.JsonBodyProjector;
 
 import com.belieme.server.domain.university.*;
@@ -24,30 +22,6 @@ import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
 public class ApiController {
-    @Autowired
-    protected UniversityRepository universityRepository;
-    
-    @Autowired
-    protected DepartmentRepository deptRepo;
-    
-    @Autowired
-    protected MajorRepository majorRepo;
-    
-    @Autowired
-    protected UserRepository userRepo;
-    
-    @Autowired
-    protected PermissionRepository permissionRepo;
-    
-    @Autowired
-    protected ThingRepository thingRepo;
-    
-    @Autowired
-    protected ItemRepository itemRepo;
-    
-    @Autowired
-    protected EventRepository eventRepo;
-    
     protected UniversityDao univDao = null;
     protected DepartmentDao deptDao = null;
     protected MajorDao majorDao = null;
@@ -59,8 +33,8 @@ public class ApiController {
     
     protected JsonBodyProjector jsonBodyProjector;
     
-    private void setControllers() {
-        RepositoryManager repoManager = new RepositoryManager(universityRepository, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    private void setControllers(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        RepositoryManager repoManager = new RepositoryManager(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
         if(univDao == null) {
             this.univDao = new UniversityDaoImpl(repoManager);
         }
@@ -87,13 +61,13 @@ public class ApiController {
         }
     }
     
-    private void setControllersAndJsonBodyProjector() {
-        setControllers();
+    private void setControllersAndJsonBodyProjector(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        setControllers(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
         jsonBodyProjector = new JsonBodyProjector(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, eventDao);
     }
     
-    protected ApiController() {
-        setControllersAndJsonBodyProjector();
+    protected ApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        setControllersAndJsonBodyProjector(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
         System.out.println("만들어짐?");
     }
 }

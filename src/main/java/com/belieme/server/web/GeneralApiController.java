@@ -2,6 +2,7 @@ package com.belieme.server.web;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,15 @@ import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.permission.Permissions;
 import com.belieme.server.domain.user.*;
 
+import com.belieme.server.data.university.*;
+import com.belieme.server.data.department.*;
+import com.belieme.server.data.major.*;
+import com.belieme.server.data.user.*;
+import com.belieme.server.data.permission.*;
+import com.belieme.server.data.thing.*;
+import com.belieme.server.data.item.*;
+import com.belieme.server.data.event.*;
+
 import com.belieme.server.web.common.Globals;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
@@ -28,8 +38,9 @@ public class GeneralApiController extends ApiController {
     private static final String CKU_CODE = "CKU";
     private static final String SNU_CODE = "SNU";
     
-    public GeneralApiController() {
-        super();
+    @Autowired
+    public GeneralApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
     @GetMapping("/apiVer")

@@ -1,5 +1,6 @@
 package com.belieme.server.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,16 @@ import java.util.List;
 import com.belieme.server.domain.exception.ServerDomainException;
 import com.belieme.server.domain.thing.ThingDto;
 import com.belieme.server.domain.user.UserDto;
+
+import com.belieme.server.data.university.*;
+import com.belieme.server.data.department.*;
+import com.belieme.server.data.major.*;
+import com.belieme.server.data.user.*;
+import com.belieme.server.data.permission.*;
+import com.belieme.server.data.thing.*;
+import com.belieme.server.data.item.*;
+import com.belieme.server.data.event.*;
+
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
@@ -18,8 +29,9 @@ import com.belieme.server.web.jsonbody.*;
 @RestController
 @RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things")
 public class ThingApiController extends ApiController {
-    public ThingApiController() {
-        super();
+    @Autowired
+    public ThingApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
 
     @GetMapping("")
