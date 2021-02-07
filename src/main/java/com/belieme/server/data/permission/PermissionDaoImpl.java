@@ -27,7 +27,8 @@ public class PermissionDaoImpl implements PermissionDao {
             UserEntity user = repositoryManager.getUserEntityById(permissionEntity.getUserId());
             output.setUnivCode(univ.getCode());
             output.setStudentId(user.getStudentId());
-            output.setDeptCode(dept.getCode());    
+            output.setDeptCode(dept.getCode());
+            output.setPermission(Permissions.valueOf(permissionEntity.getPermission()));
         } catch(NotFoundOnDataBaseException e) {
             throw new InternalDataBaseException();
         }
