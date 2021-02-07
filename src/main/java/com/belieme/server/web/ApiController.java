@@ -68,6 +68,5 @@ public class ApiController {
     
     protected ApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
         setControllersAndJsonBodyProjector(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
-        System.out.println("만들어짐?");
     }
 }

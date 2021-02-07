@@ -29,7 +29,7 @@ public class PermissionApiController extends ApiController {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
-    @PostMapping("") // TODO 권한 수정도 이걸로 하기 (현재 있는 권한 변경은 duplicateException걸려서 안된다. -> 권한 제거는 Permissions에 추가적으로 BAN이라는 걸 만들어서 USER를 BAN만들어서 제거 하기로)
+    @PostMapping("")
     public ResponseEntity<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionInfoJsonBody requestBody) throws HttpException, ServerDomainException {
         if(requestBody.getDeptCode() == null || requestBody.getPermission() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : deptCode(String), permission(String)");
@@ -43,7 +43,8 @@ public class PermissionApiController extends ApiController {
         permission.setUnivCode(univCode);
         permission.setDeptCode(requestBody.getDeptCode());
         permission.setStudentId(studentId);
-        try {
+        
+        try { // TODO 좀 더 깔쌈하게 하기
             permission.setPermission(Permissions.valueOf(requestBody.getPermission()));    
         } catch(IllegalArgumentException e) {
             throw new BadRequestException("RequestBody의 permission은 BANNED, USER, STAFF, MASTER 중 하나여야 합니다.");

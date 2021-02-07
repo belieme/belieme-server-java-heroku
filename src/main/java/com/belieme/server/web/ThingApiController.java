@@ -58,7 +58,7 @@ public class ThingApiController extends ApiController {
         return ResponseEntity.ok().body(new ListResponse(univ, dept, output));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{thingCode}")
     public ResponseEntity<ResponseWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
@@ -79,7 +79,7 @@ public class ThingApiController extends ApiController {
         return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
     }
 
-    @PostMapping("")
+    @PostMapping("") // TODO amount는 어따 팔아먹었는가
     public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingJsonBody requestBody) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
@@ -121,7 +121,7 @@ public class ThingApiController extends ApiController {
         return ResponseEntity.created(location).body(new ResponseWithItems(univ, dept, output));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{thingCode}")
     public ResponseEntity<ResponseWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @RequestBody ThingJsonBody requestBody) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
