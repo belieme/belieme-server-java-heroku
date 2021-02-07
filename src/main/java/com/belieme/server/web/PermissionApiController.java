@@ -44,7 +44,7 @@ public class PermissionApiController extends ApiController {
         permission.setDeptCode(requestBody.getDeptCode());
         permission.setStudentId(studentId);
         permission.setPermission(Permissions.valueOf(requestBody.getPermission()));
-        if(permission.getPermission() == null) { //TODO 헤더로 token받아서 permission 확인하고 줄 수 있는 권한자만 가능하게 하기
+        if(permission.getPermission().name() == null) { //TODO 헤더로 token받아서 permission 확인하고 줄 수 있는 권한자만 가능하게 하기
             throw new BadRequestException("RequestBody의 permission은 BANNED, USER, STAFF, MASTER 중 하나여야 합니다.");
         }
         
