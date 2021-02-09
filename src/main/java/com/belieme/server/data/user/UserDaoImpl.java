@@ -82,7 +82,7 @@ public class UserDaoImpl implements UserDao {
                 output.setUserId(userId);
                 output.setDeptId(deptId);
             } catch(NotFoundOnDataBaseException e2) {
-                throw new InternalDataBaseException();
+                throw new InternalDataBaseException("UserDaoImpl.findOrMakeNewPermissionEntity()");
             }
         }
         return output;
@@ -96,7 +96,7 @@ public class UserDaoImpl implements UserDao {
             univ = repositoryManager.getUnivEntityById(userEntity.getUnivId());
             output.setUnivCode(univ.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("UserDaoImpl.toUserDto()");
         }
         
         output.setStudentId(userEntity.getStudentId());
@@ -115,7 +115,7 @@ public class UserDaoImpl implements UserDao {
                 output.addPermission(dept.getCode(), Permissions.valueOf(permission.getPermission()));
                 // TODO 같은 dept code를 갖는 permissions가 있을 시 예외처리는 안함. db에 저장하는 것을 제대로 만들면 딱히 필요없을 듯
             } catch(NotFoundOnDataBaseException e) {
-                throw new InternalDataBaseException();
+                throw new InternalDataBaseException("UserDaoImpl.toUserDto()");
             }
         }
         

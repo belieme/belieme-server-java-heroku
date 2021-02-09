@@ -30,7 +30,7 @@ public class PermissionDaoImpl implements PermissionDao {
             output.setDeptCode(dept.getCode());
             output.setPermission(Permissions.valueOf(permissionEntity.getPermission()));
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("PermissionDaoImpl.toPermissionDto()");
         }
         return output;
     }

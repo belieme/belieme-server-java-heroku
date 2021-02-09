@@ -47,18 +47,18 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public UniversityEntity getUnivEntityByUnivCode(String univCode) throws NotFoundOnDataBaseException, InternalDataBaseException {
         List<UniversityEntity> univListFromDb = univRepo.findByCode(univCode);
         if(univListFromDb.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getUnivEntityByUnivCode()");
         } else if(univListFromDb.size() == 1) {
             return univListFromDb.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getUnivEntityByUnivCode()");
         }
     }
     
     public UniversityEntity getUnivEntityById(int id) throws NotFoundOnDataBaseException {
         UniversityEntity output = univRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getUnivEntityById()");
         } else {
             return output;
         }
@@ -67,7 +67,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public void checkUnivDuplicate(String univCode) throws CodeDuplicationException {
         List<UniversityEntity> univListFromDb = univRepo.findByCode(univCode);
         if(univListFromDb.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkUnivDuplicate()");
         }
     }
     
@@ -88,7 +88,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public DepartmentEntity getDeptEntityById(int id) throws NotFoundOnDataBaseException {
         DepartmentEntity output = deptRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getDeptEntityById()");
         } else {
             return output;
         }
@@ -97,11 +97,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public DepartmentEntity getDeptEntityByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException, NotFoundOnDataBaseException {
         List<DepartmentEntity> deptListFromDb = deptRepo.findByUnivIdAndCode(getUnivEntityByUnivCode(univCode).getId(), deptCode);
         if(deptListFromDb.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getDeptEntityByUnivCodeAndDeptCode()");
         } else if(deptListFromDb.size() == 1) {
             return deptListFromDb.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getDeptEntityByUnivCodeAndDeptCode()");
         }
     }
     
@@ -109,7 +109,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int univId = getUnivEntityByUnivCode(univCode).getId();
         List<DepartmentEntity> deptListFromDb = deptRepo.findByUnivIdAndCode(univId, deptCode);
         if(deptListFromDb.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkDeptDuplication()");
         }
     }
     
@@ -146,12 +146,12 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
                 if(output == null) {
                     output = majorEntitiesByUnivCode.get(i);    
                 } else {
-                    throw new InternalDataBaseException();
+                    throw new InternalDataBaseException("RepositoryManager.getMajorEntityByUnivCodeAndMajorCode()");
                 }
             }
         }
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getMajorEntityByUnivCodeAndMajorCode()");
         }
         return output;
     }
@@ -160,7 +160,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         List<MajorEntity> majorEntitiesByUnivCode = getAllMajorEntitiesByUnivCode(univCode);
         for(int i = 0; i < majorEntitiesByUnivCode.size(); i++) {
             if(majorCode.equals(majorEntitiesByUnivCode.get(i).getCode())) {
-                throw new CodeDuplicationException();
+                throw new CodeDuplicationException("RepositoryManager.checkMajorDuplication()");
             }
         }
     }
@@ -172,7 +172,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public UserEntity getUserEntityById(int id) throws NotFoundOnDataBaseException {
         UserEntity output = userRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getUserEntityById()");
         } else {
             return output;
         }
@@ -185,9 +185,9 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         if(userList.size() == 1) {
             return userList.get(0);
         } else if(userList.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getUserEntityByUnivCodeAndStudentId()");
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getUserEntityByUnivCodeAndStudentId()");
         }
     }
     
@@ -197,9 +197,9 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         if(userList.size() == 1) {
             return userList.get(0);
         } else if(userList.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getUserEntityByToken()");
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getUserEntityByToken()");
         }
     }
     
@@ -211,14 +211,14 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int univId = getUnivEntityByUnivCode(univCode).getId();
         List<UserEntity> userListFromDb = userRepo.findByUnivIdAndStudentId(univId, studentId);
         if(userListFromDb.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkUserDuplicationByUnivCodeAndStudentId()");
         }
     }
     
     public void checkUserDuplicationByToken(String token) throws CodeDuplicationException {
         List<UserEntity> userListFromDb = userRepo.findByToken(token);
         if(userListFromDb.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkUserDuplicationByToken()");
         }
     }
     
@@ -249,11 +249,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         
         List<PermissionEntity> permissionListFromDb = permissionRepo.findByUserIdAndDeptId(userId, deptId);
         if(permissionListFromDb.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getPermissionEntityByUnivCodeAndStudentIdAndDeptCode()");
         } else if (permissionListFromDb.size() == 1) {
             return permissionListFromDb.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager,getPermissionEntityByUnivCodeAndStudentIdAndDeptCode()");
         }
     }
     
@@ -262,7 +262,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int deptId = getDeptEntityByUnivCodeAndDeptCode(univCode, deptCode).getId();
         List<PermissionEntity> permissionList = permissionRepo.findByUserIdAndDeptId(userId, deptId);
         if(permissionList.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkPermissionDuplication()");
         }
     }
     
@@ -273,7 +273,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public ThingEntity getThingEntity(int id) throws NotFoundOnDataBaseException {
         ThingEntity output = thingRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getThingEntity()");
         } else {
             return output;
         }
@@ -289,11 +289,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int deptId = getDeptEntityByUnivCodeAndDeptCode(univCode, deptCode).getId();
         List<ThingEntity> thingList = thingRepo.findByDeptIdAndCode(deptId, thingCode);
         if(thingList.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode()");
         } else if(thingList.size() == 1) {
             return thingList.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode()");
         }
     }
     
@@ -305,14 +305,14 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int deptId = getDeptEntityByUnivCodeAndDeptCode(univCode, deptCode).getId();
         List<ThingEntity> thingList = thingRepo.findByDeptIdAndCode(deptId, thingCode);
         if(thingList.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkThingDuplication()");
         }
     }
     
     public ItemEntity getItemEntityById(int id) throws NotFoundOnDataBaseException {
         ItemEntity output = itemRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getItemEntityById()");
         } else {
             return output;
         }
@@ -322,11 +322,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int thingId = getThingEntityByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode).getId();
         List<ItemEntity> itemList = itemRepo.findByThingIdAndNum(thingId, itemNum);
         if(itemList.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum()");
         } else if(itemList.size() == 1) {
             return itemList.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum()");
         }
     }
     
@@ -352,7 +352,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int thingId = getThingEntityByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode).getId();
         List<ItemEntity> itemList = itemRepo.findByThingIdAndNum(thingId, itemNum);
         if(itemList.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkItemDuplication()");
         }
     }
     
@@ -363,7 +363,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public EventEntity getEventEntityById(int id) throws NotFoundOnDataBaseException {
         EventEntity output = eventRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getEventEntityById()");
         } else {
             return output;
         }
@@ -406,11 +406,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
         List<EventEntity> eventList = eventRepo.findByItemIdAndNum(itemId, eventNum);
         if(eventList.size() == 0) {
-            throw new NotFoundOnDataBaseException();
+            throw new NotFoundOnDataBaseException("RepositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum()");
         } else if(eventList.size() == 1) {
             return eventList.get(0);
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("RepositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum()");
         }
     }
     
@@ -418,7 +418,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         int itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
         List<EventEntity> eventList = eventRepo.findByItemIdAndNum(itemId, eventNum);
         if(eventList.size() != 0) {
-            throw new CodeDuplicationException();
+            throw new CodeDuplicationException("RepositoryManager.checkEventDuplication()");
         }
     }
     

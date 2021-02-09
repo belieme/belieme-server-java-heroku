@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 public abstract class ServerDomainException extends Exception {
     public abstract String getMessage();
     
+    public abstract String getPinPoint();
+    
     public ResponseEntity<ExceptionResponse> toResponseEntity() {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse(getMessage(), "?"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse(getMessage(), getPinPoint()));
     } 
 }

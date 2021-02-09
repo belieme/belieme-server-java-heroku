@@ -46,7 +46,7 @@ public class ThingDaoImpl implements ThingDao {
         
             return output;
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("ThingDaoImpl.toThingDto()");
         }        
     }
     

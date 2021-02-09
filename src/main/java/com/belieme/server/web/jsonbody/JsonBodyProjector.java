@@ -185,7 +185,7 @@ public class JsonBodyProjector {
             status = ThingStatus.USABLE;
         }
         else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("JsonBodyProjector.getStatus()");
         }
         return status;
     }
@@ -209,7 +209,7 @@ public class JsonBodyProjector {
                 return ItemStatus.USABLE;
             }    
         } else {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("JsonBodyProjector.getStatus()");
         }
     }
     

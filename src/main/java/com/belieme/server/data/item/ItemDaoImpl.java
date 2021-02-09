@@ -46,7 +46,7 @@ public class ItemDaoImpl implements ItemDao{
             }
             return output;
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("ItemDaoImpl.toItemDto()");
         }    
     }
     

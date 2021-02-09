@@ -36,7 +36,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
             UniversityEntity univ = repositoryManager.getUnivEntityById(deptEntity.getUnivId());    
             output.setUnivCode(univ.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("DepartmentDaoImpl.toDepartmentDto()");
         }
         return output;
     }

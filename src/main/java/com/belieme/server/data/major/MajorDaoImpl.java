@@ -36,7 +36,7 @@ public class MajorDaoImpl implements MajorDao {
             output.setUnivCode(univEntity.getCode());
             output.setDeptCode(deptEntity.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("MajorDaoImpl.toMajorDto()");
         }
         output.setCode(majorEntity.getCode());
         
