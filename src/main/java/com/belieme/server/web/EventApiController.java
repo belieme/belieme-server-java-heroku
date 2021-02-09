@@ -187,7 +187,7 @@ public class EventApiController extends ApiController {
         try {
             lastEvent = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());    
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException("EventApiController.getItemStatus()");//TODO 여기에 이게 있어도 되는가....
         }
         
         String lastEventStatus = lastEvent.getStatus();
