@@ -9,6 +9,6 @@ public abstract class ServerDomainException extends Exception {
     public abstract String getMessage();
     
     public ResponseEntity<ExceptionResponse> toResponseEntity() {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse("?", "?"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse(getMessage(), "?"));
     } 
 }
