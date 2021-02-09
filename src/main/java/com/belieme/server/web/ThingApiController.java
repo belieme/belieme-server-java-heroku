@@ -86,8 +86,8 @@ public class ThingApiController extends ApiController {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        if(requestBody.getCode() == null || requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) {
-            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String), amount(int)(optional)");
+        if(requestBody.getCode() == null || requestBody.getName() == null || requestBody.getEmoji() == null) {
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String)(optional), amount(int)(optional)");
         }
         
         if(requestBody.getAmount() != null && requestBody.getAmount() < 0) {
