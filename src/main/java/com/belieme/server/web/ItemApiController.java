@@ -30,7 +30,7 @@ import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
 @RestController
-@RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things/{thingId}/items")
+@RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things/{thingCode}/items")
 public class ItemApiController extends ApiController {
     @Autowired
     public ItemApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
