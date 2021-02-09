@@ -101,6 +101,7 @@ public class ItemApiController extends ApiController {
                 max = tmp.getNum();
             }
         }
+        
         ItemDto newItem = new ItemDto();
         newItem.setUnivCode(univCode);
         newItem.setDeptCode(deptCode);

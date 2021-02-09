@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.belieme.server.domain.exception.ServerDomainException;
+import com.belieme.server.domain.item.ItemDto;
 import com.belieme.server.domain.thing.ThingDto;
 import com.belieme.server.domain.user.UserDto;
 
@@ -80,13 +81,17 @@ public class ThingApiController extends ApiController {
     }
 
     @PostMapping("") // TODO amount는 어따 팔아먹었는가
-    public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingInfoJsonBody requestBody) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
         if(requestBody.getCode() == null || requestBody.getName() == null || requestBody.getEmoji() == null || requestBody.getDescription() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String), amount(int)(optional)");
+        }
+        
+        if(requestBody.getAmount() != null && requestBody.getAmount() < 0) {
+            throw new BadRequestException("amount는 음수가 될 수 없습니다.");
         }
         
         UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
@@ -108,6 +113,18 @@ public class ThingApiController extends ApiController {
         newThing.setDeptCode(deptCode);
         
         ThingDto savedThing = thingDao.save(newThing);
+        
+        if(requestBody.getAmount() != null) {
+            for(int i = 0; i < requestBody.getAmount(); i++) {
+                ItemDto newItem = new ItemDto();
+                newItem.setUnivCode(univCode);
+                newItem.setDeptCode(deptCode);
+                newItem.setThingCode(requestBody.getCode());
+                newItem.setNum(i+1);
+                newItem.setLastEventNum(0);
+                itemDao.save(newItem);
+            }
+        }
         ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(savedThing);
         
         URI location;

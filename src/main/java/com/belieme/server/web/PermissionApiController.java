@@ -37,8 +37,6 @@ public class PermissionApiController extends ApiController {
         
         UniversityDto univ = univDao.findByCode(univCode);
         
-        UserDto user = userDao.findByUnivCodeAndStudentId(univCode, studentId);
-        
         PermissionDto permission = new PermissionDto();
         permission.setUnivCode(univCode);
         permission.setDeptCode(requestBody.getDeptCode());
@@ -57,6 +55,7 @@ public class PermissionApiController extends ApiController {
             savedPermission = permissionDao.update(univCode, studentId, requestBody.getDeptCode(), permission);
         }
         
+        UserDto user = userDao.findByUnivCodeAndStudentId(univCode, studentId);
         return ResponseEntity.ok().body(createResponse(univ, user, savedPermission));
     }
     
