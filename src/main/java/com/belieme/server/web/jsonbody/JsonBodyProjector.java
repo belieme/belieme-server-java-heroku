@@ -196,7 +196,8 @@ public class JsonBodyProjector {
         if(lastEventNum == 0) { // TODO default 이걸로??
             return ItemStatus.USABLE;
         }
-    
+
+        System.out.println("LastEventNum : " + lastEventNum); //AAA
         EventDto lastEvent = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), lastEventNum);
         if(lastEvent != null) {
             String lastEventStatus = lastEvent.getStatus();
