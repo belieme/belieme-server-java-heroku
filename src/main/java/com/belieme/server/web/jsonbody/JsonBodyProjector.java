@@ -196,8 +196,7 @@ public class JsonBodyProjector {
         if(lastEventNum == 0) { // TODO default 이걸로??
             return ItemStatus.USABLE;
         }
-
-        System.out.println("LastEventNum : " + lastEventNum); //AAA
+        
         EventDto lastEvent = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), lastEventNum);
         if(lastEvent != null) {
             String lastEventStatus = lastEvent.getStatus();
@@ -247,7 +246,11 @@ public class JsonBodyProjector {
     }
     
     private EventDto getLastEvent(ItemDto itemDto) throws ServerDomainException {
-        return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());
+        try {
+            return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());   
+        } catch(NotFoundOnDataBaseException e) {
+            return null;
+        }
     }
     
     private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws ServerDomainException {
