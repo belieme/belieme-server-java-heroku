@@ -254,6 +254,10 @@ public class JsonBodyProjector {
     }
     
     private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws ServerDomainException {
+        if(eventDto == null) {
+            return null;
+        }
+        
         EventJsonBodyNestedToItem output = new EventJsonBodyNestedToItem();
         output.setNum(eventDto.getNum());
         
