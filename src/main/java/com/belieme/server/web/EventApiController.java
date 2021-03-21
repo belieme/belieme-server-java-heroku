@@ -97,7 +97,7 @@ public class EventApiController extends ApiController {
         String thingCode = requestBody.getThingCode();
         Integer itemNum = requestBody.getItemNum();
         if(thingCode == null) {
-            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : thingId(int), itemNum(int)(optional)");
+            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : thingCode(String), itemNum(int)(optional)");
         }
         
         UniversityDto univ = univDao.findByCode(univCode);
@@ -137,6 +137,12 @@ public class EventApiController extends ApiController {
             if(getItemStatus(reservedItem) != ItemStatus.USABLE) {
                 throw new MethodNotAllowedException("이 item은 사용할 수 없습니다.");
             }
+        }
+        
+        if(eventDao == null) {
+            System.out.println("설마");
+        } else {
+            System.out.println("역시");
         }
         
         List<EventDto> eventsByItem = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode,deptCode, thingCode, itemNum);
