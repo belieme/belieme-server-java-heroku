@@ -103,12 +103,14 @@ public class EventDaoImpl implements EventDao {
     }
     
     public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
+        System.out.println("S findByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
         List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         List<EventDto> output = new ArrayList<>();
         
         for(int i = 0; i < eventList.size(); i++) {
             output.add(toEventDto(eventList.get(i)));
         }
+        System.out.println("E findByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
         return output;
     }
     
