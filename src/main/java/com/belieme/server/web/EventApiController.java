@@ -145,7 +145,8 @@ public class EventApiController extends ApiController {
             System.out.println("역시");
         }
         
-        List<EventDto> eventsByItem = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+        eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+        List<EventDto> eventsByItem = new ArrayList<>();
         int lastEventNum = 0;
         for(int i = 0; i < eventsByItem.size(); i++) {
             if(lastEventNum < eventsByItem.get(i).getNum()) {
