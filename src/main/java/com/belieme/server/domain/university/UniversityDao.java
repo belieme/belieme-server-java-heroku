@@ -4,8 +4,8 @@ import java.util.List;
 import com.belieme.server.domain.exception.*;
 
 public interface UniversityDao {
-    public List<UniversityDto> findAllUnivs() throws ServerDomainException;
-    public UniversityDto findByCode(String code) throws ServerDomainException;
-    public UniversityDto save(UniversityDto univ) throws ServerDomainException;
-    public UniversityDto update(String code, UniversityDto univ) throws ServerDomainException;
+    public List<UniversityDto> findAllUnivs();
+    public UniversityDto findByCode(String code) throws InternalDataBaseException, NotFoundOnDataBaseException;
+    public UniversityDto save(UniversityDto univ) throws CodeDuplicationException;
+    public UniversityDto update(String code, UniversityDto univ) throws  InternalDataBaseException, CodeDuplicationException, NotFoundOnDataBaseException;
 }

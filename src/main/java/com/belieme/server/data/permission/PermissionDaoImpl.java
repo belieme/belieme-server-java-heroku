@@ -7,9 +7,7 @@ import com.belieme.server.data.RepositoryManager;
 import com.belieme.server.data.department.DepartmentEntity;
 import com.belieme.server.data.university.UniversityEntity;
 import com.belieme.server.data.user.UserEntity;
-import com.belieme.server.domain.exception.InternalDataBaseException;
-import com.belieme.server.domain.exception.NotFoundOnDataBaseException;
-import com.belieme.server.domain.exception.ServerDomainException;
+import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.permission.*;
 
 public class PermissionDaoImpl implements PermissionDao {
@@ -43,15 +41,15 @@ public class PermissionDaoImpl implements PermissionDao {
         return output;
     }
     
-    public List<PermissionDto> findAllByUnivCodeAndStudentId(String univCode, String studentId) throws ServerDomainException {
+    public List<PermissionDto> findAllByUnivCodeAndStudentId(String univCode, String studentId) throws InternalDataBaseException {
         return toPermissionDtoList(repositoryManager.getAllPermissionEntitiesByUnivCodeAndDeptCode(univCode, studentId));
     }
     
-    public PermissionDto findByUnivCodeAndStudentIdAndDeptCode(String univCode, String studentId, String deptCode) throws ServerDomainException {
+    public PermissionDto findByUnivCodeAndStudentIdAndDeptCode(String univCode, String studentId, String deptCode) throws NotFoundOnDataBaseException, InternalDataBaseException {
         return toPermissionDto(repositoryManager.getPermissionEntityByUnivCodeAndStudentIdAndDeptCode(univCode, studentId, deptCode));
     }
     
-    public PermissionDto save(PermissionDto permission) throws ServerDomainException {
+    public PermissionDto save(PermissionDto permission) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         repositoryManager.checkPermissionDuplication(permission.getUnivCode(), permission.getStudentId(), permission.getDeptCode());
         
         int userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(permission.getUnivCode(), permission.getStudentId()).getId();
@@ -66,7 +64,7 @@ public class PermissionDaoImpl implements PermissionDao {
         return output;
     }
     
-    public PermissionDto update(String univCode, String studentId, String deptCode, PermissionDto permission) throws ServerDomainException {
+    public PermissionDto update(String univCode, String studentId, String deptCode, PermissionDto permission) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         PermissionEntity target = repositoryManager.getPermissionEntityByUnivCodeAndStudentIdAndDeptCode(univCode, studentId, deptCode);
         
         if(univCode != permission.getUnivCode() || studentId != permission.getStudentId() || deptCode != permission.getDeptCode()) {

@@ -11,7 +11,7 @@ import com.belieme.server.data.university.UniversityEntity;
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.item.*;
 
-public class ItemDaoImpl implements ItemDao{
+public class ItemDaoImpl implements ItemDao {
     private RepositoryManager repositoryManager;
     
     public ItemDaoImpl(RepositoryManager repositoryManager) {
@@ -50,7 +50,7 @@ public class ItemDaoImpl implements ItemDao{
         }    
     }
     
-    public List<ItemDto> findByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws NotFoundOnDataBaseException, InternalDataBaseException {
+    public List<ItemDto> findByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws InternalDataBaseException {
         List<ItemEntity> itemListFromDb = repositoryManager.getAllItemEntitiesByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         List<ItemDto> output = new ArrayList<>();
         for(int i = 0; i < itemListFromDb.size(); i++) {

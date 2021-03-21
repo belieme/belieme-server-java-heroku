@@ -16,7 +16,7 @@ public class ThingDaoImpl implements ThingDao {
         this.repositoryManager = repositoryManager;
     }
     
-    public List<ThingDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws NotFoundOnDataBaseException, InternalDataBaseException {
+    public List<ThingDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
         List<ThingEntity> thingListFromDb = repositoryManager.getAllThingEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
         List<ThingDto> output = new ArrayList<>();
         

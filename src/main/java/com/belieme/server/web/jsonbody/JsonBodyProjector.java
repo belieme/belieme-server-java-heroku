@@ -47,7 +47,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public DepartmentJsonBody toDepartmentJsonBody(DepartmentDto deptDto) throws ServerDomainException {
+    public DepartmentJsonBody toDepartmentJsonBody(DepartmentDto deptDto) throws InternalDataBaseException {
         if(deptDto == null) {
             return null;
         }
@@ -64,11 +64,11 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private List<MajorDto> getMajorDtoList(DepartmentDto deptDto) throws ServerDomainException {
+    private List<MajorDto> getMajorDtoList(DepartmentDto deptDto) throws InternalDataBaseException {
         return majorDao.findAllByUnivCodeAndDeptCode(deptDto.getUnivCode(), deptDto.getCode());
     }
     
-    public MajorJsonBody toMajorJsonBody(MajorDto majorDto) throws ServerDomainException {
+    public MajorJsonBody toMajorJsonBody(MajorDto majorDto) throws InternalDataBaseException {
         if(majorDto == null) {
             return null;
         }
@@ -82,7 +82,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private DepartmentDto getDeptDto(MajorDto majorDto) throws ServerDomainException { // TODO 이제부터 ServerDomainException보다는 Exception하나하나 표기하자. 다 바꾸자.
+    private DepartmentDto getDeptDto(MajorDto majorDto) throws InternalDataBaseException { 
         try {
             return deptDao.findByUnivCodeAndDeptCode(majorDto.getUnivCode(), majorDto.getDeptCode());
         } catch(NotFoundOnDataBaseException e) {
@@ -90,7 +90,7 @@ public class JsonBodyProjector {
         }
     }
     
-    public UserJsonBody toUserJsonBody(UserDto userDto) throws ServerDomainException {
+    public UserJsonBody toUserJsonBody(UserDto userDto) throws InternalDataBaseException {
         if(userDto == null) {
             return null;
         }
@@ -113,7 +113,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private UniversityDto getUnivDto(UserDto userDto) throws ServerDomainException {
+    private UniversityDto getUnivDto(UserDto userDto) throws InternalDataBaseException {
         try {
             return univDao.findByCode(userDto.getUnivCode());
         } catch(NotFoundOnDataBaseException e) {
@@ -121,7 +121,7 @@ public class JsonBodyProjector {
         }
     }
     
-    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) throws ServerDomainException {
+    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) throws InternalDataBaseException {
         if(userDto == null) {
             return null;
         }
@@ -143,7 +143,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public ThingJsonBody toThingJsonBody(ThingDto thingDto) throws ServerDomainException {
+    public ThingJsonBody toThingJsonBody(ThingDto thingDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(thingDto == null) {
             return null;
         }
@@ -164,7 +164,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private int getAmount(ThingDto thing) throws ServerDomainException {
+    private int getAmount(ThingDto thing) throws NotFoundOnDataBaseException, InternalDataBaseException {
         int amount = 0;
         
         List<ItemDto> items = getItems(thing);
@@ -177,7 +177,7 @@ public class JsonBodyProjector {
         return amount;
     }
     
-    private int getCount(ThingDto thing) throws ServerDomainException {
+    private int getCount(ThingDto thing) throws NotFoundOnDataBaseException, InternalDataBaseException {
         int count = 0;
         List<ItemDto> items = getItems(thing);
         for(int i = 0; i < items.size(); i++) {
@@ -188,7 +188,7 @@ public class JsonBodyProjector {
         return count;
     }
     
-    private List<ItemDto> getItems(ThingDto thing) throws ServerDomainException {
+    private List<ItemDto> getItems(ThingDto thing) throws NotFoundOnDataBaseException, InternalDataBaseException {
         String univCode = thing.getUnivCode();
         String deptCode = thing.getDeptCode();
         String thingCode = thing.getCode();
@@ -197,7 +197,7 @@ public class JsonBodyProjector {
         return items;
     }
     
-    private ThingStatus getStatus(ThingDto thing) throws ServerDomainException {
+    private ThingStatus getStatus(ThingDto thing) throws NotFoundOnDataBaseException, InternalDataBaseException {
         ThingStatus status;
         int amount = 0;
         int count = 0;
@@ -228,7 +228,7 @@ public class JsonBodyProjector {
         return status;
     }
     
-    private ItemStatus getStatus(ItemDto itemDto) throws ServerDomainException {
+    private ItemStatus getStatus(ItemDto itemDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         int lastEventNum = itemDto.getLastEventNum();
         
         if(lastEventNum == 0) { // TODO default 이걸로??
@@ -251,7 +251,7 @@ public class JsonBodyProjector {
         }
     }
     
-    public ThingJsonBodyWithItems toThingJsonBodyWithItems(ThingDto thingDto) throws ServerDomainException {
+    public ThingJsonBodyWithItems toThingJsonBodyWithItems(ThingDto thingDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(thingDto == null) {
             return null;
         }
@@ -277,7 +277,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public ItemJsonBody toItemJsonBody(ItemDto itemDto) throws ServerDomainException {
+    public ItemJsonBody toItemJsonBody(ItemDto itemDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(itemDto == null) {
             return null;
         }
@@ -289,14 +289,14 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private EventDto getLastEvent(ItemDto itemDto) throws ServerDomainException {
+    private EventDto getLastEvent(ItemDto itemDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(itemDto.getLastEventNum() == 0) {
             return null;
         }
         return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());   
     }
     
-    private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws ServerDomainException {
+    private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto == null) {
             return null;
         }
@@ -322,28 +322,28 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private UserDto getUser(EventDto eventDto) throws ServerDomainException {
+    private UserDto getUser(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto.getUserStudentId() == null) {
             return null;
         }
         return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getUserStudentId());
     }
     
-    private UserDto getApproveManager(EventDto eventDto) throws ServerDomainException {
+    private UserDto getApproveManager(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto.getApproveManagerStudentId() == null) {
             return null;
         }
         return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());
     }
     
-    private UserDto getReturnManager(EventDto eventDto) throws ServerDomainException {
+    private UserDto getReturnManager(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto.getReturnManagerStudentId() == null) {
             return null;
         }
         return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());
     }
     
-    private UserDto getLostManager(EventDto eventDto) throws ServerDomainException {
+    private UserDto getLostManager(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto.getLostManagerStudentId() == null) {
             return null;
         }
@@ -363,7 +363,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public PermissionJsonBody toPermissionJsonBody(PermissionDto permissionDto) throws ServerDomainException {
+    public PermissionJsonBody toPermissionJsonBody(PermissionDto permissionDto) throws InternalDataBaseException {
         if(permissionDto == null) {
             return null;
         }
@@ -377,7 +377,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private DepartmentDto getDeptDto(PermissionDto permissionDto) throws ServerDomainException {
+    private DepartmentDto getDeptDto(PermissionDto permissionDto) throws InternalDataBaseException {
         try {
             return deptDao.findByUnivCodeAndDeptCode(permissionDto.getUnivCode(), permissionDto.getDeptCode());
         } catch(NotFoundOnDataBaseException e) {
@@ -385,7 +385,7 @@ public class JsonBodyProjector {
         }
     }
         
-    public EventJsonBody toEventJsonBody(EventDto eventDto) throws ServerDomainException {
+    public EventJsonBody toEventJsonBody(EventDto eventDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(eventDto == null) {
             return null;
         }
@@ -417,7 +417,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private ThingDto getThingDto(EventDto eventDto) throws ServerDomainException {
+    private ThingDto getThingDto(EventDto eventDto) throws InternalDataBaseException {
         try {
             return thingDao.findByUnivCodeAndDeptCodeAndCode(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode());
         } catch(NotFoundOnDataBaseException e) {
@@ -425,7 +425,7 @@ public class JsonBodyProjector {
         }
     }
     
-    private ItemDto getItemDto(EventDto eventDto) throws ServerDomainException {
+    private ItemDto getItemDto(EventDto eventDto) throws InternalDataBaseException {
         try {
             return itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndNum(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
         } catch(NotFoundOnDataBaseException e) {
@@ -448,7 +448,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private ItemJsonBodyNestedToEvent toItemJsonBodyNestedToEvent(ItemDto itemDto) throws ServerDomainException {
+    private ItemJsonBodyNestedToEvent toItemJsonBodyNestedToEvent(ItemDto itemDto) throws NotFoundOnDataBaseException, InternalDataBaseException {
         if(itemDto == null) {
             return null;
         }

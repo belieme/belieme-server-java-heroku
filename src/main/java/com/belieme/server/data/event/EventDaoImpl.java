@@ -19,25 +19,36 @@ public class EventDaoImpl implements EventDao {
         this.repositoryManager = repositoryManager;
     }
     
-    private EventDto toEventDto(EventEntity eventEntity) throws NotFoundOnDataBaseException {
+    private EventDto toEventDto(EventEntity eventEntity) throws InternalDataBaseException {
         EventDto output = new EventDto();
         
-        ItemEntity itemEntity = repositoryManager.getItemEntityById(eventEntity.getItemId());
-        ThingEntity thingEntity = repositoryManager.getThingEntity(itemEntity.getThingId());
-        DepartmentEntity deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
-        UniversityEntity univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
+        ItemEntity itemEntity;
+        ThingEntity thingEntity;
+        DepartmentEntity deptEntity;
+        UniversityEntity univEntity;
+        String userStudentId;
+        String approveManagerStudentId;
+        String returnManagerStudentId;
+        String lostManagerStudentId;
+        
+        try {
+            itemEntity = repositoryManager.getItemEntityById(eventEntity.getItemId());
+            thingEntity = repositoryManager.getThingEntity(itemEntity.getThingId());
+            deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
+            univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
+            userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();
+            approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();
+            returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();
+            lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();
+        } catch(NotFoundOnDataBaseException e) {
+            throw new InternalDataBaseException("EventDto.toEventDto(EventEntity eventEntity)");
+        }
         
         output.setUnivCode(univEntity.getCode());
         output.setDeptCode(deptEntity.getCode());
         output.setThingCode(thingEntity.getCode());
         output.setItemNum(itemEntity.getNum());
         output.setNum(eventEntity.getNum());
-    
-        String userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();
-        String approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();
-        String returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();
-        String lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();
-        
         output.setUserStudentId(userStudentId);
         output.setApproveManagerStudentId(approveManagerStudentId);
         output.setReturnManagerStudentId(returnManagerStudentId);
@@ -52,7 +63,7 @@ public class EventDaoImpl implements EventDao {
         return output;
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws NotFoundOnDataBaseException, InternalDataBaseException {
+    public List<EventDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
         List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
         List<EventDto> output = new ArrayList<>();
         
@@ -62,7 +73,7 @@ public class EventDaoImpl implements EventDao {
         return output;
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userStudentId) throws NotFoundOnDataBaseException, InternalDataBaseException {
+    public List<EventDto> findByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userStudentId) throws InternalDataBaseException {
         List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndUserStudnetId(univCode, deptCode, userStudentId);
         List<EventDto> output = new ArrayList<>();
         
@@ -72,7 +83,7 @@ public class EventDaoImpl implements EventDao {
         return output;
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws NotFoundOnDataBaseException, InternalDataBaseException {
+    public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
         List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         List<EventDto> output = new ArrayList<>();
         
@@ -101,16 +112,19 @@ public class EventDaoImpl implements EventDao {
         } else {
             userId = 0;
         }
+        
         if(event.getApproveManagerStudentId() != null) {
             approveManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getApproveManagerStudentId()).getId();
         } else {
             approveManagerId = 0;
         }
+        
         if(event.getReturnManagerStudentId() != null) {
             returnManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getReturnManagerStudentId()).getId();
         } else {
             returnManagerId = 0;
         }
+        
         if(event.getLostManagerStudentId() != null) {
             lostManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getLostManagerStudentId()).getId();    
         } else {
@@ -153,16 +167,19 @@ public class EventDaoImpl implements EventDao {
         } else {
             userId = 0;
         }
+        
         if(event.getApproveManagerStudentId() != null) {
             approveManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getApproveManagerStudentId()).getId();
         } else {
             approveManagerId = 0;
         }
+        
         if(event.getReturnManagerStudentId() != null) {
             returnManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getReturnManagerStudentId()).getId();
         } else {
             returnManagerId = 0;
         }
+        
         if(event.getLostManagerStudentId() != null) {
             lostManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getLostManagerStudentId()).getId();    
         } else {

@@ -28,6 +28,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
     private DepartmentDto toDepartmentDto(DepartmentEntity deptEntity) throws InternalDataBaseException {
         DepartmentDto output = new DepartmentDto();
         
+        
         output.setCode(deptEntity.getCode());
         output.setName(deptEntity.getName());
         output.setAvailable(deptEntity.isAvailble());
