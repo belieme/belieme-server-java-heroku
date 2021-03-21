@@ -36,10 +36,29 @@ public class EventDaoImpl implements EventDao {
             thingEntity = repositoryManager.getThingEntity(itemEntity.getThingId());
             deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
             univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
-            userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();
-            approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();
-            returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();
-            lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();
+            if(eventEntity.getUserId() == 0) {
+                userStudentId = "";
+            } else {
+                userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();    
+            }
+            
+            if(eventEntity.getApproveManagerId() == 0) {
+                approveManagerStudentId = "";
+            } else {
+                approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();    
+            }
+            
+            if(eventEntity.getReturnManagerId() == 0) {
+                returnManagerStudentId = "";
+            } else {
+                returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();    
+            }
+            
+            if(eventEntity.getLostManagerId() == 0) {
+                lostManagerStudentId = "";    
+            } else {
+                lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();    
+            }
         } catch(NotFoundOnDataBaseException e) {
             throw new InternalDataBaseException("EventDto.toEventDto(EventEntity eventEntity)");
         }
