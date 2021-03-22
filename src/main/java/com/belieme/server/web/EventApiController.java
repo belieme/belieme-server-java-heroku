@@ -272,7 +272,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/cancel") //TODO 논의점 cancel manager를 만들어야 하는가?
-    public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, int itemNum, int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
@@ -298,7 +298,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/approve")
-    public ResponseEntity<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, int itemNum, int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
@@ -326,7 +326,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/return")
-    public ResponseEntity<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, int itemNum, int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
@@ -354,7 +354,7 @@ public class EventApiController extends ApiController {
     }
     
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/lost")
-    public ResponseEntity<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, int itemNum, int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
@@ -382,7 +382,7 @@ public class EventApiController extends ApiController {
     }
     
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/found")
-    public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, int itemNum, int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
