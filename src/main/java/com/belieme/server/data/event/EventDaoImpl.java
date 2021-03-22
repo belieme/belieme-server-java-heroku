@@ -41,25 +41,25 @@ public class EventDaoImpl implements EventDao {
             deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
             univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
             if(eventEntity.getUserId() == 0) {
-                userStudentId = "";
+                userStudentId = null;
             } else {
                 userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();    
             }
             
             if(eventEntity.getApproveManagerId() == 0) {
-                approveManagerStudentId = "";
+                approveManagerStudentId = null;
             } else {
                 approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();    
             }
             
             if(eventEntity.getReturnManagerId() == 0) {
-                returnManagerStudentId = "";
+                returnManagerStudentId = null;
             } else {
                 returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();    
             }
             
             if(eventEntity.getLostManagerId() == 0) {
-                lostManagerStudentId = "";    
+                lostManagerStudentId = null;    
             } else {
                 lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();    
             }
