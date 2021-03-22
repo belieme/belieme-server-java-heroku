@@ -66,7 +66,7 @@ public class MajorDaoImpl implements MajorDao {
     
     public MajorDto update(String univCode, String majorCode, MajorDto major) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         MajorEntity target = repositoryManager.getMajorEntityByUnivCodeAndMajorCode(univCode, majorCode);
-        if(univCode != major.getUnivCode() || majorCode != major.getCode()) {
+        if(!univCode.equals(major.getUnivCode()) || !majorCode.equals(major.getCode())) {
             repositoryManager.checkMajorDuplication(major.getUnivCode(), major.getCode());   
             int deptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(major.getUnivCode(), major.getDeptCode()).getId();
             target.setDeptId(deptId);

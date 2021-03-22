@@ -51,7 +51,7 @@ public class UniversityDaoImpl implements UniversityDao {
     
     public UniversityDto update(String univCode, UniversityDto univ) throws InternalDataBaseException, CodeDuplicationException, NotFoundOnDataBaseException {
         UniversityEntity target = repositoryManager.getUnivEntityByUnivCode(univCode);
-        if(univCode != univ.getCode()) {
+        if(!univCode.equals(univ.getCode())) {
             repositoryManager.checkUnivDuplicate(univ.getCode());
         }
         

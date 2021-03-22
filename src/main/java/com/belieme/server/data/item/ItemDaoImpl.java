@@ -83,7 +83,7 @@ public class ItemDaoImpl implements ItemDao {
     public ItemDto update(String univCode, String deptCode, String thingCode, int num, ItemDto item) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         ItemEntity target = repositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, num);
         
-        if(univCode != item.getUnivCode() || deptCode != item.getDeptCode() || thingCode != item.getThingCode() || num != item.getNum()) {
+        if(!univCode.equals(item.getUnivCode()) || !deptCode.equals(item.getDeptCode()) || !thingCode.equals(item.getThingCode()) || num != item.getNum()) {
             repositoryManager.checkItemDuplication(item.getUnivCode(), item.getDeptCode(), item.getThingCode(), item.getNum());
             int newThingId = repositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode(item.getUnivCode(), item.getDeptCode(), item.getThingCode()).getId();
             target.setThingId(newThingId);

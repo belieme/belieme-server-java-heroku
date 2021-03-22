@@ -179,7 +179,7 @@ public class EventDaoImpl implements EventDao {
     public EventDto update(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto event) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         EventEntity target = repositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
         
-        if(univCode != event.getUnivCode() || deptCode != event.getDeptCode() || thingCode != event.getThingCode() || itemNum != event.getItemNum() || eventNum != event.getNum()) {
+        if(!univCode.equals(event.getUnivCode()) || !deptCode.equals(event.getDeptCode()) || !thingCode.equals(event.getThingCode()) || itemNum != event.getItemNum() || eventNum != event.getNum()) {
             repositoryManager.checkEventDuplication(event.getUnivCode(), event.getDeptCode(), event.getThingCode(), event.getItemNum(), event.getNum());
             ItemEntity item = repositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(event.getUnivCode(),event.getDeptCode(), event.getThingCode(), event.getItemNum());
             target.setItemId(item.getId());

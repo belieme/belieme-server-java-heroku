@@ -129,7 +129,7 @@ public class UserDaoImpl implements UserDao {
     public UserDto update(String univCode, String studentId, UserDto user) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         UserEntity target = repositoryManager.getUserEntityByUnivCodeAndStudentId(univCode, studentId);
         
-        if(univCode != user.getUnivCode() || studentId != user.getStudentId()) {
+        if(!univCode.equals(user.getUnivCode()) || !studentId.equals(user.getStudentId())) {
             repositoryManager.checkUserDuplicationByUnivCodeAndStudentId(user.getUnivCode(), user.getStudentId());
             int newUnivId = repositoryManager.getUnivEntityByUnivCode(user.getUnivCode()).getId();
             target.setUnivId(newUnivId);
