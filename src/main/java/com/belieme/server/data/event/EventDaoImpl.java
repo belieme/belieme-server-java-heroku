@@ -19,6 +19,10 @@ public class EventDaoImpl implements EventDao {
         this.repositoryManager = repositoryManager;
     }
     
+    public void println() {
+        System.out.println("요건 되는거니?");
+    }
+    
     private EventDto toEventDto(EventEntity eventEntity) throws InternalDataBaseException {
         EventDto output = new EventDto();
         

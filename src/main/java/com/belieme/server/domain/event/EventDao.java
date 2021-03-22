@@ -4,6 +4,7 @@ import java.util.List;
 import com.belieme.server.domain.exception.*;
 
 public interface EventDao {
+    public void println();
     public List<EventDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException;
     public List<EventDto> findByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userId) throws InternalDataBaseException;
     public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException;

@@ -145,8 +145,8 @@ public class EventApiController extends ApiController {
             System.out.println("역시");
         }
         
-        eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
-        List<EventDto> eventsByItem = new ArrayList<>();
+        //TODO univCode, deptCode, thingCode, itemNum 로그 다 찍어보고 어디서 null pointer exc 나오는지 확인하기
+        List<EventDto> eventsByItem = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         int lastEventNum = 0;
         for(int i = 0; i < eventsByItem.size(); i++) {
             if(lastEventNum < eventsByItem.get(i).getNum()) {
