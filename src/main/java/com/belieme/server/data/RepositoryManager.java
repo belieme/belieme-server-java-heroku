@@ -438,7 +438,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
             int itemId = itemList.get(i).getId();
             List<EventEntity> eventList = eventRepo.findByItemId(itemId);
             for(int j = 0; j < eventList.size(); j++) {
-                if(eventList.get(i).getUserId() == userId) {
+                if(eventList.get(j).getUserId() == userId) {
                     output.add(eventList.get(j));        
                 }
             }
