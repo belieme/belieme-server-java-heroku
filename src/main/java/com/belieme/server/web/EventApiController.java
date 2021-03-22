@@ -61,6 +61,26 @@ public class EventApiController extends ApiController {
         return ResponseEntity.ok().body(createListResponse(univ, dept, eventList));
     }
 
+    @GetMapping("/things/{thingCode}/items/{itemNum}/events")
+    public ResponseEntity<ListResponse> getEventsOfItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum) throws HttpException, ServerDomainException {
+        if(userToken == null) {
+            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
+        }
+        
+        UniversityDto univ = univDao.findByCode(univCode);
+        DepartmentDto dept = deptDao.findByUnivCodeAndDeptCode(univCode, deptCode);
+        
+        UserDto user = userDao.findByToken(userToken);
+        
+        List<EventDto> eventList = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+        if(user.hasStaffPermission(deptCode)) {
+            return ResponseEntity.ok().body(createListResponse(univ, dept, eventList));
+        }
+        else {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
+        }
+    }
+    
     @GetMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}")
     public ResponseEntity<Response> getItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
