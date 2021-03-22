@@ -239,12 +239,12 @@ public class JsonBodyProjector {
         if(lastEvent != null) {
             String lastEventStatus = lastEvent.getStatus();
             if(lastEventStatus.equals("EXPIRED")||lastEventStatus.equals("RETURNED")||lastEventStatus.equals("FOUND")||lastEventStatus.equals("FOUNDANDRETURNED")) {
-                return ItemStatus.UNUSABLE;
+                return ItemStatus.USABLE;
             }
             else if (lastEventStatus.equals("LOST")){
                 return ItemStatus.INACTIVATE;
             } else {
-                return ItemStatus.USABLE;
+                return ItemStatus.UNUSABLE;
             }    
         } else {
             throw new InternalDataBaseException("JsonBodyProjector.getStatus()");
