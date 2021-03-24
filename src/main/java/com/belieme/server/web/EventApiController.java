@@ -401,7 +401,7 @@ public class EventApiController extends ApiController {
         }
     }
     
-    @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/found")
+    @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/found") //TODO 이거 exception걸리네?
     public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
