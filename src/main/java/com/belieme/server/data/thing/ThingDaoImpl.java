@@ -71,7 +71,7 @@ public class ThingDaoImpl implements ThingDao {
     public ThingDto update(String univCode, String deptCode, String code, ThingDto thing) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException { // TODO 학교 바꾸는 거 같은거 가능??
         ThingEntity target = repositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, code);
         
-        if(!univCode.equals(thing.getUnivCode()) || !deptCode.equals(thing.getDeptCode()) || !code.equals(thing.getCode())) {
+        if(!univCode.equalsIgnoreCase(thing.getUnivCode()) || !deptCode.equalsIgnoreCase(thing.getDeptCode()) || !code.equalsIgnoreCase(thing.getCode())) {
             repositoryManager.checkThingDuplication(thing.getUnivCode(), thing.getDeptCode(), thing.getCode());
             int newDeptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(thing.getUnivCode(), thing.getDeptCode()).getId();
             target.setDeptId(newDeptId);

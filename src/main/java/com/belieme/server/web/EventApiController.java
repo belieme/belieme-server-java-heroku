@@ -130,7 +130,7 @@ public class EventApiController extends ApiController {
             
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
-                if(tmp.getThingCode().equals(thingCode)) { //TODO null pointer exception 발생 할 수도 있지 않을까?
+                if(tmp.getThingCode().equalsIgnoreCase(thingCode)) { //TODO null pointer exception 발생 할 수도 있지 않을까?
                     throw new MethodNotAllowedException("빌리려고 하는 물품종류에 대한 열린 기록이 있습니다."); //TODO 이 exception은 없애던가 메세지를 바꾸기
                 }
             }

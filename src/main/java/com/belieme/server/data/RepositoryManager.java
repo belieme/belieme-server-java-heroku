@@ -95,12 +95,10 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     }
     
     public DepartmentEntity getDeptEntityByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException, NotFoundOnDataBaseException { // done
-        System.out.println("##S :getDeptEntityByUnivCodeAndDeptCode");
         List<DepartmentEntity> deptListFromDb = deptRepo.findByUnivIdAndCode(getUnivEntityByUnivCode(univCode).getId(), deptCode);
         if(deptListFromDb.size() == 0) {
             throw new NotFoundOnDataBaseException("RepositoryManager.getDeptEntityByUnivCodeAndDeptCode()");
         } else if(deptListFromDb.size() == 1) {
-            System.out.println("##E :getDeptEntityByUnivCodeAndDeptCode");
             return deptListFromDb.get(0);
         } else {
             throw new InternalDataBaseException("RepositoryManager.getDeptEntityByUnivCodeAndDeptCode()");
@@ -150,7 +148,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
         List<MajorEntity> majorEntitiesByUnivCode = getAllMajorEntitiesByUnivCode(univCode);
         MajorEntity output = null;
         for(int i = 0; i < majorEntitiesByUnivCode.size(); i++) {
-            if(majorCode.equals(majorEntitiesByUnivCode.get(i).getCode())) {
+            if(majorCode.equalsIgnoreCase(majorEntitiesByUnivCode.get(i).getCode())) {
                 if(output == null) {
                     output = majorEntitiesByUnivCode.get(i);    
                 } else {
@@ -167,7 +165,7 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     public void checkMajorDuplication(String univCode, String majorCode) throws CodeDuplicationException, InternalDataBaseException { // done
         List<MajorEntity> majorEntitiesByUnivCode = getAllMajorEntitiesByUnivCode(univCode);
         for(int i = 0; i < majorEntitiesByUnivCode.size(); i++) {
-            if(majorCode.equals(majorEntitiesByUnivCode.get(i).getCode())) {
+            if(majorCode.equalsIgnoreCase(majorEntitiesByUnivCode.get(i).getCode())) {
                 throw new CodeDuplicationException("RepositoryManager.checkMajorDuplication()");
             }
         }
@@ -310,13 +308,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     }
     
     public ThingEntity getThingEntityByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws NotFoundOnDataBaseException, InternalDataBaseException { // done
-        System.out.println("##S :getThingEntityByUnivCodeAndDeptCodeAndThingCode");
         int deptId = getDeptEntityByUnivCodeAndDeptCode(univCode, deptCode).getId();
         List<ThingEntity> thingList = thingRepo.findByDeptIdAndCode(deptId, thingCode);
         if(thingList.size() == 0) {
             throw new NotFoundOnDataBaseException("RepositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode()");
         } else if(thingList.size() == 1) {
-            System.out.println("##E :getThingEntityByUnivCodeAndDeptCodeAndThingCode");
             return thingList.get(0);
         } else {
             throw new InternalDataBaseException("RepositoryManager.getThingEntityByUnivCodeAndDeptCodeAndThingCode()");
@@ -362,13 +358,11 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     }
     
     public ItemEntity getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws NotFoundOnDataBaseException, InternalDataBaseException { // done
-        System.out.println("##S :getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
         int thingId = getThingEntityByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode).getId();
         List<ItemEntity> itemList = itemRepo.findByThingIdAndNum(thingId, itemNum);
         if(itemList.size() == 0) {
             throw new NotFoundOnDataBaseException("RepositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum()");
         } else if(itemList.size() == 1) {
-            System.out.println("##E :getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
             return itemList.get(0);
         } else {
             throw new InternalDataBaseException("RepositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum()");
@@ -447,15 +441,12 @@ public class RepositoryManager { //TODO 함수 이름 일관화 하고 daoImpl�
     }
     
     public List<EventEntity> getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException { // 일단 이걸로
-        System.out.println("##S :getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
         int itemId;
         try { 
             itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
         } catch(NotFoundOnDataBaseException e) {
-            System.out.println("##E :getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum1");
             return new ArrayList<>();
         }
-        System.out.println("##E :getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum2");
         return eventRepo.findByItemId(itemId);
     }
     

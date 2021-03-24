@@ -67,7 +67,7 @@ public class PermissionDaoImpl implements PermissionDao {
     public PermissionDto update(String univCode, String studentId, String deptCode, PermissionDto permission) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
         PermissionEntity target = repositoryManager.getPermissionEntityByUnivCodeAndStudentIdAndDeptCode(univCode, studentId, deptCode);
         
-        if(!univCode.equals(permission.getUnivCode()) || !studentId.equals(permission.getStudentId()) || !deptCode.equals(permission.getDeptCode())) {
+        if(!univCode.equalsIgnoreCase(permission.getUnivCode()) || !studentId.equals(permission.getStudentId()) || !deptCode.equalsIgnoreCase(permission.getDeptCode())) {
             repositoryManager.checkPermissionDuplication(permission.getUnivCode(), permission.getStudentId(), permission.getDeptCode());    
             int userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(permission.getUnivCode(), permission.getStudentId()).getId();
             int deptId = repositoryManager.getDeptEntityByUnivCodeAndDeptCode(permission.getUnivCode(), permission.getDeptCode()).getId();

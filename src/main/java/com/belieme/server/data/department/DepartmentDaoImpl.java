@@ -70,7 +70,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
     public DepartmentDto update(String univCode, String deptCode, DepartmentDto dept) throws NotFoundOnDataBaseException, CodeDuplicationException, InternalDataBaseException {
         DepartmentEntity target = getDeptEntity(univCode, deptCode);
         
-        if(!univCode.equals(dept.getUnivCode()) || !deptCode.equals(dept.getCode())) {
+        if(!univCode.equalsIgnoreCase(dept.getUnivCode()) || !deptCode.equalsIgnoreCase(dept.getCode())) {
             repositoryManager.checkDeptDuplication(dept.getUnivCode(), dept.getCode());
             int newUnivId = repositoryManager.getUnivEntityByUnivCode(dept.getUnivCode()).getId();
             target.setUnivId(newUnivId);
