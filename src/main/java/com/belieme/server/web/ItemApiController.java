@@ -51,7 +51,7 @@ public class ItemApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndCode(univCode, deptCode, thingCode);
+        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         List<ItemDto> items = itemDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         
         return ResponseEntity.ok().body(createListResponse(univ, dept, thing, items));
@@ -71,8 +71,8 @@ public class ItemApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndCode(univCode, deptCode, thingCode);
-        ItemDto item = itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndNum(univCode, deptCode, thingCode, itemNum);
+        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+        ItemDto item = itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         return ResponseEntity.ok().body(createResponse(univ, dept, thing, item));
     }
 
@@ -91,7 +91,7 @@ public class ItemApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
 
-        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndCode(univCode, deptCode, thingCode);
+        ThingDto thing = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         List<ItemDto> items = itemDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
 
         int max = 0;

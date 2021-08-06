@@ -9,8 +9,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.belieme.server.domain.exception.NotFoundOnDataBaseException;
-import com.belieme.server.domain.exception.ServerDomainException;
+import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.item.ItemDto;
 import com.belieme.server.domain.thing.ThingDto;
 import com.belieme.server.domain.user.UserDto;
@@ -75,7 +74,7 @@ public class ThingApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndCode(univCode, deptCode, thingCode);
+        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         
         ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(target);
         return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
@@ -155,7 +154,7 @@ public class ThingApiController extends ApiController {
         UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
         try {
             user = userDao.findByToken(userToken);
-        } catch(NotFoundOnDataBaseException e) {
+        } catch(NotFoundOnServerException e) {
             throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
         }
         
@@ -163,7 +162,7 @@ public class ThingApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndCode(univCode, deptCode, thingCode);
+        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         
         if(requestBody.getCode() != null) {
             target.setCode(requestBody.getCode());    

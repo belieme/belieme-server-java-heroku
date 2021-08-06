@@ -102,7 +102,7 @@ public class GeneralApiController extends ApiController {
                     UserDto savedUser;
                     try {
                          newUser = userDao.findByUnivCodeAndStudentId(univCode, studentId);    
-                    } catch (NotFoundOnDataBaseException e) {
+                    } catch (NotFoundOnServerException e) {
                         newUser = new UserDto();
                         newUser.setCreateTimeStampNow();
                         newUser.setUnivCode(univCode);
