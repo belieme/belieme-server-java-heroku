@@ -23,6 +23,9 @@ import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
+// TODO 변수 및 함수 이름 직관성 있고 일관성 있게 만들기 event부터 하면 그나마 쉬울 듯?
+// public method는 클래스 상단에 private method는 클래스 하단에 몰아두기
+
 
 @RestController
 @RequestMapping("/univs")
@@ -33,39 +36,20 @@ public class UniversityApiController extends ApiController {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
-    private UniversityDto toUniversityDto(UniversityJsonBody univJsonBody) {
-        UniversityDto output = new UniversityDto();
-        output.setCode(univJsonBody.getCode());
-        output.setName(univJsonBody.getName());
-        output.setApiUrl(univJsonBody.getApiUrl());
-        
-        return output;
-    }
-    
     @GetMapping("") 
-    public ResponseEntity<ListResponseBody> getUniv() throws ServerDomainException {
-        List<UniversityJsonBody> output = getAllUniversitiesAndCastToJsonBody();
+    public ResponseEntity<ListResponseBody> getAllUnivsMapping() throws ServerDomainException {
+        List<UniversityJsonBody> output = getAllUnivsAndCastToJsonBody();
         return ResponseEntity.ok(new ListResponseBody(output));
     }
     
-    private List<UniversityJsonBody> getAllUniversitiesAndCastToJsonBody() throws ServerDomainException {
-        ArrayList<UniversityJsonBody> output = new ArrayList<>();
-        List<UniversityDto> univDtoList = univDao.findAllUnivs();
-        
-        for(int i = 0; i < univDtoList.size(); i++) {
-            output.add(jsonBodyProjector.toUniversityJsonBody(univDtoList.get(i)));
-        }
-        return output;
-    }
-    
     @GetMapping("/{univCode}") 
-    public ResponseEntity<ResponseBody> getUnivByUnivCode(@PathVariable String univCode) throws ServerDomainException {
+    public ResponseEntity<ResponseBody> getAnUnivMapping(@PathVariable String univCode) throws ServerDomainException {
         UniversityJsonBody output = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
         return ResponseEntity.ok(new ResponseBody(output));
     }
     
     @PostMapping("")
-    public ResponseEntity<ResponseBody> postNewUniverity(@RequestBody UniversityJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseBody> postNewUnivMapping(@RequestBody UniversityJsonBody requestBody) throws HttpException, ServerDomainException {
         if(requestBody.getName() == null || requestBody.getCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), code(String), apiUrl(String)(Optional)");
         }
@@ -94,6 +78,25 @@ public class UniversityApiController extends ApiController {
         
         univDao.update(univCode, toUniversityDto(requestBody));
         return ResponseEntity.ok(new ResponseBody(requestBody)); 
+    }
+    
+    private UniversityDto toUniversityDto(UniversityJsonBody univJsonBody) {
+        UniversityDto output = new UniversityDto();
+        output.setCode(univJsonBody.getCode());
+        output.setName(univJsonBody.getName());
+        output.setApiUrl(univJsonBody.getApiUrl());
+        
+        return output;
+    }
+    
+    private List<UniversityJsonBody> getAllUnivsAndCastToJsonBody() throws ServerDomainException {
+        ArrayList<UniversityJsonBody> output = new ArrayList<>();
+        List<UniversityDto> univDtoList = univDao.findAllUnivs();
+        
+        for(int i = 0; i < univDtoList.size(); i++) {
+            output.add(jsonBodyProjector.toUniversityJsonBody(univDtoList.get(i)));
+        }
+        return output;
     }
     
     public class ResponseBody {

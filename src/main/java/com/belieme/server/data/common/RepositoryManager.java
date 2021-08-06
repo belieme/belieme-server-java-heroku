@@ -1,4 +1,4 @@
-package com.belieme.server.data;
+package com.belieme.server.data.common;
 
 import java.util.*;
 

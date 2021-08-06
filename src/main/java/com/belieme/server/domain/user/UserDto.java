@@ -159,6 +159,10 @@ public class UserDto {
         this.token = token;
     }
     
+    public void setPermissions(Map<String, Permissions> permissions) {
+        this.permissions = permissions;
+    }
+    
     public void setCreateTimeStampNow() {
         createTimeStamp = System.currentTimeMillis()/1000;
     }
@@ -177,9 +181,5 @@ public class UserDto {
     
     public void resetToken() {
         this.token = null;
-    }
-    
-    public void addPermission(String deptCode, Permissions permission) {
-        permissions.put(deptCode, permission);
     }
 }

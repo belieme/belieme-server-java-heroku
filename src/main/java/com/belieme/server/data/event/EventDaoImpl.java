@@ -1,235 +1,40 @@
 package com.belieme.server.data.event;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.belieme.server.data.RepositoryManager;
-import com.belieme.server.data.department.*;
-import com.belieme.server.data.item.ItemEntity;
-import com.belieme.server.data.thing.ThingEntity;
-import com.belieme.server.data.university.*;
+import com.belieme.server.data.common.*;
 
 import com.belieme.server.domain.event.*;
 import com.belieme.server.domain.exception.*;
 
 public class EventDaoImpl implements EventDao {
-    private RepositoryManager repositoryManager;
+    private DomainAdapter domainAdapter;
     
     public EventDaoImpl(RepositoryManager repositoryManager) {
-        this.repositoryManager = repositoryManager;
-    }
-    
-    public void println() {
-        System.out.println("요건 되는거니?");
-    }
-    
-    private EventDto toEventDto(EventEntity eventEntity) throws InternalDataBaseException {
-        EventDto output = new EventDto();
-        
-        ItemEntity itemEntity;
-        ThingEntity thingEntity;
-        DepartmentEntity deptEntity;
-        UniversityEntity univEntity;
-        String userStudentId;
-        String approveManagerStudentId;
-        String returnManagerStudentId;
-        String lostManagerStudentId;
-        
-        try {
-            itemEntity = repositoryManager.getItemEntityById(eventEntity.getItemId());
-            thingEntity = repositoryManager.getThingEntity(itemEntity.getThingId());
-            deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
-            univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());
-            if(eventEntity.getUserId() == 0) {
-                userStudentId = null;
-            } else {
-                userStudentId = repositoryManager.getUserEntityById(eventEntity.getUserId()).getStudentId();    
-            }
-            
-            if(eventEntity.getApproveManagerId() == 0) {
-                approveManagerStudentId = null;
-            } else {
-                approveManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId()).getStudentId();    
-            }
-            
-            if(eventEntity.getReturnManagerId() == 0) {
-                returnManagerStudentId = null;
-            } else {
-                returnManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId()).getStudentId();    
-            }
-            
-            if(eventEntity.getLostManagerId() == 0) {
-                lostManagerStudentId = null;    
-            } else {
-                lostManagerStudentId = repositoryManager.getUserEntityById(eventEntity.getLostManagerId()).getStudentId();    
-            }
-        } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("EventDto.toEventDto(EventEntity eventEntity)");
-        }
-        
-        output.setUnivCode(univEntity.getCode());
-        output.setDeptCode(deptEntity.getCode());
-        output.setThingCode(thingEntity.getCode());
-        output.setItemNum(itemEntity.getNum());
-        output.setNum(eventEntity.getNum());
-        output.setUserStudentId(userStudentId);
-        output.setApproveManagerStudentId(approveManagerStudentId);
-        output.setReturnManagerStudentId(returnManagerStudentId);
-        output.setLostManagerStudentId(lostManagerStudentId);
-    
-        output.setReserveTimeStamp(eventEntity.getReserveTimeStamp());
-        output.setApproveTimeStamp(eventEntity.getApproveTimeStamp());
-        output.setReturnTimeStamp(eventEntity.getReturnTimeStamp());
-        output.setCancelTimeStamp(eventEntity.getCancelTimeStamp());
-        output.setLostTimeStamp(eventEntity.getLostTimeStamp());
-        
-        return output;
+        this.domainAdapter = new DomainAdapter(repositoryManager);
     }
     
     public List<EventDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
-        List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
-        List<EventDto> output = new ArrayList<>();
-        
-        for(int i = 0; i < eventList.size(); i++) {
-            output.add(toEventDto(eventList.get(i)));
-        }
-        return output;
+        return domainAdapter.getEventDtoListByUnivCodeAndDeptCode(univCode, deptCode);
     }
     
     public List<EventDto> findByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userStudentId) throws InternalDataBaseException {
-        List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndUserStudnetId(univCode, deptCode, userStudentId);
-        List<EventDto> output = new ArrayList<>();
-        
-        for(int i = 0; i < eventList.size(); i++) {
-            output.add(toEventDto(eventList.get(i)));
-        }
-        return output;
+        return domainAdapter.getEventDtoListByUnivCodeAndDeptCodeAndStudentId(univCode, deptCode, userStudentId);
     }
     
     public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
-        System.out.println("##S :findByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
-        List<EventEntity> eventList = repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
-        List<EventDto> output = new ArrayList<>();
-        
-        for(int i = 0; i < eventList.size(); i++) {
-            output.add(toEventDto(eventList.get(i)));
-        }
-        System.out.println("##E :findByUnivCodeAndDeptCodeAndThingCodeAndItemNum");
-        return output;
+        return domainAdapter.getEventDtoListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
     }
     
-    public EventDto findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundOnDataBaseException, InternalDataBaseException {
-        return toEventDto(repositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum));
+    public EventDto findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundOnServerException, InternalDataBaseException {
+        return domainAdapter.getEventDtoByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
     }
     
-    public EventDto save(EventDto event) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException {
-        repositoryManager.checkEventDuplication(event.getUnivCode(), event.getDeptCode(), event.getThingCode(), event.getItemNum(), event.getNum());
-        
-        EventEntity newEvent = new EventEntity();
-        
-        ItemEntity item = repositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(event.getUnivCode(),event.getDeptCode(), event.getThingCode(), event.getItemNum());
-        newEvent.setItemId(item.getId());
-        newEvent.setNum(event.getNum());
-        
-        int userId, approveManagerId, returnManagerId, lostManagerId;
-        if(event.getUserStudentId() != null) {
-            userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getUserStudentId()).getId();    
-        } else {
-            userId = 0;
-        }
-        
-        if(event.getApproveManagerStudentId() != null) {
-            approveManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getApproveManagerStudentId()).getId();
-        } else {
-            approveManagerId = 0;
-        }
-        
-        if(event.getReturnManagerStudentId() != null) {
-            returnManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getReturnManagerStudentId()).getId();
-        } else {
-            returnManagerId = 0;
-        }
-        
-        if(event.getLostManagerStudentId() != null) {
-            lostManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getLostManagerStudentId()).getId();    
-        } else {
-            lostManagerId = 0;
-        }
-        
-        
-        newEvent.setUserId(userId);
-        newEvent.setApproveManagerId(approveManagerId);
-        newEvent.setReturnManagerId(returnManagerId);
-        newEvent.setLostManagerId(lostManagerId);
-        
-        newEvent.setReserveTimeStamp(event.getReserveTimeStamp());
-        newEvent.setApproveTimeStamp(event.getApproveTimeStamp());
-        newEvent.setReturnTimeStamp(event.getReturnTimeStamp());
-        newEvent.setCancelTimeStamp(event.getCancelTimeStamp());
-        newEvent.setLostTimeStamp(event.getLostTimeStamp());
-        
-        EventEntity savedEventEntity = repositoryManager.saveEvent(newEvent);
-        item.setLastEventId(savedEventEntity.getId());
-        
-        repositoryManager.saveItem(item);
-        
-        return toEventDto(savedEventEntity);
+    public EventDto save(EventDto event) throws InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { 
+        return domainAdapter.saveEventDto(event);        
     }
     
-    public EventDto update(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto event) throws NotFoundOnDataBaseException, InternalDataBaseException, CodeDuplicationException { // TODO code는 Ignore case해야함!! 
-        EventEntity target = repositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
-        
-        System.out.println(univCode + " " + event.getUnivCode() + "\n" +
-                       deptCode + " " + event.getDeptCode() + "\n" +
-                       thingCode + " " + event.getThingCode() + "\n" +
-                       itemNum + " " + event.getItemNum() + "\n" +
-                       eventNum + " " + event.getNum() + "\n");
-        if(!univCode.equalsIgnoreCase(event.getUnivCode()) || !deptCode.equalsIgnoreCase(event.getDeptCode()) || !thingCode.equalsIgnoreCase(event.getThingCode()) || itemNum != event.getItemNum() || eventNum != event.getNum()) {
-            repositoryManager.checkEventDuplication(event.getUnivCode(), event.getDeptCode(), event.getThingCode(), event.getItemNum(), event.getNum());
-            ItemEntity item = repositoryManager.getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(event.getUnivCode(),event.getDeptCode(), event.getThingCode(), event.getItemNum());
-            target.setItemId(item.getId());
-            target.setNum(item.getNum());
-        }
-        
-        int userId, approveManagerId, returnManagerId, lostManagerId;
-        if(event.getUserStudentId() != null) {
-            userId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getUserStudentId()).getId();    
-        } else {
-            userId = 0;
-        }
-        
-        if(event.getApproveManagerStudentId() != null) {
-            approveManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getApproveManagerStudentId()).getId();
-        } else {
-            approveManagerId = 0;
-        }
-        
-        if(event.getReturnManagerStudentId() != null) {
-            returnManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getReturnManagerStudentId()).getId();
-        } else {
-            returnManagerId = 0;
-        }
-        
-        if(event.getLostManagerStudentId() != null) {
-            lostManagerId = repositoryManager.getUserEntityByUnivCodeAndStudentId(event.getUnivCode(), event.getLostManagerStudentId()).getId();    
-        } else {
-            lostManagerId = 0;
-        }
-        
-        
-        target.setUserId(userId);
-        target.setApproveManagerId(approveManagerId);
-        target.setReturnManagerId(returnManagerId);
-        target.setLostManagerId(lostManagerId);
-        
-        target.setReserveTimeStamp(event.getReserveTimeStamp());
-        target.setApproveTimeStamp(event.getApproveTimeStamp());
-        target.setReturnTimeStamp(event.getReturnTimeStamp());
-        target.setCancelTimeStamp(event.getCancelTimeStamp());
-        target.setLostTimeStamp(event.getLostTimeStamp());
-        
-        EventEntity savedEventEntity = repositoryManager.saveEvent(target);
-        
-        return toEventDto(savedEventEntity);
+    public EventDto update(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto event) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
+        return domainAdapter.updateEventDto(univCode, deptCode, thingCode, itemNum, eventNum, event);
     }
 }

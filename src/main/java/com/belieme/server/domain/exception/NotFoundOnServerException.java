@@ -1,14 +1,14 @@
 package com.belieme.server.domain.exception;
 
-public class CodeDuplicationException extends ServerDomainException { //DuplicateKeyException
+public class NotFoundOnServerException extends ServerDomainException {
     private String pinPoint;
     
-    public CodeDuplicationException(String pinPoint) {
+    public NotFoundOnServerException(String pinPoint) {
         this.pinPoint = pinPoint;
     }
     
     public String getMessage() {
-        return "This code is already on database.";
+        return "NotFound";
     }
     
     public String getPinPoint() {
