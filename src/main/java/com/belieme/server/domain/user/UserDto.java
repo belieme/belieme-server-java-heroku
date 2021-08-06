@@ -163,7 +163,9 @@ public class UserDto {
         this.permissions = permissions;
     }
     
-    public void addPermission(String deptCode , Permissions permission)
+    public void addPermission(String deptCode , Permissions permission) {
+        this.permissions.put(deptCode, permission);
+    }
     
     public void setCreateTimeStampNow() {
         createTimeStamp = System.currentTimeMillis()/1000;
