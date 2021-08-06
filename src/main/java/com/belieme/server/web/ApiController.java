@@ -11,7 +11,7 @@ import com.belieme.server.domain.thing.*;
 import com.belieme.server.domain.item.*;
 import com.belieme.server.domain.event.*;
 
-import com.belieme.server.data.*;
+import com.belieme.server.data.common.*;
 import com.belieme.server.data.university.*;
 import com.belieme.server.data.department.*;
 import com.belieme.server.data.major.*;
