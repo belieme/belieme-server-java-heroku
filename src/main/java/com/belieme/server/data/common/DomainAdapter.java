@@ -129,7 +129,7 @@ public class DomainAdapter {
         checkMajorDuplication(major);
         
         MajorEntity newMajor = new MajorEntity();
-        DepartmentEntity deptEntity = getDeptEntityByUnivCodeAndDeptCodeForSave(major.getUnivCode(), major.getCode());
+        DepartmentEntity deptEntity = getDeptEntityByUnivCodeAndDeptCodeForSave(major.getUnivCode(), major.getDeptCode());
         newMajor.setDeptId(deptEntity.getId());
         newMajor.setCode(major.getCode());
         
@@ -141,7 +141,7 @@ public class DomainAdapter {
         if(!univCode.equalsIgnoreCase(major.getUnivCode()) || !majorCode.equalsIgnoreCase(major.getCode())) {
             checkMajorDuplication(major);  
             
-            DepartmentEntity deptEntity = getDeptEntityByUnivCodeAndDeptCodeForSave(major.getUnivCode(), major.getCode());
+            DepartmentEntity deptEntity = getDeptEntityByUnivCodeAndDeptCodeForSave(major.getUnivCode(), major.getDeptCode());
             target.setDeptId(deptEntity.getId());
             target.setCode(major.getCode());
         }
