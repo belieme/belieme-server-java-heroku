@@ -1,11 +1,11 @@
-package com.belieme.server.web;
-
-import java.net.URI;
-import java.util.*;
+package com.belieme.server.web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.*;
 
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.university.*;

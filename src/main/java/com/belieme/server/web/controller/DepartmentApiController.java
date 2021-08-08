@@ -1,4 +1,4 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
 
 import java.net.URI;
 import java.util.ArrayList;

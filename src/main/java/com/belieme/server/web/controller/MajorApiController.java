@@ -1,4 +1,8 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,10 +23,6 @@ import com.belieme.server.data.event.*;
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path="/univs/{univCode}/majors")

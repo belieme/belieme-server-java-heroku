@@ -1,4 +1,4 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
 
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.web.exception.*;

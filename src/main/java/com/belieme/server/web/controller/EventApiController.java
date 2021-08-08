@@ -1,4 +1,4 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
 
 import java.net.*;
 import java.util.*;
@@ -23,6 +23,7 @@ import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
+
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
@@ -196,9 +197,6 @@ public class EventApiController extends ApiController {
         EventDto output = updateEvent(thingCode, itemNum, eventNum, eventBeforeUpdate);
         return createGetResponseEntity(output);
     }
-    
-    // TODO 1. 밑에 있는 해체하기 하기
-    //      2. NotFoundOnDataBaseException, InternalDataBaseException을 InternalServerErrorException로 바꾸기
     
     private UserDto requester;
     private UniversityDto univ;

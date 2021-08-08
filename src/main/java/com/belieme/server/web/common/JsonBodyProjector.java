@@ -1,7 +1,9 @@
-package com.belieme.server.web.jsonbody;
+package com.belieme.server.web.common;
 
 import java.util.List;
 import java.util.Map;
+
+import com.belieme.server.web.jsonbody.*;
 
 import com.belieme.server.domain.department.*;
 import com.belieme.server.domain.event.*;

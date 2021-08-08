@@ -1,4 +1,8 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.university.*;
@@ -17,9 +21,6 @@ import com.belieme.server.data.event.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path="/univs/{univCode}/users/{studentId}/permissions")

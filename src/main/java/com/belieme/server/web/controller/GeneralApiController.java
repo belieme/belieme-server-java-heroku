@@ -1,4 +1,4 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,7 +27,7 @@ import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
-import com.belieme.server.web.common.Globals;
+import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 

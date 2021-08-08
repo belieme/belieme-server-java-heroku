@@ -1,6 +1,6 @@
-package com.belieme.server.web;
+package com.belieme.server.web.controller;
 
-import com.belieme.server.web.jsonbody.JsonBodyProjector;
+import com.belieme.server.web.common.*;
 
 import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.department.*;
