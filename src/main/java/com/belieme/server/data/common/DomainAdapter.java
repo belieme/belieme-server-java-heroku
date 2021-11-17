@@ -871,7 +871,6 @@ public class DomainAdapter {
         }
     }
     
-    //TODO 여기부터 Thing부터 하기
     private ThingDto toThingDto(ThingEntity thingEntity) throws InternalDataBaseException {
         ThingDto output = new ThingDto();
         

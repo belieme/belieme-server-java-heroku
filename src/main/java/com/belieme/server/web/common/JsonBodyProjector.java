@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.belieme.server.web.jsonbody.*;
+import com.belieme.server.web.exception.*;
 
 import com.belieme.server.domain.department.*;
 import com.belieme.server.domain.event.*;
@@ -14,9 +15,7 @@ import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.user.*;
 import com.belieme.server.domain.permission.*;
 
-import com.belieme.server.domain.exception.*;
 
-// TODO try catch로 InternalDataBaseException으로 바꾼거 NotFoundOnDataBaseException로 다시 바꾸기
 
 public class JsonBodyProjector {
     private UniversityDao univDao;
@@ -43,6 +42,7 @@ public class JsonBodyProjector {
         if(univDto == null) {
             return null;
         }
+        
         UniversityJsonBody output = new UniversityJsonBody();
         output.setCode(univDto.getCode());
         output.setName(univDto.getName());
@@ -51,10 +51,11 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public DepartmentJsonBody toDepartmentJsonBody(DepartmentDto deptDto) throws InternalDataBaseException {
+    public DepartmentJsonBody toDepartmentJsonBody(DepartmentDto deptDto) throws InternalServerErrorException {
         if(deptDto == null) {
             return null;
         }
+        
         DepartmentJsonBody output = new DepartmentJsonBody();
         output.code = deptDto.getCode();
         output.name = deptDto.getName();
@@ -68,16 +69,20 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private List<MajorDto> getMajorDtoList(DepartmentDto deptDto) throws InternalDataBaseException {
-        return majorDao.findAllByUnivCodeAndDeptCode(deptDto.getUnivCode(), deptDto.getCode());
+    private List<MajorDto> getMajorDtoList(DepartmentDto deptDto) throws InternalServerErrorException {
+        try {
+            return majorDao.findAllByUnivCodeAndDeptCode(deptDto.getUnivCode(), deptDto.getCode());    
+        } catch(InternalDataBaseException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
     
-    public MajorJsonBody toMajorJsonBody(MajorDto majorDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public MajorJsonBody toMajorJsonBody(MajorDto majorDto) throws InternalServerErrorException, GoneException {
         if(majorDto == null) {
             return null;
         }
-        MajorJsonBody output = new MajorJsonBody();
         
+        MajorJsonBody output = new MajorJsonBody();
         output.setCode(majorDto.getCode());
         
         DepartmentDto dept = getDeptDto(majorDto);
@@ -86,16 +91,23 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private DepartmentDto getDeptDto(MajorDto majorDto) throws InternalDataBaseException, NotFoundOnServerException { 
-        return deptDao.findByUnivCodeAndDeptCode(majorDto.getUnivCode(), majorDto.getDeptCode());
+    private DepartmentDto getDeptDto(MajorDto majorDto) throws InternalServerErrorException, GoneException {
+        try {
+            return deptDao.findByUnivCodeAndDeptCode(majorDto.getUnivCode(), majorDto.getDeptCode());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    public UserJsonBody toUserJsonBody(UserDto userDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public UserJsonBody toUserJsonBody(UserDto userDto) throws InternalServerErrorException, GoneException {
         if(userDto == null) {
             return null;
         }
-        UserJsonBody output = new UserJsonBody();
         
+        UserJsonBody output = new UserJsonBody();
+    
         UniversityDto univ = getUnivDto(userDto);
         output.setUniversity(toUniversityJsonBody(univ));
         output.setStudentId(userDto.getStudentId());
@@ -113,11 +125,17 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private UniversityDto getUnivDto(UserDto userDto) throws InternalDataBaseException, NotFoundOnServerException {
-        return univDao.findByCode(userDto.getUnivCode());
+    private UniversityDto getUnivDto(UserDto userDto) throws InternalServerErrorException, GoneException {
+        try {
+            return univDao.findByCode(userDto.getUnivCode());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) throws InternalServerErrorException, GoneException {
         if(userDto == null) {
             return null;
         }
@@ -139,7 +157,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public ThingJsonBody toThingJsonBody(ThingDto thingDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public ThingJsonBody toThingJsonBody(ThingDto thingDto) throws InternalServerErrorException, GoneException {
         if(thingDto == null) {
             return null;
         }
@@ -160,7 +178,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private int getAmount(ThingDto thing) throws InternalDataBaseException, NotFoundOnServerException {
+    private int getAmount(ThingDto thing) throws InternalServerErrorException, GoneException {
         int amount = 0;
         
         List<ItemDto> items = getItems(thing);
@@ -173,7 +191,7 @@ public class JsonBodyProjector {
         return amount;
     }
     
-    private int getCount(ThingDto thing) throws InternalDataBaseException, NotFoundOnServerException {
+    private int getCount(ThingDto thing) throws InternalServerErrorException, GoneException {
         int count = 0;
         List<ItemDto> items = getItems(thing);
         for(int i = 0; i < items.size(); i++) {
@@ -184,17 +202,20 @@ public class JsonBodyProjector {
         return count;
     }
     
-    private List<ItemDto> getItems(ThingDto thing) throws InternalDataBaseException {
+    private List<ItemDto> getItems(ThingDto thing) throws InternalServerErrorException {
         String univCode = thing.getUnivCode();
         String deptCode = thing.getDeptCode();
         String thingCode = thing.getCode();
         
-        List<ItemDto> items = itemDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
-        return items;
+        try {
+            List<ItemDto> items = itemDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+            return items;
+        } catch(InternalDataBaseException e) {
+            throw new InternalServerErrorException(e);
+        }   
     }
     
-    private ThingStatus getStatus(ThingDto thing) throws InternalDataBaseException, NotFoundOnServerException {
-        ThingStatus status;
+    private ThingStatus getStatus(ThingDto thing) throws InternalServerErrorException, GoneException {
         int amount = 0;
         int count = 0;
         
@@ -210,27 +231,17 @@ public class JsonBodyProjector {
         }
         
         if(amount == 0) { // 여기도 생각할 여지가 필요할 듯, TODO deactivate 만들 때 쓰기
-            status = ThingStatus.INACTIVATE;
+            return ThingStatus.INACTIVATE;
         }
         else if(count == 0) {
-            status = ThingStatus.UNUSABLE;
+            return ThingStatus.UNUSABLE;
         }
-        else if(amount >= count) {
-            status = ThingStatus.USABLE;
+        else { // amount > count
+            return ThingStatus.USABLE;
         }
-        else {
-            throw new InternalDataBaseException("JsonBodyProjector.getStatus()");
-        }
-        return status;
     }
     
-    private ItemStatus getStatus(ItemDto itemDto) throws InternalDataBaseException, NotFoundOnServerException {
-        int lastEventNum = itemDto.getLastEventNum();
-        
-        if(lastEventNum == 0) {
-            return ItemStatus.USABLE;
-        }
-        
+    private ItemStatus getStatus(ItemDto itemDto) throws InternalServerErrorException, GoneException {        
         EventDto lastEvent = getLastEvent(itemDto);
         if(lastEvent != null) {
             String lastEventStatus = lastEvent.getStatus();
@@ -242,21 +253,23 @@ public class JsonBodyProjector {
             } else {
                 return ItemStatus.UNUSABLE;
             }    
-        } else {
-            throw new InternalDataBaseException("JsonBodyProjector.getStatus()");
+        } else { // lastEventNum이 0일 때
+            return ItemStatus.USABLE;
         }
     }
     
-    public ThingJsonBodyWithItems toThingJsonBodyWithItems(ThingDto thingDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public ThingJsonBodyWithItems toThingJsonBodyWithItems(ThingDto thingDto) throws InternalServerErrorException, GoneException {
         if(thingDto == null) {
             return null;
         }
-        ThingJsonBodyWithItems output = new ThingJsonBodyWithItems();
         
         int amount = getAmount(thingDto);
         int count = getCount(thingDto);
         ThingStatus status = getStatus(thingDto);
+        List<ItemDto> itemDtoes = getItems(thingDto);
         
+        ThingJsonBodyWithItems output = new ThingJsonBodyWithItems();
+
         output.setAmount(amount);
         output.setCount(count);
         output.setStatus(status.name());
@@ -265,7 +278,6 @@ public class JsonBodyProjector {
         output.setDescription(thingDto.getDescription());
         output.setEmoji(thingDto.getEmoji());
         
-        List<ItemDto> itemDtoes = getItems(thingDto);
         for(int i = 0; i < itemDtoes.size(); i++) {
             output.addItem(toItemJsonBody(itemDtoes.get(i)));
         }
@@ -273,42 +285,53 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public ItemJsonBody toItemJsonBody(ItemDto itemDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public ItemJsonBody toItemJsonBody(ItemDto itemDto) throws InternalServerErrorException, GoneException {
         if(itemDto == null) {
             return null;
         }
+        
+        EventDto lastEvent = getLastEvent(itemDto);
+        
         ItemJsonBody output = new ItemJsonBody();
+        
         output.setNum(itemDto.getNum());
-        output.setLastEvent(toEventJsonBodyNestedToItem(getLastEvent(itemDto)));
+        output.setLastEvent(toEventJsonBodyNestedToItem(lastEvent));
         output.setStatus(getStatus(itemDto).name());
         
         return output;
     }
     
-    private EventDto getLastEvent(ItemDto itemDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private EventDto getLastEvent(ItemDto itemDto) throws InternalServerErrorException, GoneException {
         if(itemDto.getLastEventNum() == 0) {
             return null;
         }
-        return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());   
+        
+        try {
+            return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto == null) {
             return null;
         }
-        
-        EventJsonBodyNestedToItem output = new EventJsonBodyNestedToItem();
-        output.setNum(eventDto.getNum());
         
         UserDto user = getUser(eventDto);
         UserDto approveManager = getApproveManager(eventDto);
         UserDto returnManager = getReturnManager(eventDto);
         UserDto lostManager = getLostManager(eventDto);
+        
+        EventJsonBodyNestedToItem output = new EventJsonBodyNestedToItem();
+        
+        output.setNum(eventDto.getNum());
         output.setUser(toUserJsonBodyNestedToEvent(user));
         output.setApproveManager(toUserJsonBodyNestedToEvent(approveManager));
         output.setReturnManager(toUserJsonBodyNestedToEvent(returnManager));
         output.setLostManager(toUserJsonBodyNestedToEvent(lostManager));
-        
         output.setReserveTimeStamp(eventDto.getReserveTimeStamp());
         output.setApproveTimeStamp(eventDto.getApproveTimeStamp());
         output.setCancelTimeStamp(eventDto.getCancelTimeStamp());
@@ -318,32 +341,60 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private UserDto getUser(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private UserDto getUser(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto.getUserStudentId() == null) {
             return null;
         }
-        return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getUserStudentId());    
+        
+        try {
+            return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getUserStudentId());    
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    private UserDto getApproveManager(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private UserDto getApproveManager(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto.getApproveManagerStudentId() == null) {
             return null;
         }
-        return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());          
+        
+        try {
+            return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());          
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    private UserDto getReturnManager(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private UserDto getReturnManager(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto.getReturnManagerStudentId() == null) {
             return null;
         }
-        return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());
+        
+        try {
+            return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
-    private UserDto getLostManager(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private UserDto getLostManager(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto.getLostManagerStudentId() == null) {
             return null;
         }
-        return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getLostManagerStudentId());
+        
+        try {
+            return userDao.findByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getLostManagerStudentId());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
     private UserJsonBodyNestedToEvent toUserJsonBodyNestedToEvent(UserDto userDto) {
@@ -352,6 +403,7 @@ public class JsonBodyProjector {
         }
         
         UserJsonBodyNestedToEvent output = new UserJsonBodyNestedToEvent();
+        
         output.setStudentId(userDto.getStudentId());
         output.setName(userDto.getName());
         output.setEntranceYear(userDto.getEntranceYear());
@@ -359,47 +411,50 @@ public class JsonBodyProjector {
         return output;
     }
     
-    public PermissionJsonBody toPermissionJsonBody(PermissionDto permissionDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public PermissionJsonBody toPermissionJsonBody(PermissionDto permissionDto) throws InternalServerErrorException, GoneException {
         if(permissionDto == null) {
             return null;
         }
+        DepartmentDto dept = getDeptDto(permissionDto);
         
         PermissionJsonBody output = new PermissionJsonBody();
         output.setPermission(permissionDto.getPermission().name());
-        
-        DepartmentDto dept = getDeptDto(permissionDto);
         output.setDepartment(toDepartmentJsonBody(dept));
         
         return output;
     }
     
-    private DepartmentDto getDeptDto(PermissionDto permissionDto) throws InternalDataBaseException, NotFoundOnServerException {
-        return deptDao.findByUnivCodeAndDeptCode(permissionDto.getUnivCode(), permissionDto.getDeptCode());
+    private DepartmentDto getDeptDto(PermissionDto permissionDto) throws InternalServerErrorException, GoneException {
+        try {
+            return deptDao.findByUnivCodeAndDeptCode(permissionDto.getUnivCode(), permissionDto.getDeptCode());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
         
-    public EventJsonBody toEventJsonBody(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
+    public EventJsonBody toEventJsonBody(EventDto eventDto) throws InternalServerErrorException, GoneException {
         if(eventDto == null) {
             return null;
         }
-        
-        EventJsonBody output = new EventJsonBody();
-        
+
         ThingDto thing = getThingDto(eventDto);
         ItemDto item = getItemDto(eventDto);
-        output.setThing(toThingJsonBodyNestedToEvent(thing));
-        output.setItem(toItemJsonBodyNestedToEvent(item));
-        
-        output.setNum(eventDto.getNum());
-        
         UserDto user = getUser(eventDto);
         UserDto approveManager = getApproveManager(eventDto);
         UserDto returnManager = getReturnManager(eventDto);
         UserDto lostManager = getLostManager(eventDto);
+        
+        EventJsonBody output = new EventJsonBody();
+        
+        output.setNum(eventDto.getNum());
+        output.setThing(toThingJsonBodyNestedToEvent(thing));
+        output.setItem(toItemJsonBodyNestedToEvent(item));
         output.setUser(toUserJsonBodyNestedToEvent(user));
         output.setApproveManager(toUserJsonBodyNestedToEvent(approveManager));
         output.setReturnManager(toUserJsonBodyNestedToEvent(returnManager));
         output.setLostManager(toUserJsonBodyNestedToEvent(lostManager));
-        
         output.setReserveTimeStamp(eventDto.getReserveTimeStamp());
         output.setApproveTimeStamp(eventDto.getApproveTimeStamp());
         output.setCancelTimeStamp(eventDto.getCancelTimeStamp());
@@ -409,13 +464,25 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private ThingDto getThingDto(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
-        return thingDao.findByUnivCodeAndDeptCodeAndThingCode(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode());
+    private ThingDto getThingDto(EventDto eventDto) throws InternalServerErrorException, GoneException {
+        try {
+            return thingDao.findByUnivCodeAndDeptCodeAndThingCode(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
         
     }
     
-    private ItemDto getItemDto(EventDto eventDto) throws InternalDataBaseException, NotFoundOnServerException {
-        return itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
+    private ItemDto getItemDto(EventDto eventDto) throws InternalServerErrorException, GoneException {
+        try {
+            return itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
+        } catch(InternalDataBaseException e1) {
+            throw new InternalServerErrorException(e1);
+        } catch(NotFoundOnServerException e2) {
+            throw new GoneException(e2);
+        }
     }
     
     private ThingJsonBodyNestedToEvent toThingJsonBodyNestedToEvent(ThingDto thingDto) {
@@ -433,7 +500,7 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private ItemJsonBodyNestedToEvent toItemJsonBodyNestedToEvent(ItemDto itemDto) throws InternalDataBaseException, NotFoundOnServerException {
+    private ItemJsonBodyNestedToEvent toItemJsonBodyNestedToEvent(ItemDto itemDto) throws InternalServerErrorException, GoneException {
         if(itemDto == null) {
             return null;
         }

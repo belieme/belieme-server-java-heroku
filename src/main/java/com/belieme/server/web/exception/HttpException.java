@@ -11,6 +11,10 @@ public class HttpException extends Exception {
         
     }
     
+    protected HttpException(Exception e) {
+        this.message = e.getMessage();
+    }
+    
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
