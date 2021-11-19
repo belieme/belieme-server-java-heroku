@@ -7,7 +7,7 @@ import com.belieme.server.web.exception.*;
 public class Globals {
     public static final String serverUrl = "https://belieme.herokuapp.com";
     
-    public static URI getLocation(String path) throws HttpException {
+    public static URI getLocation(String path) throws InternalServerErrorException {
         try {
             return new URI(Globals.serverUrl + path);
         } catch(URISyntaxException e) {

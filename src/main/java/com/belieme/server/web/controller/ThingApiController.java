@@ -36,21 +36,26 @@ public class ThingApiController extends ApiController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ListResponse> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) throws HttpException, ServerDomainException {
+    public ResponseEntity<ListResponse> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) throws UnauthorizedException, InternalServerErrorException, NotFoundException, ForbiddenException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDao.findByUnivCodeAndDeptCode(univCode, deptCode));
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
         
-        UserDto user = userDao.findByToken(userToken);
+        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
+        try {
+            user = dataAdapter.findUserByToken(userToken);
+        } catch(NotFoundException e) {
+            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
+        }
         
         if(!user.hasUserPermission(deptCode)) {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
             
-        List<ThingDto> thingDtoList = thingDao.findByUnivCodeAndDeptCode(univCode, deptCode);
+        List<ThingDto> thingDtoList = dataAdapter.findAllThingsByUnivCodeAndDeptCode(univCode, deptCode);
         ArrayList<ThingJsonBody> output = new ArrayList<>();
         for (int i = 0; i < thingDtoList.size(); i++) {
             ThingJsonBody tmp = jsonBodyProjector.toThingJsonBody(thingDtoList.get(i)); 
@@ -60,44 +65,54 @@ public class ThingApiController extends ApiController {
     }
 
     @GetMapping("/{thingCode}")
-    public ResponseEntity<ResponseWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode) throws UnauthorizedException, InternalServerErrorException, NotFoundException, ForbiddenException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDao.findByUnivCodeAndDeptCode(univCode, deptCode));
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
         
-        UserDto user = userDao.findByToken(userToken);
-        
-        if(!user.hasUserPermission(deptCode)) {
-            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
+        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
+        try {
+            user = dataAdapter.findUserByToken(userToken);
+        } catch(NotFoundException e) {
+            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
         }
         
-        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+        if(!user.hasUserPermission(deptCode)) {    
+        	throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
+        }
+        
+        ThingDto target = dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         
         ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(target);
         return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
     }
 
     @PostMapping("") // TODO amount는 어따 팔아먹었는가
-    public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingInfoJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingInfoJsonBody requestBody) throws UnauthorizedException, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
         
         if(requestBody.getCode() == null || requestBody.getName() == null || requestBody.getEmoji() == null) {
-            throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String)(optional), amount(int)(optional)");
+        	throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String)(optional), amount(int)(optional)");
         }
         
         if(requestBody.getAmount() != null && requestBody.getAmount() < 0) {
             throw new BadRequestException("amount는 음수가 될 수 없습니다.");
         }
         
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDao.findByUnivCodeAndDeptCode(univCode, deptCode));
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
         
-        UserDto user = userDao.findByToken(userToken);
+        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
+        try {
+            user = dataAdapter.findUserByToken(userToken);
+        } catch(NotFoundException e) {
+            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
+        }
         
         if(!user.hasStaffPermission(deptCode)) {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
@@ -112,7 +127,7 @@ public class ThingApiController extends ApiController {
         newThing.setUnivCode(univCode);
         newThing.setDeptCode(deptCode);
         
-        ThingDto savedThing = thingDao.save(newThing);
+        ThingDto savedThing = dataAdapter.saveThing(newThing);
         
         if(requestBody.getAmount() != null) {
             for(int i = 0; i < requestBody.getAmount(); i++) {
@@ -122,7 +137,7 @@ public class ThingApiController extends ApiController {
                 newItem.setThingCode(requestBody.getCode());
                 newItem.setNum(i+1);
                 newItem.setLastEventNum(0);
-                itemDao.save(newItem);
+                dataAdapter.saveItem(newItem);
             }
         }
         ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(savedThing);
@@ -139,7 +154,7 @@ public class ThingApiController extends ApiController {
     }
 
     @PatchMapping("/{thingCode}")
-    public ResponseEntity<ResponseWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @RequestBody ThingJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @RequestBody ThingJsonBody requestBody) throws UnauthorizedException, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         if(userToken == null) {
             throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
         }
@@ -148,13 +163,13 @@ public class ThingApiController extends ApiController {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String) 중 하나 이상");
         }
         
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDao.findByUnivCodeAndDeptCode(univCode, deptCode));
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
         
         UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
         try {
-            user = userDao.findByToken(userToken);
-        } catch(NotFoundOnServerException e) {
+            user = dataAdapter.findUserByToken(userToken);
+        } catch(NotFoundException e) {
             throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
         }
         
@@ -162,7 +177,7 @@ public class ThingApiController extends ApiController {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
-        ThingDto target = thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+        ThingDto target = dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
         
         if(requestBody.getCode() != null) {
             target.setCode(requestBody.getCode());    
@@ -177,7 +192,7 @@ public class ThingApiController extends ApiController {
             target.setDescription(requestBody.getDescription());
         }
         
-        ThingDto newAndSavedThing = thingDao.update(univCode, deptCode, thingCode, target);
+        ThingDto newAndSavedThing = dataAdapter.updateThing(univCode, deptCode, thingCode, target);
         ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(newAndSavedThing);
         return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
     }

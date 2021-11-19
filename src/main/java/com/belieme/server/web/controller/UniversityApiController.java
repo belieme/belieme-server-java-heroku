@@ -37,35 +37,35 @@ public class UniversityApiController extends ApiController {
     }
     
     @GetMapping("") 
-    public ResponseEntity<ListResponseBody> getAllUnivsMapping() throws ServerDomainException {
+    public ResponseEntity<ListResponseBody> getAllUnivsMapping() {
         List<UniversityJsonBody> output = getAllUnivsAndCastToJsonBody();
         return ResponseEntity.ok(new ListResponseBody(output));
     }
     
     @GetMapping("/{univCode}") 
-    public ResponseEntity<ResponseBody> getAnUnivMapping(@PathVariable String univCode) throws ServerDomainException {
-        UniversityJsonBody output = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
+    public ResponseEntity<ResponseBody> getAnUnivMapping(@PathVariable String univCode) throws NotFoundException, InternalServerErrorException {
+        UniversityJsonBody output = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
         return ResponseEntity.ok(new ResponseBody(output));
     }
     
     @PostMapping("")
-    public ResponseEntity<ResponseBody> postNewUnivMapping(@RequestBody UniversityJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseBody> postNewUnivMapping(@RequestBody UniversityJsonBody requestBody) throws BadRequestException, MethodNotAllowedException, InternalServerErrorException, ConflictException {
         if(requestBody.getName() == null || requestBody.getCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), code(String), apiUrl(String)(Optional)");
         }
         
-        univDao.save(toUniversityDto(requestBody));
+        dataAdapter.saveUniv(toUniversityDto(requestBody));
         URI location = Globals.getLocation("/univ/" + requestBody.getCode());
         return ResponseEntity.created(location).body(new ResponseBody(requestBody));
     }
     
     @PatchMapping("/{univCode}")
-    public ResponseEntity<ResponseBody> updateUniverity(@PathVariable String univCode, @RequestBody UniversityJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseBody> updateUniverity(@PathVariable String univCode, @RequestBody UniversityJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
         if(requestBody.getName() == null && requestBody.getCode() == null && requestBody.getApiUrl() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), code(String), apiUrl(String) 중 최소 하나");
         }
         
-        UniversityJsonBody target = jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(univCode));
+        UniversityJsonBody target = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
         if(requestBody.getName() == null) {
             requestBody.setName(target.getName());
         }
@@ -76,7 +76,7 @@ public class UniversityApiController extends ApiController {
             requestBody.setApiUrl(target.getApiUrl());
         }
         
-        univDao.update(univCode, toUniversityDto(requestBody));
+        dataAdapter.updateUniv(univCode, toUniversityDto(requestBody));
         return ResponseEntity.ok(new ResponseBody(requestBody)); 
     }
     
@@ -89,9 +89,9 @@ public class UniversityApiController extends ApiController {
         return output;
     }
     
-    private List<UniversityJsonBody> getAllUnivsAndCastToJsonBody() throws ServerDomainException {
+    private List<UniversityJsonBody> getAllUnivsAndCastToJsonBody() {
         ArrayList<UniversityJsonBody> output = new ArrayList<>();
-        List<UniversityDto> univDtoList = univDao.findAllUnivs();
+        List<UniversityDto> univDtoList = dataAdapter.findAllUnivs();
         
         for(int i = 0; i < univDtoList.size(); i++) {
             output.add(jsonBodyProjector.toUniversityJsonBody(univDtoList.get(i)));

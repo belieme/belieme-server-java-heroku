@@ -33,19 +33,19 @@ public class MajorApiController extends ApiController {
     }
     
     @PostMapping("")
-    public ResponseEntity<Response> postNewMajor(@PathVariable String univCode, @RequestBody MajorInfoJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> postNewMajor(@PathVariable String univCode, @RequestBody MajorInfoJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
         if(requestBody.getMajorCode() == null || requestBody.getDeptCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : majorCode(String), deptCode(String)");
         }
         
-        UniversityDto univ = univDao.findByCode(univCode);
+        UniversityDto univ = dataAdapter.findUnivByCode(univCode);
         
         MajorDto newMajor = new MajorDto();
         newMajor.setUnivCode(univ.getCode());
         newMajor.setCode(requestBody.getMajorCode());
         newMajor.setDeptCode(requestBody.getDeptCode());
         
-        MajorDto savedMajor = majorDao.save(newMajor);
+        MajorDto savedMajor = dataAdapter.saveMajor(newMajor);
         
         URI location;
         try {
@@ -58,7 +58,7 @@ public class MajorApiController extends ApiController {
         return ResponseEntity.created(location).body(createResponse(univ, savedMajor));
     }
     
-    private Response createResponse(UniversityDto univDto, MajorDto majorDto) throws ServerDomainException {
+    private Response createResponse(UniversityDto univDto, MajorDto majorDto) throws NotFoundException, InternalServerErrorException {
         UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
         MajorJsonBody major = jsonBodyProjector.toMajorJsonBody(majorDto);
         return new Response(univ, major);

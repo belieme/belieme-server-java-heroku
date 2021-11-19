@@ -22,15 +22,16 @@ import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
 public class ApiController {
-    protected UniversityDao univDao = null;
-    protected DepartmentDao deptDao = null;
-    protected MajorDao majorDao = null;
-    protected UserDao userDao = null;
-    protected PermissionDao permissionDao = null;
-    protected ThingDao thingDao = null;
-    protected ItemDao itemDao = null;
-    protected EventDao eventDao = null;
+    private UniversityDao univDao = null;
+    private DepartmentDao deptDao = null;
+    private MajorDao majorDao = null;
+    private UserDao userDao = null;
+    private PermissionDao permissionDao = null;
+    private ThingDao thingDao = null;
+    private ItemDao itemDao = null;
+    private EventDao eventDao = null;
     
+    protected DataAdapter dataAdapter;
     protected JsonBodyProjector jsonBodyProjector;
     
     private void setControllers(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
@@ -59,14 +60,12 @@ public class ApiController {
         if(eventDao == null) {
             this.eventDao = new EventDaoImpl(repoManager);
         }
-    }
-    
-    private void setControllersAndJsonBodyProjector(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        setControllers(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
-        jsonBodyProjector = new JsonBodyProjector(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, eventDao);
+        
+        this.dataAdapter = new DataAdapter(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, eventDao);
+        this.jsonBodyProjector = new JsonBodyProjector(dataAdapter);
     }
     
     protected ApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        setControllersAndJsonBodyProjector(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+        setControllers(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
 }

@@ -30,13 +30,13 @@ public class PermissionApiController extends ApiController {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
-    @PostMapping("")
-    public ResponseEntity<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionInfoJsonBody requestBody) throws HttpException, ServerDomainException {
+    @PostMapping("") // TODO UserToken 받아서 아무나 못 바꾸게 하기
+    public ResponseEntity<Response> postNewPermission(@PathVariable String univCode, @PathVariable String studentId, @RequestBody PermissionInfoJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
         if(requestBody.getDeptCode() == null || requestBody.getPermission() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : deptCode(String), permission(String)");
         }
         
-        UniversityDto univ = univDao.findByCode(univCode);
+        UniversityDto univ = dataAdapter.findUnivByCode(univCode);
         
         PermissionDto permission = new PermissionDto();
         permission.setUnivCode(univCode);
@@ -51,16 +51,16 @@ public class PermissionApiController extends ApiController {
         
         PermissionDto savedPermission;
         try {
-            savedPermission = permissionDao.save(permission);
-        } catch(CodeDuplicationException e) {
-            savedPermission = permissionDao.update(univCode, studentId, requestBody.getDeptCode(), permission);
+            savedPermission = dataAdapter.savePermission(permission);
+        } catch(ConflictException e) {
+            savedPermission = dataAdapter.updatePermission(univCode, studentId, requestBody.getDeptCode(), permission);
         }
         
-        UserDto user = userDao.findByUnivCodeAndStudentId(univCode, studentId);
+        UserDto user = dataAdapter.findUserByUnivCodeAndStudentId(univCode, studentId);
         return ResponseEntity.ok().body(createResponse(univ, user, savedPermission));
     }
     
-    private Response createResponse(UniversityDto univ, UserDto user, PermissionDto permission) throws ServerDomainException {
+    private Response createResponse(UniversityDto univ, UserDto user, PermissionDto permission) throws NotFoundException, InternalServerErrorException {
         UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
         UserJsonBodyWithoutToken userJsonBody = jsonBodyProjector.toUserJsonBodyWithoutToken(user);
         PermissionJsonBody permissionJsonBody = jsonBodyProjector.toPermissionJsonBody(permission);

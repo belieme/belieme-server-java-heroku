@@ -14,7 +14,7 @@ public class ThingDaoImpl implements ThingDao {
         this.domainAdapter = new DomainAdapter(repositoryManager);
     } 
     
-    public List<ThingDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
+    public List<ThingDto> findAllByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
         return domainAdapter.getThingDtoListByUnivCodeAndDeptCode(univCode, deptCode);
     }
     

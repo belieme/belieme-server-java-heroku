@@ -37,21 +37,21 @@ public class DepartmentApiController extends ApiController {
     }
     
     @GetMapping("")
-    public ResponseEntity<ListResponse> getDepartments(@PathVariable String univCode) throws ServerDomainException {
+    public ResponseEntity<ListResponse> getDepartments(@PathVariable String univCode) throws NotFoundException, InternalServerErrorException {
         UniversityJsonBody univOutput = getUniversityByCodeAndCastToJsonBody(univCode);
         
         List<DepartmentJsonBody> deptOutput = getAllDepartmentsByUnivCodeAndCastToJsonBody(univCode);
         return ResponseEntity.ok(new ListResponse(univOutput, deptOutput));
     }
     
-    private UniversityJsonBody getUniversityByCodeAndCastToJsonBody(String code) throws ServerDomainException {
-        return jsonBodyProjector.toUniversityJsonBody(univDao.findByCode(code));
+    private UniversityJsonBody getUniversityByCodeAndCastToJsonBody(String code) throws NotFoundException, InternalServerErrorException {
+        return jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(code));
     }
     
-    private List<DepartmentJsonBody> getAllDepartmentsByUnivCodeAndCastToJsonBody(String univCode) throws ServerDomainException {
+    private List<DepartmentJsonBody> getAllDepartmentsByUnivCodeAndCastToJsonBody(String univCode) throws InternalServerErrorException {
         ArrayList<DepartmentJsonBody> output = new ArrayList<>();
         List<DepartmentDto> deptDtoList;
-        deptDtoList = deptDao.findAllByUnivCode(univCode);    
+        deptDtoList = dataAdapter.findAllDeptsByUnivCode(univCode);    
         
         for(int i = 0; i < deptDtoList.size(); i++) {
             output.add(jsonBodyProjector.toDepartmentJsonBody(deptDtoList.get(i)));
@@ -61,25 +61,25 @@ public class DepartmentApiController extends ApiController {
     
     
     @GetMapping("/{deptCode}")
-    public ResponseEntity<Response> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) throws ServerDomainException {
+    public ResponseEntity<Response> getDepartment(@PathVariable String univCode, @PathVariable String deptCode) throws NotFoundException, InternalServerErrorException {
         UniversityJsonBody univOutput = getUniversityByCodeAndCastToJsonBody(univCode);
         
         DepartmentJsonBody deptOutput = getDepartmentByUnivCodeAndDeptCodeAndCastToJsonBody(univCode, deptCode);
         return ResponseEntity.ok(new Response(univOutput, deptOutput));
     }
     
-    private DepartmentJsonBody getDepartmentByUnivCodeAndDeptCodeAndCastToJsonBody(String univCode, String deptCode) throws ServerDomainException {
-        return jsonBodyProjector.toDepartmentJsonBody(deptDao.findByUnivCodeAndDeptCode(univCode, deptCode));    
+    private DepartmentJsonBody getDepartmentByUnivCodeAndDeptCodeAndCastToJsonBody(String univCode, String deptCode) throws InternalServerErrorException, NotFoundException {
+        return jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));    
     }
     
     @PostMapping("")
-    public ResponseEntity<Response> postNewDepartment(@PathVariable String univCode, @RequestBody DepartmentJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> postNewDepartment(@PathVariable String univCode, @RequestBody DepartmentJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
         if(requestBody.code == null || requestBody.name == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : code(String), name(String)");
         }
         UniversityJsonBody univOutput = getUniversityByCodeAndCastToJsonBody(univCode);
         
-        DepartmentDto savedDept = deptDao.save(toDepartmentDto(univCode, requestBody));
+        DepartmentDto savedDept = dataAdapter.saveDept(toDepartmentDto(univCode, requestBody));
         URI location = Globals.getLocation("/univ/" + requestBody.code);
         
         return ResponseEntity.created(location).body(new Response(univOutput,jsonBodyProjector.toDepartmentJsonBody(savedDept)));
@@ -96,7 +96,7 @@ public class DepartmentApiController extends ApiController {
     }
     
     @PatchMapping("/{deptCode}")
-    public ResponseEntity<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody DepartmentJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> updateDepartment(@PathVariable String univCode, @PathVariable String deptCode, @RequestBody DepartmentJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
         if(requestBody.name == null && requestBody.code == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : code(String), name(String) 중 최소 하나");
         }
@@ -112,7 +112,7 @@ public class DepartmentApiController extends ApiController {
             requestBody.code = target.code;
         }
         
-        DepartmentDto savedDept = deptDao.save(toDepartmentDto(univCode, requestBody));
+        DepartmentDto savedDept = dataAdapter.updateDept(univCode, deptCode, toDepartmentDto(univCode, requestBody));
         return ResponseEntity.ok().body(new Response(univOutput, jsonBodyProjector.toDepartmentJsonBody(savedDept)));
     }
     

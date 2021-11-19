@@ -14,15 +14,15 @@ public class EventDaoImpl implements EventDao {
         this.domainAdapter = new DomainAdapter(repositoryManager);
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
+    public List<EventDto> findAllByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
         return domainAdapter.getEventDtoListByUnivCodeAndDeptCode(univCode, deptCode);
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userStudentId) throws InternalDataBaseException {
+    public List<EventDto> findAllByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userStudentId) throws InternalDataBaseException {
         return domainAdapter.getEventDtoListByUnivCodeAndDeptCodeAndStudentId(univCode, deptCode, userStudentId);
     }
     
-    public List<EventDto> findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
+    public List<EventDto> findAllByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
         return domainAdapter.getEventDtoListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
     }
     

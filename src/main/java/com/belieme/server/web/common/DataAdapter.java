@@ -3,46 +3,407 @@ package com.belieme.server.web.common;
 import java.util.List;
 
 import com.belieme.server.domain.university.*;
-// import com.belieme.server.domain.department.*;
-// import com.belieme.server.domain.event.*;
-// import com.belieme.server.domain.major.*;
-// import com.belieme.server.domain.user.*;
-// import com.belieme.server.domain.permission.*;
-// import com.belieme.server.domain.thing.*;
-// import com.belieme.server.domain.item.*;
-import com.belieme.server.data.exception.NotFoundOnDataBaseException;
+import com.belieme.server.domain.department.*;
+import com.belieme.server.domain.event.*;
+import com.belieme.server.domain.major.*;
+import com.belieme.server.domain.user.*;
+import com.belieme.server.domain.permission.*;
+import com.belieme.server.domain.thing.*;
+import com.belieme.server.domain.item.*;
+
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.web.exception.*;
 
 public class DataAdapter {
     private UniversityDao univDao;
-    // private DepartmentDao deptDao;
-    // private MajorDao majorDao;
-    // private UserDao userDao;
-    // private PermissionDao permissionDao;
-    // private ThingDao thingDao;
-    // private ItemDao itemDao;
-    // private EventDao eventDao;
+    private DepartmentDao deptDao;
+    private MajorDao majorDao;
+    private UserDao userDao;
+    private PermissionDao permissionDao;
+    private ThingDao thingDao;
+    private ItemDao itemDao;
+    private EventDao eventDao;
+    
+    public DataAdapter(UniversityDao univDao, DepartmentDao deptDao, MajorDao majorDao, UserDao userDao, PermissionDao permissionDao, ThingDao thingDao, ItemDao itemDao, EventDao eventDao) {
+        this.univDao = univDao;
+        this.deptDao = deptDao;
+        this.majorDao = majorDao;
+        this.userDao = userDao;
+        this.permissionDao = permissionDao;
+        this.thingDao = thingDao;
+        this.itemDao = itemDao;
+        this.eventDao = eventDao;
+    }
     
     public List<UniversityDto> findAllUnivs() {
         return univDao.findAllUnivs();
     }
     
-    public UniversityDto findUnivByCode(String code) throws InternalServerErrorException, GoneException {
+    public UniversityDto findUnivByCode(String code) throws NotFoundException, InternalServerErrorException {
         try {
             return univDao.findByCode(code);    
-        } catch(InternalDataBaseException e1) {
+        } catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		}catch(InternalDataBaseException e1) {
             throw new InternalServerErrorException(e1);
-        } catch(NotFoundOnServerException e2) {
-            throw new GoneException(e2);
         }
     }
     
-    public UniversityDto saveUniv(UniversityDto univ) {
-        return univDao.save(univ);
+    public UniversityDto saveUniv(UniversityDto univ) throws ConflictException {
+        try {
+			return univDao.save(univ);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
     }
     
-    public UniversityDto updateUniv(String code, UniversityDto univ) {
-        return univDao.update(code, univ);
+    public UniversityDto updateUniv(String code, UniversityDto univ) throws NotFoundException, InternalServerErrorException, ConflictException {
+		try {
+			return univDao.update(code, univ);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		} 
+    }
+    
+    public List<DepartmentDto> findAllDeptsByUnivCode(String univCode) throws InternalServerErrorException {
+    	try {
+			return deptDao.findAllByUnivCode(univCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public DepartmentDto findDeptByUnivCodeAndDeptCode(String univCode, String deptCode) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return deptDao.findByUnivCodeAndDeptCode(univCode, deptCode);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public DepartmentDto saveDept(DepartmentDto dept) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return deptDao.save(dept);
+		}  catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public DepartmentDto updateDept(String univCode, String deptCode, DepartmentDto dept) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return deptDao.update(univCode, deptCode, dept);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<MajorDto> findAllMajorsByUnivCode(String univCode) throws InternalServerErrorException {
+    	try {
+			return majorDao.findAllByUnivCode(univCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public List<MajorDto> findAllMajorsByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
+    	try {
+			return majorDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public MajorDto findMajorByUnivCodeAndMajorCode(String univCode, String majorCode) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return majorDao.findByUnivCodeAndMajorCode(univCode, majorCode);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		}catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public MajorDto saveMajor(MajorDto major) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return majorDao.save(major);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public MajorDto updateMajor(String univCode, String majorCode, MajorDto major) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return majorDao.update(univCode, majorCode, major);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<UserDto> findAllUsersByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
+    	try {
+			return userDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public UserDto findUserByUnivCodeAndStudentId(String univCode, String studentId) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return userDao.findByUnivCodeAndStudentId(univCode, studentId);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public UserDto findUserByToken(String token) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return userDao.findByToken(token);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public UserDto saveUser(UserDto user) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return userDao.save(user);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public UserDto updateUser(String univCode, String studentId, UserDto user) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return userDao.update(univCode, studentId, user);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<PermissionDto> findAllPermissionsByUnivCodeAndStudentId(String univCode, String studentId) throws InternalServerErrorException {
+    	try {
+			return permissionDao.findAllByUnivCodeAndStudentId(univCode, studentId);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public PermissionDto findPermissionByUnivCodeAndStudentIdAndDeptCode(String univCode, String studentId, String deptCode) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return permissionDao.findByUnivCodeAndStudentIdAndDeptCode(univCode, studentId, deptCode);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public PermissionDto savePermission(PermissionDto permission) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return permissionDao.save(permission);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public PermissionDto updatePermission(String univCode, String studentId, String deptCode, PermissionDto permission) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return permissionDao.update(univCode, studentId, deptCode, permission);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<ThingDto> findAllThingsByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
+    	try {
+			return thingDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public ThingDto findThingByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return thingDao.findByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public ThingDto saveThing(ThingDto thing) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return thingDao.save(thing);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public ThingDto updateThing(String univCode, String deptCode, String code, ThingDto user) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return thingDao.update(univCode, deptCode, code, user);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<ItemDto> findAllItemsByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws InternalServerErrorException {
+    	try {
+			return itemDao.findAllByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    public ItemDto findItemByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    public ItemDto saveItem(ItemDto item) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return itemDao.save(item);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    public ItemDto updateItem(String univCode, String deptCode, String code, int num, ItemDto item) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return itemDao.update(univCode, deptCode, code, num, item);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    
+    public List<EventDto> findAllEventsByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
+    	try {
+			return eventDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public List<EventDto> findAllEventsByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userId) throws InternalServerErrorException {
+    	try {
+			return eventDao.findAllByUnivCodeAndDeptCodeAndUserId(univCode, deptCode, userId);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public List<EventDto> findAllEventsByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalServerErrorException {
+    	try {
+			return eventDao.findAllByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public EventDto findEventByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundException, InternalServerErrorException {
+    	try {
+			return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
+		} catch (NotFoundOnServerException e) {
+			throw new NotFoundException(e);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		}
+    }
+    
+    public EventDto saveEvent(EventDto event) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+			return eventDao.save(event);
+		} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
+    }
+    public EventDto updateEvent(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto event) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    	try {
+    		return eventDao.update(univCode, deptCode, thingCode, itemNum, eventNum, event);
+    	} catch(NotFoundOnServerException e) {
+    		throw new NotFoundException(e);
+    	} catch (InternalDataBaseException e) {
+			throw new InternalServerErrorException(e);
+		} catch (BreakDataBaseRulesException e) {
+			throw new MethodNotAllowedException(e);
+		} catch (CodeDuplicationException e) {
+			throw new ConflictException(e);
+		}
     }
 }

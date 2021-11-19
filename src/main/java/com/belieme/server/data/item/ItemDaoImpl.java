@@ -14,7 +14,7 @@ public class ItemDaoImpl implements ItemDao {
         this.domainAdapter = new DomainAdapter(repositoryManager);
     }
     
-    public List<ItemDto> findByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws InternalDataBaseException {
+    public List<ItemDto> findAllByUnivCodeAndDeptCodeAndThingCode(String univCode, String deptCode, String thingCode) throws InternalDataBaseException {
         return domainAdapter.getItemDtoListByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
     }
     

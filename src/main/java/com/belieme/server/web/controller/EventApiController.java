@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.department.*;
 import com.belieme.server.domain.user.*;
@@ -38,7 +37,7 @@ public class EventApiController extends ApiController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity<ListResponse> getAllEventsFromDeptMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) throws HttpException, ServerDomainException  { //TODO studentId를 다른걸로 바꿀까?
+    public ResponseEntity<ListResponse> getAllEventsFromDeptMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException { //TODO studentId를 다른걸로 바꿀까?
         init(userToken, univCode, deptCode);
         
         checkRequesterHasPermissionToStudentIdFromDept(studentId);
@@ -48,7 +47,7 @@ public class EventApiController extends ApiController {
     }
 
     @GetMapping("/things/{thingCode}/items/{itemNum}/events")
-    public ResponseEntity<ListResponse> getAllEventsFromItemMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum) throws HttpException, ServerDomainException  {
+    public ResponseEntity<ListResponse> getAllEventsFromItemMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException {
         init(userToken, univCode, deptCode);
         checkIfRequesterHasStaffPermission();
         
@@ -57,7 +56,7 @@ public class EventApiController extends ApiController {
     }
     
     @GetMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}")
-    public ResponseEntity<Response> getAnEventMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> getAnEventMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException {
         init(userToken, univCode, deptCode);
         
         EventDto event = getEventByThingCodeAndItemNumAndEventNumFromDept(thingCode, itemNum, eventNum);
@@ -68,7 +67,7 @@ public class EventApiController extends ApiController {
     
     //TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
     @PostMapping("/events/reserve")
-    public ResponseEntity<Response> postRequestEventByUser(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ItemInfoJsonBody requestBody) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> postRequestEventByUser(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ItemInfoJsonBody requestBody) throws UnauthorizedException, NotFoundException, InternalServerErrorException, BadRequestException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);
         checkIfBodyIncludesThingCode(requestBody);
         checkIfRequesterHasUserPermission();
@@ -98,7 +97,7 @@ public class EventApiController extends ApiController {
     }
     
     @PostMapping("/events/lost")
-    public ResponseEntity<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ItemInfoJsonBody requestBody) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> createLostEvent(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ItemInfoJsonBody requestBody) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, BadRequestException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);
         checkIfRequesterHasStaffPermission();
         checkIfBodyIncludesThingCodeAndItemNum(requestBody);
@@ -125,7 +124,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/cancel") //TODO 논의점 cancel manager를 만들어야 하는가?
-    public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);
         
         EventDto eventBeforeUpdate = getEventByThingCodeAndItemNumAndEventNumFromDept(thingCode, itemNum, eventNum);
@@ -139,7 +138,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/approve")
-    public ResponseEntity<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> responseItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);    
         checkIfRequesterHasStaffPermission();
     
@@ -154,7 +153,7 @@ public class EventApiController extends ApiController {
     }
 
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/return")
-    public ResponseEntity<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException  {
+    public ResponseEntity<Response> returnItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);    
         checkIfRequesterHasStaffPermission();
     
@@ -169,8 +168,8 @@ public class EventApiController extends ApiController {
     }
     
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/lost")
-    public ResponseEntity<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException  {
-        init(userToken, univCode, deptCode);    
+    public ResponseEntity<Response> lostItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
+        init(userToken, univCode, deptCode);        
         checkIfRequesterHasStaffPermission();
     
         EventDto eventBeforeUpdate = getEventByThingCodeAndItemNumAndEventNumFromDept(thingCode, itemNum, eventNum);
@@ -184,7 +183,7 @@ public class EventApiController extends ApiController {
     }
     
     @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/found")
-    public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws HttpException, ServerDomainException {
+    public ResponseEntity<Response> foundItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);    
         checkIfRequesterHasStaffPermission();
     
@@ -202,11 +201,11 @@ public class EventApiController extends ApiController {
     private UniversityDto univ;
     private DepartmentDto dept;
     
-    private void init(String userToken, String univCode, String deptCode) throws UnauthorizedException, ServerDomainException  {
+    private void init(String userToken, String univCode, String deptCode) throws UnauthorizedException, NotFoundException, InternalServerErrorException {
         checkUserTokenIsNotNull(userToken);
-        requester = userDao.findByToken(userToken);
-        univ = univDao.findByCode(univCode);
-        dept = deptDao.findByUnivCodeAndDeptCode(univCode, deptCode);
+        requester = dataAdapter.findUserByToken(userToken);
+        univ = dataAdapter.findUnivByCode(univCode);
+        dept = dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode);
     }
     
     private EventDto createNewEventWithInitValue() {
@@ -237,7 +236,7 @@ public class EventApiController extends ApiController {
         return target.intValue();
     }
     
-    private int getLastEventNumOfItem(String thingCode, int itemNum) throws ServerDomainException {
+    private int getLastEventNumOfItem(String thingCode, int itemNum) throws InternalServerErrorException {
         int lastEventNum = 0;
         List<EventDto> eventsByItem = getEventListByThingCodeAndItemNumFromDept(thingCode, itemNum);
         for(int i = 0; i < eventsByItem.size(); i++) {
@@ -248,25 +247,25 @@ public class EventApiController extends ApiController {
         return lastEventNum;
     }
     
-    private List<EventDto> getEventListFromDeptUsingStudentIdFilter(String userStudentId) throws ServerDomainException {
+    private List<EventDto> getEventListFromDeptUsingStudentIdFilter(String userStudentId) throws InternalServerErrorException {
         List<EventDto> eventList;
         if(userStudentId == null) {
-            eventList = eventDao.findByUnivCodeAndDeptCode(univ.getCode(), dept.getCode());            
+            eventList = dataAdapter.findAllEventsByUnivCodeAndDeptCode(univ.getCode(), dept.getCode());            
         } else {
-            eventList = eventDao.findByUnivCodeAndDeptCodeAndUserId(univ.getCode(), dept.getCode(), userStudentId);
+            eventList = dataAdapter.findAllEventsByUnivCodeAndDeptCodeAndUserId(univ.getCode(), dept.getCode(), userStudentId);
         }
         return eventList;
     }
     
-    private List<EventDto> getEventListByThingCodeAndItemNumFromDept(String thingCode, int itemNum) throws ServerDomainException {
-        return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univ.getCode(), dept.getCode(), thingCode, itemNum);
+    private List<EventDto> getEventListByThingCodeAndItemNumFromDept(String thingCode, int itemNum) throws InternalServerErrorException {
+        return dataAdapter.findAllEventsByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univ.getCode(), dept.getCode(), thingCode, itemNum);
     }
     
-    private EventDto getEventByThingCodeAndItemNumAndEventNumFromDept(String thingCode, int itemNum, int eventNum) throws ServerDomainException {
-        return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univ.getCode(), dept.getCode(), thingCode, itemNum, eventNum);
+    private EventDto getEventByThingCodeAndItemNumAndEventNumFromDept(String thingCode, int itemNum, int eventNum) throws NotFoundException, InternalServerErrorException {
+        return dataAdapter.findEventByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univ.getCode(), dept.getCode(), thingCode, itemNum, eventNum);
     }
     
-    private ItemDto getUsableItem(String thingCode, int itemNum) throws MethodNotAllowedException, ServerDomainException {
+    private ItemDto getUsableItem(String thingCode, int itemNum) throws InternalServerErrorException, NotFoundException, MethodNotAllowedException {
         if(itemNum == 0) {
             return getUsableItemFromThing(thingCode);
         } else {
@@ -274,9 +273,9 @@ public class EventApiController extends ApiController {
         }
     }
     
-    private ItemDto getUsableItemFromThing(String thingCode) throws MethodNotAllowedException, ServerDomainException {
+    private ItemDto getUsableItemFromThing(String thingCode) throws InternalServerErrorException, NotFoundException, MethodNotAllowedException {
         ItemDto output = null;
-        List<ItemDto> itemsByThing = itemDao.findByUnivCodeAndDeptCodeAndThingCode(univ.getCode(), dept.getCode(), thingCode);
+        List<ItemDto> itemsByThing = dataAdapter.findAllItemsByUnivCodeAndDeptCodeAndThingCode(univ.getCode(), dept.getCode(), thingCode);
         for(int i = 0; i < itemsByThing.size(); i++) {
             output = itemsByThing.get(i);
             if(getItemStatus(output) == ItemStatus.USABLE) {
@@ -290,27 +289,22 @@ public class EventApiController extends ApiController {
         return output;
     }
     
-    private ItemDto getItemIfIsUsable(String thingCode, int itemNum) throws MethodNotAllowedException, ServerDomainException {
-        ItemDto output = itemDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univ.getCode(), dept.getCode(), thingCode, itemNum);
+    private ItemDto getItemIfIsUsable(String thingCode, int itemNum) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException {
+        ItemDto output = dataAdapter.findItemByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univ.getCode(), dept.getCode(), thingCode, itemNum);
         if(getItemStatus(output) != ItemStatus.USABLE) {
             throw new MethodNotAllowedException("이 item은 사용할 수 없습니다.");
         }
         return output;
     }
     
-    private ItemStatus getItemStatus(ItemDto itemDto) throws InternalDataBaseException {
+    private ItemStatus getItemStatus(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {
         int lastEventNum = itemDto.getLastEventNum();
         
         if(lastEventNum == 0) {
             return ItemStatus.USABLE;
         }
     
-        EventDto lastEvent;
-        try {
-            lastEvent = eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());    
-        } catch(NotFoundOnServerException e) {
-            throw new InternalDataBaseException("EventApiController.getItemStatus()");//TODO 여기에 이게 있어도 되는가....
-        }
+        EventDto lastEvent = dataAdapter.findEventByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());    
         
         String lastEventStatus = lastEvent.getStatus();
         if(lastEventStatus.equals("EXPIRED")||lastEventStatus.equals("RETURNED")||lastEventStatus.equals("FOUND")||lastEventStatus.equals("FOUNDANDRETURNED")) {
@@ -323,16 +317,16 @@ public class EventApiController extends ApiController {
         }
     }
     
-    private EventDto saveEvent(EventDto target) throws ServerDomainException {
-        return eventDao.save(target);
+    private EventDto saveEvent(EventDto target) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+        return dataAdapter.saveEvent(target);
     }
     
-    private EventDto updateEvent(String thingCode, int itemNum, int eventNum, EventDto target) throws ServerDomainException {
-        return eventDao.update(univ.getCode(), dept.getCode(), thingCode, itemNum, eventNum, target);
+    private EventDto updateEvent(String thingCode, int itemNum, int eventNum, EventDto target) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+        return dataAdapter.updateEvent(univ.getCode(), dept.getCode(), thingCode, itemNum, eventNum, target);
     }
     
-    private ItemDto saveItem(ItemDto target) throws ServerDomainException {
-        return itemDao.save(target);
+    private ItemDto saveItem(ItemDto target) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+        return dataAdapter.saveItem(target);
     }
     
     private void checkUserTokenIsNotNull(String userToken) throws UnauthorizedException {
@@ -421,14 +415,9 @@ public class EventApiController extends ApiController {
         }
     }
     
-    private void checkIfUserCanReserveThing(String userStudentId, String thingCode) throws MethodNotAllowedException, InternalServerErrorException { // TODO 해체하기
-        List<EventDto> eventListByUser;
-        try {
-            eventListByUser = eventDao.findByUnivCodeAndDeptCodeAndUserId(univ.getCode(), dept.getCode(), userStudentId);    
-        } catch(InternalDataBaseException e) {
-            throw new InternalServerErrorException("DataBase에 규칙을 어긴 record가 존재합니다.");
-        }
-        
+    private void checkIfUserCanReserveThing(String userStudentId, String thingCode) throws InternalServerErrorException, MethodNotAllowedException { // TODO 해체하기
+        List<EventDto> eventListByUser = dataAdapter.findAllEventsByUnivCodeAndDeptCodeAndUserId(univ.getCode(), dept.getCode(), userStudentId);    
+       
         int currentEventCount = 0;
         for(int i = 0; i < eventListByUser.size(); i++) {
             EventDto tmp = eventListByUser.get(i);
@@ -444,54 +433,34 @@ public class EventApiController extends ApiController {
         }
     }
     
-    private ResponseEntity<Response> createGetResponseEntity(EventDto output) throws InternalServerErrorException, ServerDomainException {
+    private ResponseEntity<Response> createGetResponseEntity(EventDto output) throws InternalServerErrorException, NotFoundException {
         return ResponseEntity.ok().body(createResponse(univ, dept, output));
     }
     
-    private ResponseEntity<Response> createPostResponseEntity(String location, EventDto output) throws InternalServerErrorException, ServerDomainException {
+    private ResponseEntity<Response> createPostResponseEntity(String location, EventDto output) throws InternalServerErrorException, NotFoundException {
         URI uri = createUri(location);
         return ResponseEntity.created(uri).body(createResponse(univ, dept, output));
     }
     
-    private ResponseEntity<ListResponse> createGetListResponseEntity(List<EventDto> output) throws InternalServerErrorException, ServerDomainException {
+    private ResponseEntity<ListResponse> createGetListResponseEntity(List<EventDto> output) throws InternalServerErrorException, NotFoundException {
         return ResponseEntity.ok().body(createListResponse(univ, dept, output));
     }
     
-    private Response createResponse(UniversityDto univDto, DepartmentDto deptDto, EventDto eventDto) throws InternalServerErrorException, ServerDomainException {
-        UniversityJsonBody univ = toUniversityJsonBody(univDto);
-        DepartmentJsonBody dept = toDepartmentJsonBody(deptDto);
-        EventJsonBody event = toEventJsonBody(eventDto);
+    private Response createResponse(UniversityDto univDto, DepartmentDto deptDto, EventDto eventDto) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDto);
+        EventJsonBody event = jsonBodyProjector.toEventJsonBody(eventDto);
         return new Response(univ, dept, event);
     }
     
-    private ListResponse createListResponse(UniversityDto univDto, DepartmentDto deptDto, List<EventDto> eventDtoList) throws InternalServerErrorException, ServerDomainException {
-        UniversityJsonBody univ = toUniversityJsonBody(univDto);
-        DepartmentJsonBody dept = toDepartmentJsonBody(deptDto);
+    private ListResponse createListResponse(UniversityDto univDto, DepartmentDto deptDto, List<EventDto> eventDtoList) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
+        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDto);
         List<EventJsonBody> eventList = new ArrayList<>();
         for(int i = 0; i < eventDtoList.size(); i++) {
-            eventList.add(toEventJsonBody(eventDtoList.get(i)));
+            eventList.add(jsonBodyProjector.toEventJsonBody(eventDtoList.get(i)));
         }
         return new ListResponse(univ, dept, eventList);
-    }
-    
-    private UniversityJsonBody toUniversityJsonBody(UniversityDto univDto) {
-        return jsonBodyProjector.toUniversityJsonBody(univDto);
-    }
-    
-    private DepartmentJsonBody toDepartmentJsonBody(DepartmentDto deptDto) throws InternalServerErrorException {
-        try {
-            return jsonBodyProjector.toDepartmentJsonBody(deptDto);
-        } catch(InternalDataBaseException e) {
-            throw new InternalServerErrorException("DataBase에 규칙을 어긴 record가 존재합니다.");
-        }
-    }
-    
-    private EventJsonBody toEventJsonBody(EventDto eventDto) throws InternalServerErrorException, ServerDomainException {
-        try {
-            return jsonBodyProjector.toEventJsonBody(eventDto);
-        } catch(InternalDataBaseException e) {
-            throw new InternalServerErrorException("DataBase에 규칙을 어긴 record가 존재합니다.");
-        }
     }
     
     private URI createUri(String uri) throws InternalServerErrorException {

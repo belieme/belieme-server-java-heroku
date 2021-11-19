@@ -174,6 +174,8 @@ public class DomainAdapter {
         return output;
     }
     
+    
+    // TODO permission update 코드 분석 후 생각 좀 더 해보기 univCode, studentId, deptCode를 바꿀 수 있게 해야하는지,, 이런거
     public PermissionDto updatePermissionDto(String univCode, String studentId, String deptCode, PermissionDto permission) throws NotFoundOnServerException, BreakDataBaseRulesException, InternalDataBaseException, CodeDuplicationException {
         PermissionEntity target = getPermissionEntityByUnivCodeAndStudentIdAndDeptCode(univCode, studentId, deptCode);
         

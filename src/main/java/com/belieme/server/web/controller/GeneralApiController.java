@@ -50,18 +50,17 @@ public class GeneralApiController extends ApiController {
     }
     
     @GetMapping("/login")
-    public ResponseEntity<ResponseBody> getUserInfoFromUnivApi(@RequestBody LoginInfoJsonBody requestBody) throws HttpException, ServerDomainException {
+    public ResponseEntity<ResponseBody> getUserInfoFromUnivApi(@RequestBody LoginInfoJsonBody requestBody) throws BadRequestException, GateWayTimeOutException, InternalServerErrorException, NotFoundException, MethodNotAllowedException, ConflictException {
         if(requestBody.getUnivCode() == null || requestBody.getApiToken() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다. 필요한 정보 : univCode(String), apiToken(String)");
         }
         String univCode = requestBody.getUnivCode();
         String studentId;
-        
-        ResponseEntity.BodyBuilder responseBodyBuilder = ResponseEntity.ok();
 
         switch(univCode) {
             case HYU_CODE : {
-                 try {
+            	JSONObject jsonFromApi;
+                try {
                     URL url = new URL("https://api.hanyang.ac.kr/rs/user/loginInfo.json");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
@@ -85,60 +84,63 @@ public class GeneralApiController extends ApiController {
                     JSONObject jsonOutput = (JSONObject)jsonParser.parse(output);
         
                     JSONObject response = (JSONObject) jsonOutput.get("response");
-        
-                    JSONObject tmp = (JSONObject) response.get("item");
-                    studentId = (String) (tmp.get("gaeinNo"));
-                     
-                    URI location;
-                    try {
-                        location = new URI(Globals.serverUrl + "/univs/" + requestBody.getUnivCode() + "/users/" + studentId);    
-                    } catch(URISyntaxException e) {
-                        e.printStackTrace();
-                        throw new InternalServerErrorException("안알랴줌");
-                    }
-            
-                    boolean isNew = false; 
-                    UserDto newUser;
-                    UserDto savedUser;
-                    try {
-                         newUser = userDao.findByUnivCodeAndStudentId(univCode, studentId);    
-                    } catch (NotFoundOnServerException e) {
-                        newUser = new UserDto();
-                        newUser.setCreateTimeStampNow();
-                        newUser.setUnivCode(univCode);
-                        responseBodyBuilder = ResponseEntity.created(location);
-                        isNew = true;
-                    } catch (ServerDomainException e) {
-                        throw e;
-                    }
-                     
-                    newUser.setStudentId((String) (tmp.get("gaeinNo")));
-                    newUser.setName((String) (tmp.get("userNm")));
-                    newUser.setEntranceYear(Integer.parseInt(((String) (tmp.get("gaeinNo"))).substring(0,4)));
-                    newUser.setNewToken();
-                    newUser.setApprovalTimeStampNow();
+                    jsonFromApi = (JSONObject) response.get("item");
                     
-                    String sosokId = (String) tmp.get("sosokId"); 
-                    MajorDto major = majorDao.findByUnivCodeAndMajorCode(univCode, sosokId);
-                     
-                    if(!newUser.permissionsContainsKey(major.getDeptCode())) {
-                        newUser.addPermission(major.getDeptCode(), Permissions.USER);
-                    }
-                    
-                    if(isNew) {
-                        savedUser = userDao.save(newUser);
-                    } else {
-                        savedUser = userDao.update(univCode, studentId, newUser);
-                    }
-
                     if(bos != null) bos.close();
-                    if(in != null) in.close();  
+                    if(in != null) in.close();
                     
-                    return responseBodyBuilder.body(new ResponseBody(jsonBodyProjector.toUserJsonBody(savedUser)));
                 } catch (Exception e) {
                      e.printStackTrace();
                      throw new GateWayTimeOutException("서버 내부에서 https://api.hanyang.ac.kr과 통신하는데 문제가 발생하였습니다.");
                 }
+                     
+                studentId = (String) (jsonFromApi.get("gaeinNo"));
+                boolean isNew = false; 
+                UserDto newUser;
+                UserDto savedUser;
+                
+                try {
+                	newUser = dataAdapter.findUserByUnivCodeAndStudentId(univCode, studentId);    
+                } catch (NotFoundException e) {
+                    newUser = new UserDto();
+                    newUser.setCreateTimeStampNow();
+                    newUser.setUnivCode(univCode);
+                    isNew = true;
+                } catch (InternalServerErrorException e) {
+                 	throw new InternalServerErrorException(e);
+                }
+                     
+                newUser.setStudentId((String) (jsonFromApi.get("gaeinNo")));
+                newUser.setName((String) (jsonFromApi.get("userNm")));
+                newUser.setEntranceYear(Integer.parseInt(((String) (jsonFromApi.get("gaeinNo"))).substring(0,4)));
+                newUser.setNewToken();
+                newUser.setApprovalTimeStampNow();
+                
+                String sosokId = (String) jsonFromApi.get("sosokId"); 
+                MajorDto major = dataAdapter.findMajorByUnivCodeAndMajorCode(univCode, sosokId);
+                 
+                if(!newUser.permissionsContainsKey(major.getDeptCode())) {
+                    newUser.addPermission(major.getDeptCode(), Permissions.USER);
+                }
+                
+                ResponseEntity.BodyBuilder responseBodyBuilder = ResponseEntity.ok();
+                URI location;
+                try {
+                    location = new URI(Globals.serverUrl + "/univs/" + requestBody.getUnivCode() + "/users/" + studentId);    
+                } catch(URISyntaxException e) {
+                    e.printStackTrace();
+                    throw new InternalServerErrorException("안알랴줌");
+                }
+                
+                if(isNew) {
+                	responseBodyBuilder = ResponseEntity.created(location);
+                    savedUser = dataAdapter.saveUser(newUser);
+                } else {
+                    savedUser = dataAdapter.updateUser(univCode, studentId, newUser);
+                }
+
+                return responseBodyBuilder.body(new ResponseBody(jsonBodyProjector.toUserJsonBody(savedUser)));
+                
             }
             default : {
                 throw new MethodNotAllowedException("등록되어있지 않은 학교에 대한 요청입니다."); // TODO 새로운 exception으로 바꾸기
@@ -147,14 +149,14 @@ public class GeneralApiController extends ApiController {
     }
     
     @GetMapping("/me")
-    public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws HttpException, ServerDomainException {
-        UserDto target = userDao.findByToken(userToken);
+    public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, UnauthorizedException, ConflictException {
+        UserDto target = dataAdapter.findUserByToken(userToken);
         if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
             return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUserJsonBodyWithoutToken(target)));
         } else {
             target.setApprovalTimeStampZero();
             target.resetToken();
-            userDao.update(target.getUnivCode(), target.getStudentId(), target);
+            dataAdapter.updateUser(target.getUnivCode(), target.getStudentId(), target);
             throw new UnauthorizedException("토큰이 만료되었습니다.");
         }
     }
