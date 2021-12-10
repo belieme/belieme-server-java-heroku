@@ -37,8 +37,9 @@ public class MajorApiController extends ApiController {
         if(requestBody.getMajorCode() == null || requestBody.getDeptCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : majorCode(String), deptCode(String)");
         }
-        
+        System.out.println("AAAA");
         UniversityDto univ = dataAdapter.findUnivByCode(univCode);
+        System.out.println("BBBB");
         
         MajorDto newMajor = new MajorDto();
         newMajor.setUnivCode(univ.getCode());
@@ -46,6 +47,7 @@ public class MajorApiController extends ApiController {
         newMajor.setDeptCode(requestBody.getDeptCode());
         
         MajorDto savedMajor = dataAdapter.saveMajor(newMajor);
+        System.out.println("CCCC");
         
         URI location;
         try {
