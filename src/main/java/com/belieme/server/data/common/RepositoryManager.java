@@ -79,7 +79,9 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
     public List<DepartmentEntity> getAllDeptEntitiesByUnivCode(String univCode) throws UniqueKeyViolationException { // 일단 이걸로
         int univId;
         try {
-            univId = getUnivEntityByUnivCode(univCode).getId(); 
+        	System.out.println("AAAAAAAAAAAAAAAAAAAA");
+            univId = getUnivEntityByUnivCode(univCode).getId();
+            System.out.println("BBBBBBBBBBBBBBBBBBBB");
         } catch(NotFoundOnDataBaseException e) {
             return new ArrayList<>();
         }
@@ -126,13 +128,15 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
     }
     
     public List<MajorEntity> getAllMajorEntitiesByUnivCode(String univCode) throws UniqueKeyViolationException { // 일단 이걸로
+    	System.out.println("AAAAAAAAAAAAAAAA");
         List<Integer> deptIdListByUnivCode = new ArrayList<>();
         List<DepartmentEntity> deptEntityListByUnivCode = getAllDeptEntitiesByUnivCode(univCode);
+        System.out.println("BBBBBBBBBBBBBBBB");
         
         for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
             deptIdListByUnivCode.add(deptEntityListByUnivCode.get(i).getId());
         }
-        
+        System.out.println("CCCCCCCCCCCCCCCC");
         return majorRepo.findAllByDeptId(deptIdListByUnivCode);
     }
     
