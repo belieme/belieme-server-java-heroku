@@ -128,19 +128,16 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
     }
     
     public List<MajorEntity> getAllMajorEntitiesByUnivCode(String univCode) throws UniqueKeyViolationException { // 일단 이걸로
-    	System.out.println("AAAAAAAAAAAAAAAA");
         List<Integer> deptIdListByUnivCode = new ArrayList<>();
         List<DepartmentEntity> deptEntityListByUnivCode = getAllDeptEntitiesByUnivCode(univCode);
-        System.out.println("BBBBBBBBBBBBBBBB");
         
         for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
             deptIdListByUnivCode.add(deptEntityListByUnivCode.get(i).getId());
         }
-        System.out.println("CCCCCCCCCCCCCCCC");
-        for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
-        	System.out.print(deptEntityListByUnivCode.get(i) + " ");
+        
+        if(deptEntityListByUnivCode.size() == 0) {
+        	return new ArrayList<>();
         }
-        System.out.println();
         return majorRepo.findAllByDeptId(deptIdListByUnivCode);
     }
     
@@ -173,9 +170,7 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
     }
     
     public boolean doesMajorDuplicate(String univCode, String majorCode) throws UniqueKeyViolationException { // done
-    	System.out.println("AAAAAAAAAAAA");
         List<MajorEntity> majorEntitiesByUnivCode = getAllMajorEntitiesByUnivCode(univCode);
-        System.out.println("BBBBBBBBBBBB");
         for(int i = 0; i < majorEntitiesByUnivCode.size(); i++) {
             if(majorCode.equalsIgnoreCase(majorEntitiesByUnivCode.get(i).getCode())) {
                 return true;

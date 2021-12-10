@@ -128,18 +128,14 @@ public class DomainAdapter {
     }
     
     public MajorDto saveMajorDto(MajorDto major) throws InternalDataBaseException, BreakDataBaseRulesException, CodeDuplicationException {
-    	System.out.println("AAAAAAAA");
         checkMajorDuplication(major);
-        System.out.println("BBBBBBBB");
         
         MajorEntity newMajor = new MajorEntity();
         DepartmentEntity deptEntity = getDeptEntityByUnivCodeAndDeptCodeForSave(major.getUnivCode(), major.getDeptCode());
         newMajor.setDeptId(deptEntity.getId());
         newMajor.setCode(major.getCode());
         
-        System.out.println("CCCCCCCC");
         MajorDto tmp = toMajorDto(repositoryManager.saveMajor(newMajor));
-        System.out.println("DDDDDDDD");
         
         return tmp;
     }
