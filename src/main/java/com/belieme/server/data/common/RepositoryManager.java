@@ -140,7 +140,7 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
         for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
         	System.out.print(deptEntityListByUnivCode.get(i) + " ");
         }
-        System.out.println();
+        System.out.println("DDDD" + deptEntityListByUnivCode);
         if(deptEntityListByUnivCode.size() == 0) {
         	return new ArrayList<>();
         }
