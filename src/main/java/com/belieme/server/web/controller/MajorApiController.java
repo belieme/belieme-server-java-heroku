@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.belieme.server.domain.department.DepartmentDto;
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.university.*;
@@ -21,6 +24,7 @@ import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
 import com.belieme.server.web.common.*;
+import com.belieme.server.web.controller.DepartmentApiController.ListResponse;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
@@ -31,6 +35,20 @@ public class MajorApiController extends ApiController {
     public MajorApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
+    
+    @GetMapping("") // TEST 용
+    public List<MajorJsonBody> getDepartments(@PathVariable String univCode) throws NotFoundException, InternalServerErrorException {
+        ArrayList<MajorJsonBody> output = new ArrayList<>();
+        List<MajorDto> majorDtoList;
+        majorDtoList = dataAdapter.findAllMajorsByUnivCode(univCode);    
+        
+        for(int i = 0; i < majorDtoList.size(); i++) {
+            output.add(jsonBodyProjector.toMajorJsonBody(majorDtoList.get(i)));
+        }
+        
+        return output;
+    }
+    
     
     @PostMapping("")
     public ResponseEntity<Response> postNewMajor(@PathVariable String univCode, @RequestBody MajorInfoJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
