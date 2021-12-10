@@ -133,7 +133,11 @@ public class DomainAdapter {
         newMajor.setDeptId(deptEntity.getId());
         newMajor.setCode(major.getCode());
         
-        return toMajorDto(repositoryManager.saveMajor(newMajor));
+        System.out.println("AAAA");
+        MajorDto tmp = toMajorDto(repositoryManager.saveMajor(newMajor));
+        System.out.println("BBBB");
+        
+        return tmp;
     }
     
     public MajorDto updateMajorDto(String univCode, String majorCode, MajorDto major) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
