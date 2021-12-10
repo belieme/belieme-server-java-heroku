@@ -137,11 +137,11 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
             deptIdListByUnivCode.add(deptEntityListByUnivCode.get(i).getId());
         }
         System.out.println("CCCCCCCCCCCCCCCC");
-        for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
-        	System.out.print(deptEntityListByUnivCode.get(i) + " ");
+        for(int i = 0; i < deptIdListByUnivCode.size(); i++) {
+        	System.out.print(deptIdListByUnivCode.get(i) + " ");
         }
-        System.out.println("DDDD" + deptEntityListByUnivCode);
-        if(deptEntityListByUnivCode.size() == 0) {
+        System.out.println("DDDD" + deptIdListByUnivCode);
+        if(deptIdListByUnivCode.size() == 0) {
         	return new ArrayList<>();
         }
         return majorRepo.findAllByDeptId(deptIdListByUnivCode);
