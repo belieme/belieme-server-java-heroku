@@ -65,6 +65,7 @@ public class DepartmentApiController extends ApiController {
         UniversityJsonBody univOutput = getUniversityByCodeAndCastToJsonBody(univCode);
         
         DepartmentJsonBody deptOutput = getDepartmentByUnivCodeAndDeptCodeAndCastToJsonBody(univCode, deptCode);
+        System.out.println("KKKK");
         return ResponseEntity.ok(new Response(univOutput, deptOutput));
     }
     

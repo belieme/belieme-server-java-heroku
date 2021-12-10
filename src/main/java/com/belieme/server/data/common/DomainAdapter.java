@@ -2,6 +2,8 @@ package com.belieme.server.data.common;
 
 import java.util.*;
 
+import org.apache.commons.logging.Log;
+
 import com.belieme.server.data.university.*;
 import com.belieme.server.data.department.*;
 import com.belieme.server.data.major.*;
