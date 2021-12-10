@@ -165,7 +165,9 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
     }
     
     public boolean doesMajorDuplicate(String univCode, String majorCode) throws UniqueKeyViolationException { // done
+    	System.out.println("AAAAAAAAAAAA");
         List<MajorEntity> majorEntitiesByUnivCode = getAllMajorEntitiesByUnivCode(univCode);
+        System.out.println("BBBBBBBBBBBB");
         for(int i = 0; i < majorEntitiesByUnivCode.size(); i++) {
             if(majorCode.equalsIgnoreCase(majorEntitiesByUnivCode.get(i).getCode())) {
                 return true;
