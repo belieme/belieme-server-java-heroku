@@ -14,7 +14,7 @@ import com.belieme.server.data.event.*;
 
 @RestController
 @RequestMapping(path="/univs/{univCode}")
-public class UserApiController extends ApiController { //TODO 코드 정독하면서 정리하기
+public class UserApiController extends ApiController { //TODO 코드 정독하면서 정리하기...(8)
     @Autowired
     public UserApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);

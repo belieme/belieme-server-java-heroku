@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController 
 public class Advice { 
     //TODO 최종적으로는 다음과 같은 ExceptionJsonBody를 response로 하기
+    //     + 내 서버가 만든 Exception이라는 것을 알 수 있는 tag같은거 추가하기
+    //     + 모든 Exception을 서버에 로그로 기록할 수 있게 추가
     //{
     //    "timestamp": "2021-03-24T14:18:39.140+0000",
     //    "status": 405,
@@ -19,11 +21,6 @@ public class Advice {
     //}
     @ExceptionHandler(HttpException.class) 
     public ResponseEntity<ExceptionResponse> exceptionResponse(HttpException e) {
-        return e.toResponseEntity();
-    }
-    
-    @ExceptionHandler(ServerDomainException.class) // TODO 이거 없애고 ServerDomainException들은 ApiController에서 HTTPException으로 변환하기
-    public ResponseEntity<ExceptionResponse> exceptionResponse2(ServerDomainException e) {
         return e.toResponseEntity();
     }
 }

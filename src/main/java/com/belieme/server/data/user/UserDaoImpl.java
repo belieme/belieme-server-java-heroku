@@ -6,6 +6,9 @@ import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.user.*;
 
 import com.belieme.server.data.common.*;
+import com.belieme.server.web.controller.GeneralApiController;
+import com.belieme.server.web.exception.UnauthorizedException;
+import org.springframework.http.ResponseEntity;
 
 public class UserDaoImpl implements UserDao {
     private DomainAdapter domainAdapter;
@@ -22,8 +25,13 @@ public class UserDaoImpl implements UserDao {
         return domainAdapter.getUserDtoByUnivCodeAndStudentId(univCode, studentId);
     }
     
-    public UserDto findByToken(String token) throws NotFoundOnServerException, InternalDataBaseException { // TODO 토큰 만료되는거 구현하기
-        return domainAdapter.getUserDtoByToken(token);
+    public UserDto findByToken(String token) throws NotFoundOnServerException, InternalDataBaseException, TokenExpiredException { // TODO 토큰 만료되는거 구현하기
+        UserDto userByToken = domainAdapter.getUserDtoByToken(token);
+        if(System.currentTimeMillis()/1000 < userByToken.tokenExpiredTime() || userByToken.getCreateTimeStamp() == 0) {
+            return userByToken;
+        } else {
+            throw new TokenExpiredException("토큰이 만료되었습니다.");
+        }
     }
     
     public UserDto save(UserDto userDto) throws InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { 

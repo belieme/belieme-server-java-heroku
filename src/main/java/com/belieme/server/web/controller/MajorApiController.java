@@ -1,16 +1,13 @@
 package com.belieme.server.web.controller;
 
+import com.belieme.server.domain.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.belieme.server.domain.department.DepartmentDto;
-import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.university.*;
 
@@ -24,7 +21,6 @@ import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
 import com.belieme.server.web.common.*;
-import com.belieme.server.web.controller.DepartmentApiController.ListResponse;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
@@ -36,52 +32,63 @@ public class MajorApiController extends ApiController {
         super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
     }
     
-    @GetMapping("") // TEST 용
-    public List<MajorJsonBody> getDepartments(@PathVariable String univCode) throws NotFoundException, InternalServerErrorException {
-        ArrayList<MajorJsonBody> output = new ArrayList<>();
-        List<MajorDto> majorDtoList;
-        majorDtoList = dataAdapter.findAllMajorsByUnivCode(univCode);    
-        
-        for(int i = 0; i < majorDtoList.size(); i++) {
-            output.add(jsonBodyProjector.toMajorJsonBody(majorDtoList.get(i)));
-        }
-        
-        return output;
-    }
-    
-    
     @PostMapping("")
-    public ResponseEntity<Response> postNewMajor(@PathVariable String univCode, @RequestBody MajorInfoJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    public ResponseEntity<Response> postNewMajor(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @RequestBody MajorInfoJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException, UnauthorizedException, ForbiddenException {
+        init(userToken, univCode);
+        checkIfRequesterIsDeveloper();
+
         if(requestBody.getMajorCode() == null || requestBody.getDeptCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : majorCode(String), deptCode(String)");
         }
-        System.out.println("AAAA");
+
         UniversityDto univ = dataAdapter.findUnivByCode(univCode);
-        System.out.println("BBBB");
-        
+
         MajorDto newMajor = new MajorDto();
         newMajor.setUnivCode(univ.getCode());
         newMajor.setCode(requestBody.getMajorCode());
         newMajor.setDeptCode(requestBody.getDeptCode());
         
         MajorDto savedMajor = dataAdapter.saveMajor(newMajor);
-        System.out.println("CCCC");
         
+        String location = Globals.serverUrl + "/univs/" + univCode + "/majors/" + requestBody.getMajorCode();
+
+        return createPostResponseEntity(location, savedMajor);
+    }
+
+    private UserDto requester;
+    private UniversityDto univ;
+
+    private void init(String userToken, String univCode) throws UnauthorizedException, InternalServerErrorException, NotFoundException {
+        requester = dataAdapter.findUserByToken(userToken);
+        univ = dataAdapter.findUnivByCode(univCode);
+    }
+
+    private void checkIfRequesterIsDeveloper() throws ForbiddenException {
+        if(!requester.hasDeveloperPermission()) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
+        }
+    }
+
+    private URI createUri(String uri) throws InternalServerErrorException {
         URI location;
         try {
-            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/majors/" + requestBody.getMajorCode());    
+            location = new URI(uri);
         } catch(URISyntaxException e) {
             e.printStackTrace();
             throw new InternalServerErrorException("안알랴줌");
         }
-        
-        return ResponseEntity.created(location).body(createResponse(univ, savedMajor));
+        return location;
     }
-    
-    private Response createResponse(UniversityDto univDto, MajorDto majorDto) throws NotFoundException, InternalServerErrorException {
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
-        MajorJsonBody major = jsonBodyProjector.toMajorJsonBody(majorDto);
-        return new Response(univ, major);
+
+    private ResponseEntity<Response> createPostResponseEntity(String location, MajorDto majorDto) throws InternalServerErrorException, NotFoundException {
+        URI uri = createUri(location);
+        return ResponseEntity.created(uri).body(createResponse(majorDto));
+    }
+
+    private Response createResponse(MajorDto majorDto) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        MajorJsonBody majorJsonBody = jsonBodyProjector.toMajorJsonBody(majorDto);
+        return new Response(univJsonBody, majorJsonBody);
     }
     
     public class Response {

@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.permission.Permissions;
 import com.belieme.server.domain.user.*;
@@ -143,7 +142,7 @@ public class GeneralApiController extends ApiController {
                 
             }
             default : {
-                throw new MethodNotAllowedException("등록되어있지 않은 학교에 대한 요청입니다."); // TODO 새로운 exception으로 바꾸기
+                throw new MethodNotAllowedException("등록되어있지 않은 학교에 대한 요청입니다."); // TODO 새로운 exception으로 바꾸기...(1)
             }
         }
     }
@@ -151,14 +150,7 @@ public class GeneralApiController extends ApiController {
     @GetMapping("/me")
     public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, UnauthorizedException, ConflictException {
         UserDto target = dataAdapter.findUserByToken(userToken);
-        if(System.currentTimeMillis()/1000 < target.tokenExpiredTime()) {
-            return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUserJsonBodyWithoutToken(target)));
-        } else {
-            target.setApprovalTimeStampZero();
-            target.resetToken();
-            dataAdapter.updateUser(target.getUnivCode(), target.getStudentId(), target);
-            throw new UnauthorizedException("토큰이 만료되었습니다.");
-        }
+        return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUserJsonBodyWithoutToken(target)));
     }
     
     public class ResponseBody {

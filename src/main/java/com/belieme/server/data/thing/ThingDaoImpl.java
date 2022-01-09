@@ -26,7 +26,7 @@ public class ThingDaoImpl implements ThingDao {
         return domainAdapter.saveThingDto(thing);
     }
     
-    public ThingDto update(String univCode, String deptCode, String code, ThingDto thing) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { // TODO 학교 바꾸는 거 같은거 가능??
+    public ThingDto update(String univCode, String deptCode, String code, ThingDto thing) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
         return domainAdapter.updateThingDto(univCode, deptCode, code, thing);
     }
 }

@@ -1,6 +1,5 @@
 package com.belieme.server.data.user;
 
-import java.util.*;
 import javax.persistence.*;
 
 @Entity
@@ -83,22 +82,5 @@ public class UserEntity {
 
     public void setEntranceYear(int entranceYear) {
         this.entranceYear = entranceYear;
-    }
-    
-    public long tokenExpiredTime() {
-        if(approvalTimeStamp != 0) {
-            TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
-            Calendar tmp = Calendar.getInstance();
-            tmp.setTime(new Date(approvalTimeStamp*1000));
-            tmp.setTimeZone(timeZone);
-            int year = tmp.get(Calendar.YEAR);
-            if(tmp.get(Calendar.MONTH) >= Calendar.MARCH && tmp.get(Calendar.MONTH) < Calendar.SEPTEMBER) {
-                tmp.set(year, Calendar.SEPTEMBER, 1, 0, 0, 0);
-            } else {
-                tmp.set(year+1, Calendar.MARCH, 1, 0, 0, 0);
-            }
-            return tmp.getTimeInMillis()/1000;
-        }
-        return 0;
     }
 }

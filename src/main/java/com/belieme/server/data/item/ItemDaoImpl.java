@@ -26,7 +26,7 @@ public class ItemDaoImpl implements ItemDao {
         return domainAdapter.saveItemDto(item);
     }
     
-    public ItemDto update(String univCode, String deptCode, String thingCode, int num, ItemDto item) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { // TODO 사용을 하는가?
+    public ItemDto update(String univCode, String deptCode, String thingCode, int num, ItemDto item) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
         return domainAdapter.updateItemDto(univCode, deptCode, thingCode, num, item);
     }
 }

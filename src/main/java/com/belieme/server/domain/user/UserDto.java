@@ -4,13 +4,7 @@ import java.util.*;
 
 import com.belieme.server.domain.permission.*;
 
-//TODO 앞으로 user이렇게 만들기
-//permissions : deptCode, permission 
-//major codes 없어짐 대신 permissions만으로 속한 학과 알 수 있게하기
-//또 로그인 할 때는 받은 major code를 통해서 deptCode 찾아내고 이에 해당하는 permission이 없을 시
-//permission user permission 추가하기
-
-//TODO userApiController에는 permission 추가하기, 가계정 만들기, permission 박탈 / 증여하기 등 만들면 될 듯
+//TODO userApiController에는 permission 추가하기, 가계정 만들기, permission 박탈 / 증여하기 등 만들면 될 듯기...(3)
         
 public class UserDto {
     private String univCode;
@@ -68,8 +62,16 @@ public class UserDto {
     public boolean permissionsContainsKey(String key) {
         return permissions.containsKey(key);
     }
-    
+
+    public boolean hasDeveloperPermission() {
+        return permissions.get("DEV") == Permissions.DEVELOPER;
+    }
+
     public boolean hasUserPermission(String deptCode) {
+        if(hasDeveloperPermission()) {
+            return true;
+        }
+
         if(permissions.get(deptCode) == null) {
             return false;
         }
@@ -85,10 +87,15 @@ public class UserDto {
     }
     
     public boolean hasStaffPermission(String deptCode) {
+        if(hasDeveloperPermission()) {
+            return true;
+        }
+
         if(permissions.get(deptCode) == null) {
             return false;
         }
         switch(permissions.get(deptCode)) {
+            case DEVELOPER :
             case MASTER :
             case STAFF :
                 return true;
@@ -100,10 +107,14 @@ public class UserDto {
     }
     
     public boolean hasMasterPermission(String deptCode) {
+        if(hasDeveloperPermission()) {
+            return true;
+        }
         if(permissions.get(deptCode) == null) {
             return false;
         }
         switch(permissions.get(deptCode)) {
+            case DEVELOPER :
             case MASTER :
                 return true;
             case STAFF :

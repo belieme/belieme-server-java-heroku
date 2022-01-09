@@ -1,13 +1,15 @@
 package com.belieme.server.web.controller;
 
+import com.belieme.server.domain.user.UserDto;
+import com.belieme.server.web.common.Globals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
-import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.university.*;
 
 import com.belieme.server.data.university.*;
@@ -19,13 +21,10 @@ import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
 import com.belieme.server.data.event.*;
 
-import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
-// TODO 변수 및 함수 이름 직관성 있고 일관성 있게 만들기 event부터 하면 그나마 쉬울 듯?
 // public method는 클래스 상단에 private method는 클래스 하단에 몰아두기
-
 
 @RestController
 @RequestMapping("/univs")
@@ -37,35 +36,50 @@ public class UniversityApiController extends ApiController {
     }
     
     @GetMapping("") 
-    public ResponseEntity<ListResponseBody> getAllUnivsMapping() {
-        List<UniversityJsonBody> output = getAllUnivsAndCastToJsonBody();
-        return ResponseEntity.ok(new ListResponseBody(output));
+    public ResponseEntity<ListResponse> getAllUnivsMapping(@RequestHeader("user-token") String userToken) throws UnauthorizedException, ForbiddenException, InternalServerErrorException {
+        init(userToken);
+        checkIfRequesterIsDeveloper();
+
+        List<UniversityDto> univDtoList = dataAdapter.findAllUnivs();
+        System.out.println("user.dir : " + System.getProperty("user.dir"));
+        return createGetListResponseEntity(univDtoList);
     }
     
     @GetMapping("/{univCode}") 
-    public ResponseEntity<ResponseBody> getAnUnivMapping(@PathVariable String univCode) throws NotFoundException, InternalServerErrorException {
-        UniversityJsonBody output = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
-        return ResponseEntity.ok(new ResponseBody(output));
+    public ResponseEntity<Response> getAnUnivMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode) throws NotFoundException, InternalServerErrorException, UnauthorizedException, ForbiddenException {
+        init(userToken);
+        checkIfRequesterIsDeveloper();
+
+        String UpperCaseUnivCode = univCode.toUpperCase();
+        UniversityDto output = dataAdapter.findUnivByCode(UpperCaseUnivCode.toUpperCase());
+        return createGetResponseEntity(output);
     }
     
     @PostMapping("")
-    public ResponseEntity<ResponseBody> postNewUnivMapping(@RequestBody UniversityJsonBody requestBody) throws BadRequestException, MethodNotAllowedException, InternalServerErrorException, ConflictException {
+    public ResponseEntity<Response> postNewUnivMapping(@RequestHeader("user-token") String userToken, @RequestBody UniversityJsonBody requestBody) throws BadRequestException, MethodNotAllowedException, InternalServerErrorException, ConflictException, UnauthorizedException, ForbiddenException {
+        init(userToken);
+        checkIfRequesterIsDeveloper();
+
         if(requestBody.getName() == null || requestBody.getCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), code(String), apiUrl(String)(Optional)");
         }
         
-        dataAdapter.saveUniv(toUniversityDto(requestBody));
-        URI location = Globals.getLocation("/univ/" + requestBody.getCode());
-        return ResponseEntity.created(location).body(new ResponseBody(requestBody));
+        UniversityDto savedUniv = dataAdapter.saveUniv(toUniversityDto(requestBody));
+        String location = Globals.serverUrl + "/univs/" + requestBody.getCode();
+        return createPostResponseEntity(location, savedUniv);
     }
     
     @PatchMapping("/{univCode}")
-    public ResponseEntity<ResponseBody> updateUniverity(@PathVariable String univCode, @RequestBody UniversityJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    public ResponseEntity<Response> updateUniversity(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @RequestBody UniversityJsonBody requestBody) throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException, UnauthorizedException, ForbiddenException {
+        init(userToken);
+        checkIfRequesterIsDeveloper();
+
         if(requestBody.getName() == null && requestBody.getCode() == null && requestBody.getApiUrl() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), code(String), apiUrl(String) 중 최소 하나");
         }
-        
-        UniversityJsonBody target = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
+        String UpperCaseUnivCode = univCode.toUpperCase();
+
+        UniversityJsonBody target = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(UpperCaseUnivCode));
         if(requestBody.getName() == null) {
             requestBody.setName(target.getName());
         }
@@ -76,33 +90,72 @@ public class UniversityApiController extends ApiController {
             requestBody.setApiUrl(target.getApiUrl());
         }
         
-        dataAdapter.updateUniv(univCode, toUniversityDto(requestBody));
-        return ResponseEntity.ok(new ResponseBody(requestBody)); 
+        UniversityDto updatedUniv = dataAdapter.updateUniv(UpperCaseUnivCode, toUniversityDto(requestBody));
+        return createGetResponseEntity(updatedUniv);
     }
-    
+
+    private UserDto requester;
+
+    private void init(String userToken) throws UnauthorizedException, InternalServerErrorException {
+        requester = dataAdapter.findUserByToken(userToken);
+    }
+
+    private void checkIfRequesterIsDeveloper() throws ForbiddenException {
+        if(!requester.hasDeveloperPermission()) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
+        }
+    }
+
     private UniversityDto toUniversityDto(UniversityJsonBody univJsonBody) {
         UniversityDto output = new UniversityDto();
-        output.setCode(univJsonBody.getCode());
+        output.setCode(univJsonBody.getCode().toUpperCase());
         output.setName(univJsonBody.getName());
         output.setApiUrl(univJsonBody.getApiUrl());
         
         return output;
     }
-    
-    private List<UniversityJsonBody> getAllUnivsAndCastToJsonBody() {
-        ArrayList<UniversityJsonBody> output = new ArrayList<>();
-        List<UniversityDto> univDtoList = dataAdapter.findAllUnivs();
-        
+
+    private ResponseEntity<Response> createGetResponseEntity(UniversityDto output) {
+        return ResponseEntity.ok().body(createResponse(output));
+    }
+
+    private ResponseEntity<Response> createPostResponseEntity(String location, UniversityDto output) throws InternalServerErrorException {
+        URI uri = createUri(location);
+        return ResponseEntity.created(uri).body(createResponse(output));
+    }
+
+    private ResponseEntity<ListResponse> createGetListResponseEntity(List<UniversityDto> output) {
+        return ResponseEntity.ok().body(createListResponse(output));
+    }
+
+    private Response createResponse(UniversityDto univDto) {
+        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
+        return new Response(univ);
+    }
+
+    private ListResponse createListResponse(List<UniversityDto> univDtoList) {
+        List<UniversityJsonBody> univList = new ArrayList<>();
         for(int i = 0; i < univDtoList.size(); i++) {
-            output.add(jsonBodyProjector.toUniversityJsonBody(univDtoList.get(i)));
+            univList.add(jsonBodyProjector.toUniversityJsonBody(univDtoList.get(i)));
         }
-        return output;
+        return new ListResponse(univList);
+    }
+
+    private URI createUri(String uri) throws InternalServerErrorException {
+        URI location;
+        try {
+            location = new URI(uri);
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
+        }
+        return location;
     }
     
-    public class ResponseBody {
+    public class Response {
         private UniversityJsonBody univ;
         
-        public ResponseBody(UniversityJsonBody univ) {
+        public Response(UniversityJsonBody univ) {
             this.univ = univ;
         }
 
@@ -111,10 +164,10 @@ public class UniversityApiController extends ApiController {
         }
     }
     
-    public class ListResponseBody {
+    public class ListResponse {
         List<UniversityJsonBody> univs;
 
-        public ListResponseBody(List<UniversityJsonBody> univs) {
+        public ListResponse(List<UniversityJsonBody> univs) {
             this.univs = univs;
         }
 

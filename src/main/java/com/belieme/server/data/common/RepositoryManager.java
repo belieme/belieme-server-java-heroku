@@ -13,7 +13,7 @@ import com.belieme.server.data.event.*;
 
 import com.belieme.server.data.exception.*;
 
-public class RepositoryManager { //TODO exception data.exception으로 바꾸기
+public class RepositoryManager {
     private UniversityRepository univRepo;
     private DepartmentRepository deptRepo;
     private MajorRepository majorRepo;
@@ -144,7 +144,12 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
         if(deptIdListByUnivCode.size() == 0) {
         	return new ArrayList<>();
         }
-        return majorRepo.findAllByDeptId(deptIdListByUnivCode);
+
+        List<MajorEntity> output = new ArrayList<>();
+        for(int i = 0; i < deptEntityListByUnivCode.size(); i++) {
+            output.addAll(majorRepo.findByDeptId(deptIdListByUnivCode.get(i)));
+        }
+        return output;
     }
     
     public List<MajorEntity> getAllMajorEntitiesByUnivCodeAndDeptCode(String univCode, String deptCode) throws UniqueKeyViolationException { // 일단 이걸로
@@ -213,9 +218,9 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
         }
     }
     
-    public UserEntity getUserEntityByToken(String token) throws NotFoundOnDataBaseException, UniqueKeyViolationException { // done
+    public UserEntity getUserEntityByToken(String token) throws NotFoundOnDataBaseException, UniqueKeyViolationException { // TODO User-Token 만료됨 exception 만들기...(6)
         List<UserEntity> userList = userRepo.findByToken(token);
-        
+
         if(userList.size() == 1) {
             return userList.get(0);
         } else if(userList.size() == 0) {
@@ -223,6 +228,8 @@ public class RepositoryManager { //TODO exception data.exception으로 바꾸기
         } else {
             throw new UniqueKeyViolationException("RepositoryManager.getUserEntityByToken()");
         }
+
+
     }
     
     public UserEntity saveUser(UserEntity user) {

@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.department.*;
 import com.belieme.server.domain.user.*;
-import com.belieme.server.domain.item.ItemDto;
-import com.belieme.server.domain.item.ItemStatus;
+import com.belieme.server.domain.item.*;
 import com.belieme.server.domain.event.*;
 
 import com.belieme.server.data.university.*;
@@ -37,7 +36,7 @@ public class EventApiController extends ApiController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity<ListResponse> getAllEventsFromDeptMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException { //TODO studentId를 다른걸로 바꿀까?
+    public ResponseEntity<ListResponse> getAllEventsFromDeptMapping(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestParam(value = "studentId", required = false) String studentId) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException { // TODO studentId를 다른걸로 바꿀까?
         init(userToken, univCode, deptCode);
         
         checkRequesterHasPermissionToStudentIdFromDept(studentId);
@@ -64,8 +63,9 @@ public class EventApiController extends ApiController {
         
         return createGetResponseEntity(event);
     }
-    
-    //TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
+
+    // TODO reserve의 item정보를 pathVariable로 줄지 requestBody로 줄지 생각
+    // TODO 로그인 없이 관리자가 예약 신청 해주는 경우 추가하기
     @PostMapping("/events/reserve")
     public ResponseEntity<Response> postRequestEventByUser(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ItemInfoJsonBody requestBody) throws UnauthorizedException, NotFoundException, InternalServerErrorException, BadRequestException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);
@@ -86,9 +86,6 @@ public class EventApiController extends ApiController {
         event.setNum(getLastEventNumOfItem(thingCode, itemNum) + 1);
         event.setUserStudentId(userId);
         event.setReserveTimeStamp(System.currentTimeMillis()/1000);
-        
-        reservedItem.setLastEventNum(event.getNum());
-        saveItem(reservedItem);
         
         event = saveEvent(event);
         String location = Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/things/" + event.getThingCode() + "/items/" + event.getItemNum() + "/events/" + event.getNum();
@@ -114,16 +111,13 @@ public class EventApiController extends ApiController {
         event.setLostManagerStudentId(requester.getStudentId());
         event.setLostTimeStamp(System.currentTimeMillis()/1000);
         
-        lostItem.setLastEventNum(event.getNum());
-        saveItem(lostItem);
-        
         event = saveEvent(event);
         String location = Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/things/" + event.getThingCode() + "/items/" + event.getItemNum() + "/events/" + event.getNum();
         
         return createPostResponseEntity(location, event);
     }
 
-    @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/cancel") //TODO 논의점 cancel manager를 만들어야 하는가?
+    @PatchMapping("/things/{thingCode}/items/{itemNum}/events/{eventNum}/cancel") //TODO 논의점 cancel manager를 만들어야함...(5)
     public ResponseEntity<Response> cancelItem(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @PathVariable int itemNum, @PathVariable int eventNum) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
         init(userToken, univCode, deptCode);
         
@@ -202,7 +196,6 @@ public class EventApiController extends ApiController {
     private DepartmentDto dept;
     
     private void init(String userToken, String univCode, String deptCode) throws UnauthorizedException, NotFoundException, InternalServerErrorException {
-        checkUserTokenIsNotNull(userToken);
         requester = dataAdapter.findUserByToken(userToken);
         univ = dataAdapter.findUnivByCode(univCode);
         dept = dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode);
@@ -325,16 +318,6 @@ public class EventApiController extends ApiController {
         return dataAdapter.updateEvent(univ.getCode(), dept.getCode(), thingCode, itemNum, eventNum, target);
     }
     
-    private ItemDto saveItem(ItemDto target) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
-        return dataAdapter.saveItem(target);
-    }
-    
-    private void checkUserTokenIsNotNull(String userToken) throws UnauthorizedException {
-        if(userToken == null) {
-            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
-        }
-    }
-    
     private void checkIfBodyIncludesThingCode(ItemInfoJsonBody requestBody) throws BadRequestException {
         if(requestBody.getThingCode() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : thingCode(String), itemNum(int)(optional)");
@@ -415,7 +398,7 @@ public class EventApiController extends ApiController {
         }
     }
     
-    private void checkIfUserCanReserveThing(String userStudentId, String thingCode) throws InternalServerErrorException, MethodNotAllowedException { // TODO 해체하기
+    private void checkIfUserCanReserveThing(String userStudentId, String thingCode) throws InternalServerErrorException, MethodNotAllowedException {
         List<EventDto> eventListByUser = dataAdapter.findAllEventsByUnivCodeAndDeptCodeAndUserId(univ.getCode(), dept.getCode(), userStudentId);    
        
         int currentEventCount = 0;
@@ -423,8 +406,8 @@ public class EventApiController extends ApiController {
             EventDto tmp = eventListByUser.get(i);
             if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
                 currentEventCount++;
-                if(tmp.getThingCode().equalsIgnoreCase(thingCode)) { //TODO null pointer exception 발생 할 수도 있지 않을까?
-                    throw new MethodNotAllowedException("빌리려고 하는 물품종류에 대한 열린 기록이 있습니다."); //TODO 이 exception은 없애던가 메세지를 바꾸기
+                if(tmp.getThingCode().equalsIgnoreCase(thingCode)) {
+                    throw new MethodNotAllowedException("빌리려고 하는 물품종류에 대한 열린 기록이 있습니다.");
                 }
             }
         }
@@ -434,33 +417,33 @@ public class EventApiController extends ApiController {
     }
     
     private ResponseEntity<Response> createGetResponseEntity(EventDto output) throws InternalServerErrorException, NotFoundException {
-        return ResponseEntity.ok().body(createResponse(univ, dept, output));
+        return ResponseEntity.ok().body(createResponse(output));
     }
     
     private ResponseEntity<Response> createPostResponseEntity(String location, EventDto output) throws InternalServerErrorException, NotFoundException {
         URI uri = createUri(location);
-        return ResponseEntity.created(uri).body(createResponse(univ, dept, output));
+        return ResponseEntity.created(uri).body(createResponse(output));
     }
     
     private ResponseEntity<ListResponse> createGetListResponseEntity(List<EventDto> output) throws InternalServerErrorException, NotFoundException {
-        return ResponseEntity.ok().body(createListResponse(univ, dept, output));
+        return ResponseEntity.ok().body(createListResponse(output));
     }
     
-    private Response createResponse(UniversityDto univDto, DepartmentDto deptDto, EventDto eventDto) throws InternalServerErrorException, NotFoundException {
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDto);
-        EventJsonBody event = jsonBodyProjector.toEventJsonBody(eventDto);
-        return new Response(univ, dept, event);
+    private Response createResponse(EventDto eventDto) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(dept);
+        EventJsonBody eventJsonBody = jsonBodyProjector.toEventJsonBody(eventDto);
+        return new Response(univJsonBody, deptJsonBody, eventJsonBody);
     }
     
-    private ListResponse createListResponse(UniversityDto univDto, DepartmentDto deptDto, List<EventDto> eventDtoList) throws InternalServerErrorException, NotFoundException {
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(univDto);
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(deptDto);
-        List<EventJsonBody> eventList = new ArrayList<>();
+    private ListResponse createListResponse(List<EventDto> eventDtoList) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(dept);
+        List<EventJsonBody> eventJsonBodyList = new ArrayList<>();
         for(int i = 0; i < eventDtoList.size(); i++) {
-            eventList.add(jsonBodyProjector.toEventJsonBody(eventDtoList.get(i)));
+            eventJsonBodyList.add(jsonBodyProjector.toEventJsonBody(eventDtoList.get(i)));
         }
-        return new ListResponse(univ, dept, eventList);
+        return new ListResponse(univJsonBody, deptJsonBody, eventJsonBodyList);
     }
     
     private URI createUri(String uri) throws InternalServerErrorException {

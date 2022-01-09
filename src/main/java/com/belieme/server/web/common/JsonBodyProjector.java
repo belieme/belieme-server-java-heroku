@@ -196,7 +196,7 @@ public class JsonBodyProjector {
             }
         }
         
-        if(amount == 0) { // 여기도 생각할 여지가 필요할 듯, TODO deactivate 만들 때 쓰기
+        if(amount == 0) { // 여기도 생각할 여지가 필요할 듯, TODO deactivate 만들 때 쓰기기...(9)
             return ThingStatus.INACTIVATE;
         }
         else if(count == 0) {

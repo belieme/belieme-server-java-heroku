@@ -298,7 +298,7 @@ public class DomainAdapter {
         return toThingDto(repositoryManager.saveThing(target));
     }
     
-    public ThingDto updateThingDto(String univCode, String deptCode, String code, ThingDto thingDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { // TODO 학교 바꾸는 거 같은거 가능??
+    public ThingDto updateThingDto(String univCode, String deptCode, String code, ThingDto thingDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
         ThingEntity target = getThingEntityByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, code);
         
         if(!univCode.equalsIgnoreCase(thingDto.getUnivCode()) || !deptCode.equalsIgnoreCase(thingDto.getDeptCode()) || !code.equalsIgnoreCase(thingDto.getCode())) {
@@ -345,7 +345,7 @@ public class DomainAdapter {
         return toItemDto(repositoryManager.saveItem(target));
     }
     
-    public ItemDto updateItemDto(String univCode, String deptCode, String thingCode, int itemNum, ItemDto itemDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { // TODO 학교 바꾸는 거 같은거 가능??
+    public ItemDto updateItemDto(String univCode, String deptCode, String thingCode, int itemNum, ItemDto itemDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
         ItemEntity target = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         
         if(!univCode.equalsIgnoreCase(itemDto.getUnivCode()) || !deptCode.equalsIgnoreCase(itemDto.getDeptCode()) || !thingCode.equalsIgnoreCase(itemDto.getThingCode()) || itemNum != itemDto.getNum()) {
@@ -437,7 +437,7 @@ public class DomainAdapter {
         return toEventDto(savedEventEntity);
     }
     
-    public EventDto updateEventDto(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto eventDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException { // TODO 학교 바꾸는 거 같은거 가능??
+    public EventDto updateEventDto(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto eventDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
         EventEntity target = getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
         
         if(!univCode.equalsIgnoreCase(eventDto.getUnivCode()) || !deptCode.equalsIgnoreCase(eventDto.getDeptCode()) || !thingCode.equalsIgnoreCase(eventDto.getThingCode()) || itemNum != eventDto.getItemNum() || eventNum != eventDto.getNum()) {
@@ -630,7 +630,7 @@ public class DomainAdapter {
         try {
             return repositoryManager.getAllMajorEntitiesByUnivCode(univCode);
         } catch(UniqueKeyViolationException e) {
-            throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다."); //TODO 어떤 record의 어떤키인지 알려주는 것 까지는 안 되는 것인가...
+            throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다."); //TODO 어떤 record의 어떤키인지 알려주는 것 까지는 안 되는 것인가... (1)
         }
     }
 
@@ -827,7 +827,7 @@ public class DomainAdapter {
         return output;
          // TODO 같은 dept code를 갖는 permissions가 있을 시 예외처리는 안함. db에 저장하는 것을 제대로 만들면 딱히 필요없을 듯
     }
-    
+
     private UserEntity getUserEntityByToken(String token) throws NotFoundOnServerException, InternalDataBaseException {
         try {
            return repositoryManager.getUserEntityByToken(token);

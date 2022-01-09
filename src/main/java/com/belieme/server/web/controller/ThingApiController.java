@@ -1,5 +1,8 @@
 package com.belieme.server.web.controller;
 
+import com.belieme.server.domain.department.DepartmentDto;
+import com.belieme.server.domain.event.EventDto;
+import com.belieme.server.domain.university.UniversityDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +12,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.belieme.server.domain.exception.*;
 import com.belieme.server.domain.item.ItemDto;
 import com.belieme.server.domain.thing.ThingDto;
 import com.belieme.server.domain.user.UserDto;
@@ -27,6 +29,10 @@ import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
 
+
+// TODO ThingCode는 저장할 때는 대 소문자 구분되어 저장되지만 비교시에는 대 소문자 구분 x => 중복 체크도 대 소문자 구분
+//      Item, Event ApiController에도 다 적용시키기 ...(4)
+
 @RestController
 @RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things")
 public class ThingApiController extends ApiController {
@@ -37,63 +43,30 @@ public class ThingApiController extends ApiController {
 
     @GetMapping("")
     public ResponseEntity<ListResponse> getAllThings(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode) throws UnauthorizedException, InternalServerErrorException, NotFoundException, ForbiddenException {
-        if(userToken == null) {
-            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
-        }
-        
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
-        
-        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
-        try {
-            user = dataAdapter.findUserByToken(userToken);
-        } catch(NotFoundException e) {
-            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
-        }
-        
-        if(!user.hasUserPermission(deptCode)) {
+        init(userToken, univCode, deptCode);
+
+        if(!requester.hasUserPermission(deptCode)) {
             throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
-            
-        List<ThingDto> thingDtoList = dataAdapter.findAllThingsByUnivCodeAndDeptCode(univCode, deptCode);
-        ArrayList<ThingJsonBody> output = new ArrayList<>();
-        for (int i = 0; i < thingDtoList.size(); i++) {
-            ThingJsonBody tmp = jsonBodyProjector.toThingJsonBody(thingDtoList.get(i)); 
-            output.add(tmp);
-        }
-        return ResponseEntity.ok().body(new ListResponse(univ, dept, output));
+        return createGetListResponseEntity(dataAdapter.findAllThingsByUnivCodeAndDeptCode(univCode, deptCode));
     }
 
     @GetMapping("/{thingCode}")
     public ResponseEntity<ResponseWithItems> getThingById(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode) throws UnauthorizedException, InternalServerErrorException, NotFoundException, ForbiddenException {
-        if(userToken == null) {
-            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
-        }
+        init(userToken, univCode, deptCode);
         
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
-        
-        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
-        try {
-            user = dataAdapter.findUserByToken(userToken);
-        } catch(NotFoundException e) {
-            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
-        }
-        
-        if(!user.hasUserPermission(deptCode)) {    
+        if(!requester.hasUserPermission(deptCode)) {
         	throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
-        
-        ThingDto target = dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
-        
-        ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(target);
-        return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
+        return createGetResponseWithItemsEntity(dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode));
     }
 
-    @PostMapping("") // TODO amount는 어따 팔아먹었는가
+    @PostMapping("")
     public ResponseEntity<ResponseWithItems> createNewThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @RequestBody ThingInfoJsonBody requestBody) throws UnauthorizedException, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
-        if(userToken == null) {
-            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
+        init(userToken, univCode, deptCode);
+
+        if(!requester.hasStaffPermission(deptCode)) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         if(requestBody.getCode() == null || requestBody.getName() == null || requestBody.getEmoji() == null) {
@@ -103,21 +76,7 @@ public class ThingApiController extends ApiController {
         if(requestBody.getAmount() != null && requestBody.getAmount() < 0) {
             throw new BadRequestException("amount는 음수가 될 수 없습니다.");
         }
-        
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
-        
-        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
-        try {
-            user = dataAdapter.findUserByToken(userToken);
-        } catch(NotFoundException e) {
-            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
-        }
-        
-        if(!user.hasStaffPermission(deptCode)) {
-            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
-        }
-        
+
         ThingDto newThing = new ThingDto();
         newThing.setCode(requestBody.getCode());
         newThing.setName(requestBody.getName());
@@ -140,41 +99,21 @@ public class ThingApiController extends ApiController {
                 dataAdapter.saveItem(newItem);
             }
         }
-        ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(savedThing);
-        
-        URI location;
-        try {
-            location = new URI(Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/things/" + requestBody.getCode());
-        } catch(URISyntaxException e) {
-            e.printStackTrace();
-            throw new InternalServerErrorException("안알랴줌");
-        }
-        
-        return ResponseEntity.created(location).body(new ResponseWithItems(univ, dept, output));
+
+        String location = Globals.serverUrl + "/univs/" + univCode + "/depts/" + deptCode + "/things/" + requestBody.getCode();
+        return createPostResponseWithItemsEntity(location, savedThing);
     }
 
     @PatchMapping("/{thingCode}")
     public ResponseEntity<ResponseWithItems> updateNameAndEmojiOfThing(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode, @RequestBody ThingJsonBody requestBody) throws UnauthorizedException, BadRequestException, NotFoundException, InternalServerErrorException, ForbiddenException, MethodNotAllowedException, ConflictException {
-        if(userToken == null) {
-            throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");
+        init(userToken, univCode, deptCode);
+
+        if(!requester.hasStaffPermission(deptCode)) {
+            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
-        
+
         if(requestBody.getCode() == null && requestBody.getName() == null && requestBody.getEmoji() == null && requestBody.getDescription() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다.\n필요한 정보 : name(String), emoji(String), description(String) 중 하나 이상");
-        }
-        
-        UniversityJsonBody univ = jsonBodyProjector.toUniversityJsonBody(dataAdapter.findUnivByCode(univCode));
-        DepartmentJsonBody dept = jsonBodyProjector.toDepartmentJsonBody(dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode));
-        
-        UserDto user; // TODO user-token판단하는 exception바꾸기 && token 만료도 적용하기
-        try {
-            user = dataAdapter.findUserByToken(userToken);
-        } catch(NotFoundException e) {
-            throw new UnauthorizedException("만료되거나 정보가 없는 user-token입니다.");
-        }
-        
-        if(!user.hasStaffPermission(deptCode)) {
-            throw new ForbiddenException("주어진 user-token에 해당하는 user에는 api에 대한 권한이 없습니다.");
         }
         
         ThingDto target = dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);
@@ -193,8 +132,74 @@ public class ThingApiController extends ApiController {
         }
         
         ThingDto newAndSavedThing = dataAdapter.updateThing(univCode, deptCode, thingCode, target);
-        ThingJsonBodyWithItems output = jsonBodyProjector.toThingJsonBodyWithItems(newAndSavedThing);
-        return ResponseEntity.ok().body(new ResponseWithItems(univ, dept, output));
+        return createGetResponseWithItemsEntity(newAndSavedThing);
+    }
+
+    private UserDto requester;
+    private UniversityDto univ;
+    private DepartmentDto dept;
+
+    private void init(String userToken, String univCode, String deptCode) throws UnauthorizedException, NotFoundException, InternalServerErrorException {
+        requester = dataAdapter.findUserByToken(userToken);
+        univ = dataAdapter.findUnivByCode(univCode);
+        dept = dataAdapter.findDeptByUnivCodeAndDeptCode(univCode, deptCode);
+    }
+
+    private ResponseEntity<Response> createGetResponseEntity(ThingDto output) throws InternalServerErrorException, NotFoundException {
+        return ResponseEntity.ok().body(createResponse(output));
+    }
+
+    private ResponseEntity<ResponseWithItems> createGetResponseWithItemsEntity(ThingDto output) throws InternalServerErrorException, NotFoundException {
+        return ResponseEntity.ok().body(createResponseWithItems(output));
+    }
+
+    private ResponseEntity<Response> createPostResponseEntity(String location, ThingDto output) throws InternalServerErrorException, NotFoundException {
+        URI uri = createUri(location);
+        return ResponseEntity.created(uri).body(createResponse(output));
+    }
+
+    private ResponseEntity<ResponseWithItems> createPostResponseWithItemsEntity(String location, ThingDto output) throws InternalServerErrorException, NotFoundException {
+        URI uri = createUri(location);
+        return ResponseEntity.created(uri).body(createResponseWithItems(output));
+    }
+
+    private ResponseEntity<ListResponse> createGetListResponseEntity(List<ThingDto> output) throws InternalServerErrorException, NotFoundException {
+        return ResponseEntity.ok().body(createListResponse(output));
+    }
+
+    public Response createResponse(ThingDto thingDto) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(dept);
+        ThingJsonBody thingJsonBody = jsonBodyProjector.toThingJsonBody(thingDto);
+        return new Response(univJsonBody, deptJsonBody, thingJsonBody);
+    }
+
+    public ResponseWithItems createResponseWithItems(ThingDto thingDto) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(dept);
+        ThingJsonBodyWithItems thingJsonBodyWithItems = jsonBodyProjector.toThingJsonBodyWithItems(thingDto);
+        return new ResponseWithItems(univJsonBody, deptJsonBody, thingJsonBodyWithItems);
+    }
+
+    private ListResponse createListResponse(List<ThingDto> thingDtoList) throws InternalServerErrorException, NotFoundException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(dept);
+        List<ThingJsonBody> thingList = new ArrayList<>();
+        for(int i = 0; i < thingDtoList.size(); i++) {
+            thingList.add(jsonBodyProjector.toThingJsonBody(thingDtoList.get(i)));
+        }
+        return new ListResponse(univJsonBody, deptJsonBody, thingList);
+    }
+
+    private URI createUri(String uri) throws InternalServerErrorException {
+        URI location;
+        try {
+            location = new URI(uri);
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException("안알랴줌");
+        }
+        return location;
     }
     
     public class Response {

@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+// TODO cancel StudentID 만들기 ...(5)
 public class EventDto {
     private String univCode;
     private String deptCode;
@@ -194,7 +195,7 @@ public class EventDto {
     }
 
     public String getStatus() {
-        //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?
+        //TODO ERROR인 조건들 추가하기 ex)item이 널이거나 그런경우?...(1)
         if(reserveTimeStamp != 0) {
             if(returnTimeStamp != 0) {
                 if(lostTimeStamp != 0) {

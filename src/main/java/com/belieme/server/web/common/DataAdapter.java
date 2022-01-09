@@ -14,7 +14,7 @@ import com.belieme.server.domain.item.*;
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.web.exception.*;
 
-public class DataAdapter {
+public class DataAdapter { // TODO 이름 바꾸기...(8)
     private UniversityDao univDao;
     private DepartmentDao deptDao;
     private MajorDao majorDao;
@@ -183,13 +183,18 @@ public class DataAdapter {
 		}
     }
     
-    public UserDto findUserByToken(String token) throws NotFoundException, InternalServerErrorException {
-    	try {
+    public UserDto findUserByToken(String token) throws InternalServerErrorException, UnauthorizedException {
+    	if(token == null) {
+			throw new UnauthorizedException("인증이 진행되지 않았습니다. user-token을 header로 전달해 주시길 바랍니다.");//TODO Exception message체계에 변화가 필요함...(1)
+		}
+		try {
 			return userDao.findByToken(token);
 		} catch (NotFoundOnServerException e) {
-			throw new NotFoundException(e);
+			throw new UnauthorizedException(e);
 		} catch (InternalDataBaseException e) {
 			throw new InternalServerErrorException(e);
+		} catch (TokenExpiredException e) {
+			throw new UnauthorizedException(e);
 		}
     }
     
