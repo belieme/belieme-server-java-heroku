@@ -78,15 +78,12 @@ public class JsonBodyProjector {
         return dataAdapter.findDeptByUnivCodeAndDeptCode(majorDto.getUnivCode(), majorDto.getDeptCode());
     }
     
-    public UserJsonBody toUserJsonBody(UserDto userDto) throws NotFoundException, InternalServerErrorException {
+    public UserJsonBody toUserJsonBody(UserDto userDto) {
         if(userDto == null) {
             return null;
         }
         
         UserJsonBody output = new UserJsonBody();
-    
-        UniversityDto univ = getUnivDto(userDto);
-        output.setUniversity(toUniversityJsonBody(univ));
         output.setStudentId(userDto.getStudentId());
         output.setName(userDto.getName());
         output.setEntranceYear(userDto.getEntranceYear());
@@ -102,18 +99,12 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private UniversityDto getUnivDto(UserDto userDto) throws NotFoundException, InternalServerErrorException {
-        return dataAdapter.findUnivByCode(userDto.getUnivCode());
-    }
-    
-    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) throws NotFoundException, InternalServerErrorException {
+    public UserJsonBodyWithoutToken toUserJsonBodyWithoutToken(UserDto userDto) {
         if(userDto == null) {
             return null;
         }
         UserJsonBodyWithoutToken output = new UserJsonBodyWithoutToken();
-        
-        UniversityDto univ = getUnivDto(userDto);
-        output.setUniversity(toUniversityJsonBody(univ));
+
         output.setStudentId(userDto.getStudentId());
         output.setName(userDto.getName());
         output.setEntranceYear(userDto.getEntranceYear());

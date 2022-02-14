@@ -1,5 +1,6 @@
 package com.belieme.server.web.controller;
 
+import com.belieme.server.domain.university.UniversityDto;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,7 @@ public class GeneralApiController extends ApiController {
                 boolean isNew = false; 
                 UserDto newUser;
                 UserDto savedUser;
+                UniversityDto univ;
                 
                 try {
                 	newUser = dataAdapter.findUserByUnivCodeAndStudentId(univCode, studentId);    
@@ -134,11 +136,13 @@ public class GeneralApiController extends ApiController {
                 if(isNew) {
                 	responseBodyBuilder = ResponseEntity.created(location);
                     savedUser = dataAdapter.saveUser(newUser);
+                    univ = dataAdapter.findUnivByCode(savedUser.getUnivCode());
                 } else {
                     savedUser = dataAdapter.updateUser(univCode, studentId, newUser);
+                    univ = dataAdapter.findUnivByCode(savedUser.getUnivCode());
                 }
 
-                return responseBodyBuilder.body(new ResponseBody(jsonBodyProjector.toUserJsonBody(savedUser)));
+                return responseBodyBuilder.body(new ResponseBody(jsonBodyProjector.toUniversityJsonBody(univ), jsonBodyProjector.toUserJsonBody(savedUser)));
                 
             }
             default : {
@@ -148,32 +152,41 @@ public class GeneralApiController extends ApiController {
     }
     
     @GetMapping("/me")
-    public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, UnauthorizedException, ConflictException {
-        UserDto target = dataAdapter.findUserByToken(userToken);
-        return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUserJsonBodyWithoutToken(target)));
+    public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, UnauthorizedException {
+        UserDto user = dataAdapter.findUserByToken(userToken);
+        UniversityDto univ = dataAdapter.findUnivByCode(user.getUnivCode());
+        return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUniversityJsonBody(univ), jsonBodyProjector.toUserJsonBodyWithoutToken(user)));
     }
     
     public class ResponseBody {
+        UniversityJsonBody university;
         UserJsonBody user;
 
-        public ResponseBody(UserJsonBody user) {
-           this.user = user;
+        public ResponseBody(UniversityJsonBody university, UserJsonBody user) {
+            this.university = university;
+            this.user = user;
         }
         
         public UserJsonBody getUser() {
             return user;
         }
+
+        public UniversityJsonBody getUniversity() { return university; }
     }
     
     public class ResponseBodyWithoutToken {
+        UniversityJsonBody university;
         UserJsonBodyWithoutToken user;
 
-        public ResponseBodyWithoutToken(UserJsonBodyWithoutToken user) {
+        public ResponseBodyWithoutToken(UniversityJsonBody university, UserJsonBodyWithoutToken user) {
+            this.university = university;
             this.user = user;
         }
         
         public UserJsonBodyWithoutToken getUser() {
             return user;
         }
+
+        public UniversityJsonBody getUniversity() { return university; }
     } 
 }

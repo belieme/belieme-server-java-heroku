@@ -5,9 +5,7 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class UserJsonBodyWithoutToken {    
-    private UniversityJsonBody university;
-    
+public class UserJsonBodyWithoutToken {
     private String studentId;
 
     private String name;
@@ -22,10 +20,6 @@ public class UserJsonBodyWithoutToken {
     
     public UserJsonBodyWithoutToken() {
         permissions = new HashMap<>();
-    }
-    
-    public UniversityJsonBody getUniversity() {
-        return university;
     }
     
     public String getStudentId() {
@@ -56,10 +50,6 @@ public class UserJsonBodyWithoutToken {
             e.printStackTrace();
             return null;
         }
-    }
-    
-    public void setUniversity(UniversityJsonBody university) {
-        this.university = university;
     }
     
     public void setStudentId(String studentId) {
