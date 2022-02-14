@@ -48,7 +48,7 @@ public class GeneralApiController extends ApiController {
         return result;
     }
     
-    @GetMapping("/login")
+    @PatchMapping("/login")
     public ResponseEntity<ResponseBody> getUserInfoFromUnivApi(@RequestBody LoginInfoJsonBody requestBody) throws BadRequestException, GateWayTimeOutException, InternalServerErrorException, NotFoundException, MethodNotAllowedException, ConflictException {
         if(requestBody.getUnivCode() == null || requestBody.getApiToken() == null) {
             throw new BadRequestException("Request body에 정보가 부족합니다. 필요한 정보 : univCode(String), apiToken(String)");
