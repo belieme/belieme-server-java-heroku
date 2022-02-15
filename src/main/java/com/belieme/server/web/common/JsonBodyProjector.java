@@ -55,6 +55,24 @@ public class JsonBodyProjector {
         
         return output;
     }
+
+    public DepartmentJsonBody toDepartmentJsonBodyForDev(DepartmentDto deptDto) throws InternalServerErrorException {
+        if(deptDto == null) {
+            return null;
+        }
+
+        DepartmentJsonBody output = new DepartmentJsonBody();
+        output.code = deptDto.getUnivCode() + "/" + deptDto.getCode();
+        output.name = deptDto.getName();
+        output.available = deptDto.isAvailable();
+
+        List<MajorDto> majorList = getMajorDtoList(deptDto);
+        for(int i = 0; i < majorList.size(); i++) {
+            output.majorCodes.add(majorList.get(i).getCode());
+        }
+
+        return output;
+    }
     
     private List<MajorDto> getMajorDtoList(DepartmentDto deptDto) throws InternalServerErrorException {
         return dataAdapter.findAllMajorsByUnivCodeAndDeptCode(deptDto.getUnivCode(), deptDto.getCode());    

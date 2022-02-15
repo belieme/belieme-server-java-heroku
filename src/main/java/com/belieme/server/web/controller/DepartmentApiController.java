@@ -51,10 +51,11 @@ public class DepartmentApiController extends ApiController {
                     deptDtoList.addAll(dataAdapter.findAllDeptsByUnivCode(univDtoList.get(i).getCode()));
                 }
             }
+            return createGetListResponseEntityForDev(deptDtoList);
         } else {
             deptDtoList = dataAdapter.findAllDeptsByUnivCode(univCode);
+            return createGetListResponseEntity(deptDtoList);
         }
-        return createGetListResponseEntity(deptDtoList);
     }
 
     @GetMapping("/{deptCode}")
@@ -154,6 +155,10 @@ public class DepartmentApiController extends ApiController {
         return ResponseEntity.ok().body(createListResponse(deptDtoList));
     }
 
+    private ResponseEntity<ListResponse> createGetListResponseEntityForDev(List<DepartmentDto> deptDtoList) throws InternalServerErrorException {
+        return ResponseEntity.ok().body(createListResponseForDev(deptDtoList));
+    }
+
     private Response createResponse(DepartmentDto deptDto) throws InternalServerErrorException {
         UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
         DepartmentJsonBody deptJsonBody = jsonBodyProjector.toDepartmentJsonBody(deptDto);
@@ -165,6 +170,15 @@ public class DepartmentApiController extends ApiController {
         List<DepartmentJsonBody> deptJsonBodyList = new ArrayList<>();
         for(int i = 0; i < deptDtoList.size(); i++) {
             deptJsonBodyList.add(jsonBodyProjector.toDepartmentJsonBody(deptDtoList.get(i)));
+        }
+        return new ListResponse(univJsonBody, deptJsonBodyList);
+    }
+
+    private ListResponse createListResponseForDev(List<DepartmentDto> deptDtoList) throws InternalServerErrorException {
+        UniversityJsonBody univJsonBody = jsonBodyProjector.toUniversityJsonBody(univ);
+        List<DepartmentJsonBody> deptJsonBodyList = new ArrayList<>();
+        for(int i = 0; i < deptDtoList.size(); i++) {
+            deptJsonBodyList.add(jsonBodyProjector.toDepartmentJsonBodyForDev(deptDtoList.get(i)));
         }
         return new ListResponse(univJsonBody, deptJsonBodyList);
     }
