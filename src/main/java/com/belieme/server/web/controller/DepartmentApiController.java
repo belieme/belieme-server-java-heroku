@@ -39,9 +39,21 @@ public class DepartmentApiController extends ApiController {
     @GetMapping("")
     public ResponseEntity<ListResponse> getDepartments(@RequestHeader("user-token") String userToken, @PathVariable String univCode) throws NotFoundException, InternalServerErrorException, UnauthorizedException, ForbiddenException {
         init(userToken, univCode);
-        checkIfRequesterIsDeveloper();
-        
-        List<DepartmentDto> deptDtoList = dataAdapter.findAllDeptsByUnivCode(univCode);
+
+        List<DepartmentDto> deptDtoList;
+        if(univCode.equals("DEV")) {
+            checkIfRequesterIsDeveloper();
+
+            deptDtoList = new ArrayList<>();
+            List<UniversityDto> univDtoList = dataAdapter.findAllUnivs();
+            for(int i = 0; i < univDtoList.size(); i++) {
+                if(!univDtoList.get(i).getCode().equals("DEV")) {
+                    deptDtoList.addAll(dataAdapter.findAllDeptsByUnivCode(univDtoList.get(i).getCode()));
+                }
+            }
+        } else {
+            deptDtoList = dataAdapter.findAllDeptsByUnivCode(univCode);
+        }
         return createGetListResponseEntity(deptDtoList);
     }
 

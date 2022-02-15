@@ -36,12 +36,8 @@ public class UniversityApiController extends ApiController {
     }
     
     @GetMapping("") 
-    public ResponseEntity<ListResponse> getAllUnivsMapping(@RequestHeader("user-token") String userToken) throws UnauthorizedException, ForbiddenException, InternalServerErrorException {
-        init(userToken);
-        checkIfRequesterIsDeveloper();
-
+    public ResponseEntity<ListResponse> getAllUnivsMapping() {
         List<UniversityDto> univDtoList = dataAdapter.findAllUnivs();
-        System.out.println("user.dir : " + System.getProperty("user.dir"));
         return createGetListResponseEntity(univDtoList);
     }
     
@@ -171,7 +167,7 @@ public class UniversityApiController extends ApiController {
             this.univs = univs;
         }
 
-        public List<UniversityJsonBody> getUniversity() {
+        public List<UniversityJsonBody> getUniversities() {
             return univs;
         }
     }
