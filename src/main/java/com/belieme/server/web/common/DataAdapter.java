@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.department.*;
-import com.belieme.server.domain.event.*;
+import com.belieme.server.domain.history.*;
 import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.user.*;
 import com.belieme.server.domain.permission.*;
@@ -22,9 +22,9 @@ public class DataAdapter { // TODO 이름 바꾸기...(8)
     private PermissionDao permissionDao;
     private ThingDao thingDao;
     private ItemDao itemDao;
-    private EventDao eventDao;
+    private HistoryDao historyDao;
     
-    public DataAdapter(UniversityDao univDao, DepartmentDao deptDao, MajorDao majorDao, UserDao userDao, PermissionDao permissionDao, ThingDao thingDao, ItemDao itemDao, EventDao eventDao) {
+    public DataAdapter(UniversityDao univDao, DepartmentDao deptDao, MajorDao majorDao, UserDao userDao, PermissionDao permissionDao, ThingDao thingDao, ItemDao itemDao, HistoryDao historyDao) {
         this.univDao = univDao;
         this.deptDao = deptDao;
         this.majorDao = majorDao;
@@ -32,7 +32,7 @@ public class DataAdapter { // TODO 이름 바꾸기...(8)
         this.permissionDao = permissionDao;
         this.thingDao = thingDao;
         this.itemDao = itemDao;
-        this.eventDao = eventDao;
+        this.historyDao = historyDao;
     }
     
     public List<UniversityDto> findAllUnivs() {
@@ -353,33 +353,33 @@ public class DataAdapter { // TODO 이름 바꾸기...(8)
 		}
     }
     
-    public List<EventDto> findAllEventsByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
+    public List<HistoryDto> findAllHistoriesByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalServerErrorException {
     	try {
-			return eventDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
+			return historyDao.findAllByUnivCodeAndDeptCode(univCode, deptCode);
 		} catch (InternalDataBaseException e) {
 			throw new InternalServerErrorException(e);
 		}
     }
     
-    public List<EventDto> findAllEventsByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userId) throws InternalServerErrorException {
+    public List<HistoryDto> findAllHistoriesByUnivCodeAndDeptCodeAndUserId(String univCode, String deptCode, String userId) throws InternalServerErrorException {
     	try {
-			return eventDao.findAllByUnivCodeAndDeptCodeAndUserId(univCode, deptCode, userId);
+			return historyDao.findAllByUnivCodeAndDeptCodeAndUserId(univCode, deptCode, userId);
 		} catch (InternalDataBaseException e) {
 			throw new InternalServerErrorException(e);
 		}
     }
     
-    public List<EventDto> findAllEventsByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalServerErrorException {
+    public List<HistoryDto> findAllHistoriesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalServerErrorException {
     	try {
-			return eventDao.findAllByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+			return historyDao.findAllByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
 		} catch (InternalDataBaseException e) {
 			throw new InternalServerErrorException(e);
 		}
     }
     
-    public EventDto findEventByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundException, InternalServerErrorException {
+    public HistoryDto findHistoryByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws NotFoundException, InternalServerErrorException {
     	try {
-			return eventDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
+			return historyDao.findByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(univCode, deptCode, thingCode, itemNum, historyNum);
 		} catch (NotFoundOnServerException e) {
 			throw new NotFoundException(e);
 		} catch (InternalDataBaseException e) {
@@ -387,9 +387,9 @@ public class DataAdapter { // TODO 이름 바꾸기...(8)
 		}
     }
     
-    public EventDto saveEvent(EventDto event) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    public HistoryDto saveHistory(HistoryDto history) throws InternalServerErrorException, MethodNotAllowedException, ConflictException {
     	try {
-			return eventDao.save(event);
+			return historyDao.save(history);
 		} catch (InternalDataBaseException e) {
 			throw new InternalServerErrorException(e);
 		} catch (BreakDataBaseRulesException e) {
@@ -398,9 +398,9 @@ public class DataAdapter { // TODO 이름 바꾸기...(8)
 			throw new ConflictException(e);
 		}
     }
-    public EventDto updateEvent(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto event) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
+    public HistoryDto updateHistory(String univCode, String deptCode, String thingCode, int itemNum, int historyNum, HistoryDto history) throws NotFoundException, InternalServerErrorException, MethodNotAllowedException, ConflictException {
     	try {
-    		return eventDao.update(univCode, deptCode, thingCode, itemNum, eventNum, event);
+    		return historyDao.update(univCode, deptCode, thingCode, itemNum, historyNum, history);
     	} catch(NotFoundOnServerException e) {
     		throw new NotFoundException(e);
     	} catch (InternalDataBaseException e) {

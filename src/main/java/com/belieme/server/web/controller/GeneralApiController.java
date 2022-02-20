@@ -25,7 +25,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
@@ -39,8 +39,8 @@ public class GeneralApiController extends ApiController {
     private static final String SNU_CODE = "SNU";
     
     @Autowired
-    public GeneralApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    public GeneralApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
     }
     
     @GetMapping("/apiVer")
@@ -152,10 +152,10 @@ public class GeneralApiController extends ApiController {
     }
     
     @GetMapping("/me")
-    public ResponseEntity<ResponseBodyWithoutToken> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, UnauthorizedException {
+    public ResponseEntity<ResponseBody> getUserUsingUserToken(@RequestHeader(value = "User-Token") String userToken) throws NotFoundException, InternalServerErrorException, UnauthorizedException {
         UserDto user = dataAdapter.findUserByToken(userToken);
         UniversityDto univ = dataAdapter.findUnivByCode(user.getUnivCode());
-        return ResponseEntity.ok().body(new ResponseBodyWithoutToken(jsonBodyProjector.toUniversityJsonBody(univ), jsonBodyProjector.toUserJsonBodyWithoutToken(user)));
+        return ResponseEntity.ok().body(new ResponseBody(jsonBodyProjector.toUniversityJsonBody(univ), jsonBodyProjector.toUserJsonBody(user)));
     }
     
     public class ResponseBody {
@@ -173,20 +173,4 @@ public class GeneralApiController extends ApiController {
 
         public UniversityJsonBody getUniversity() { return university; }
     }
-    
-    public class ResponseBodyWithoutToken {
-        UniversityJsonBody university;
-        UserJsonBodyWithoutToken user;
-
-        public ResponseBodyWithoutToken(UniversityJsonBody university, UserJsonBodyWithoutToken user) {
-            this.university = university;
-            this.user = user;
-        }
-        
-        public UserJsonBodyWithoutToken getUser() {
-            return user;
-        }
-
-        public UniversityJsonBody getUniversity() { return university; }
-    } 
 }

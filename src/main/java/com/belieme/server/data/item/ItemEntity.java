@@ -9,7 +9,7 @@ public class ItemEntity {
     private int thingId;
     private int num;
     
-    private int lastEventId;
+    private int lastHistoryId;
 
     public ItemEntity() {
     }
@@ -26,8 +26,8 @@ public class ItemEntity {
         return num;
     }
     
-    public int getLastEventId() {
-        return lastEventId;
+    public int getLastHistoryId() {
+        return lastHistoryId;
     }
     
     public void setId(int id) {
@@ -42,7 +42,7 @@ public class ItemEntity {
         this.num = num;
     }
 
-    public void setLastEventId(int lastEventId) {
-        this.lastEventId = lastEventId;
+    public void setLastHistoryId(int lastHistoryId) {
+        this.lastHistoryId = lastHistoryId;
     }
 }

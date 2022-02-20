@@ -16,7 +16,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.web.exception.*;
 import com.belieme.server.web.jsonbody.*;
@@ -29,8 +29,8 @@ import java.net.URISyntaxException;
 @RequestMapping(path="/univs/{univCode}/users/{studentId}/permissions")
 public class PermissionApiController extends ApiController {
     @Autowired
-    public PermissionApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    public PermissionApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
     }
     
     @PostMapping("") // TODO UserToken 받아서 아무나 못 바꾸게 하기...(7)

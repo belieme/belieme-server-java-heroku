@@ -1,7 +1,7 @@
 package com.belieme.server.web.controller;
 
 import com.belieme.server.domain.department.DepartmentDto;
-import com.belieme.server.domain.event.EventDto;
+import com.belieme.server.domain.history.HistoryDto;
 import com.belieme.server.domain.university.UniversityDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
@@ -31,14 +31,14 @@ import com.belieme.server.web.jsonbody.*;
 
 
 // TODO ThingCode는 저장할 때는 대 소문자 구분되어 저장되지만 비교시에는 대 소문자 구분 x => 중복 체크도 대 소문자 구분
-//      Item, Event ApiController에도 다 적용시키기 ...(4)
+//      Item, History ApiController에도 다 적용시키기 ...(4)
 
 @RestController
 @RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things")
 public class ThingApiController extends ApiController {
     @Autowired
-    public ThingApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    public ThingApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
     }
 
     @GetMapping("")
@@ -95,7 +95,7 @@ public class ThingApiController extends ApiController {
                 newItem.setDeptCode(deptCode);
                 newItem.setThingCode(requestBody.getCode());
                 newItem.setNum(i+1);
-                newItem.setLastEventNum(0);
+                newItem.setLastHistoryNum(0);
                 dataAdapter.saveItem(newItem);
             }
         }

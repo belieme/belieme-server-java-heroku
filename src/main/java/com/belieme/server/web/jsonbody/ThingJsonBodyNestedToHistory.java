@@ -1,12 +1,12 @@
 package com.belieme.server.web.jsonbody;
 
-public class ThingJsonBodyNestedToEvent {
+public class ThingJsonBodyNestedToHistory {
     private String code;
     private String name;
     private String emoji;
     private String description;
         
-    public ThingJsonBodyNestedToEvent() {
+    public ThingJsonBodyNestedToHistory() {
     }
         
     public String getCode(){

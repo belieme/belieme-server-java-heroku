@@ -9,7 +9,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.data.exception.*;
 
@@ -21,9 +21,9 @@ public class RepositoryManager {
     private PermissionRepository permissionRepo;
     private ThingRepository thingRepo;
     private ItemRepository itemRepo;
-    private EventRepository eventRepo;
+    private HistoryRepository historyRepo;
     
-    public RepositoryManager(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
+    public RepositoryManager(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
         this.univRepo = univRepo;
         this.deptRepo = deptRepo;
         this.majorRepo = majorRepo;
@@ -31,7 +31,7 @@ public class RepositoryManager {
         this.permissionRepo = permissionRepo;
         this.thingRepo = thingRepo;
         this.itemRepo = itemRepo;
-        this.eventRepo = eventRepo;
+        this.historyRepo = historyRepo;
     }
     
     public List<UniversityEntity> getAllUnivEntities() {
@@ -415,16 +415,16 @@ public class RepositoryManager {
         return itemRepo.save(item);
     }
     
-    public EventEntity getEventEntityById(int id) throws NotFoundOnDataBaseException {
-        EventEntity output = eventRepo.findById(id).get();
+    public HistoryEntity getHistoryEntityById(int id) throws NotFoundOnDataBaseException {
+        HistoryEntity output = historyRepo.findById(id).get();
         if(output == null) {
-            throw new NotFoundOnDataBaseException("RepositoryManager.getEventEntityById()");
+            throw new NotFoundOnDataBaseException("RepositoryManager.getHistoryEntityById()");
         } else {
             return output;
         }
     }
     
-    public List<EventEntity> getAllEventEntitiesByUnivCodeAndDeptCode(String univCode, String deptCode) throws UniqueKeyViolationException { // 일단 이걸로
+    public List<HistoryEntity> getAllHistoryEntitiesByUnivCodeAndDeptCode(String univCode, String deptCode) throws UniqueKeyViolationException { // 일단 이걸로
         List<ThingEntity> thingList = getAllThingEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
         List<ItemEntity> itemList = new ArrayList<>();
         for(int i = 0; i < thingList.size(); i++) {
@@ -432,15 +432,15 @@ public class RepositoryManager {
             itemList.addAll(itemRepo.findByThingId(thingId));
         }
         
-        List<EventEntity> output = new ArrayList<>();
+        List<HistoryEntity> output = new ArrayList<>();
         for(int i = 0; i < itemList.size(); i++) {
             int itemId = itemList.get(i).getId();
-            output.addAll(eventRepo.findByItemId(itemId));
+            output.addAll(historyRepo.findByItemId(itemId));
         }
         return output;
     }
     
-    public List<EventEntity> getAllEventEntitiesByUnivCodeAndDeptCodeAndUserStudentId(String univCode, String deptCode, String userStudentId) throws UniqueKeyViolationException { // 일단 이걸로
+    public List<HistoryEntity> getAllHistoryEntitiesByUnivCodeAndDeptCodeAndUserStudentId(String univCode, String deptCode, String userStudentId) throws UniqueKeyViolationException { // 일단 이걸로
         List<ThingEntity> thingList = getAllThingEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
         List<ItemEntity> itemList = new ArrayList<>();
         for(int i = 0; i < thingList.size(); i++) {
@@ -455,42 +455,42 @@ public class RepositoryManager {
             return new ArrayList<>();
         }
 
-        List<EventEntity> output = new ArrayList<>();
+        List<HistoryEntity> output = new ArrayList<>();
         for(int i = 0; i < itemList.size(); i++) {
             int itemId = itemList.get(i).getId();
-            List<EventEntity> eventList = eventRepo.findByItemId(itemId);
-            for(int j = 0; j < eventList.size(); j++) {
-                if(eventList.get(j).getUserId() == userId) {
-                    output.add(eventList.get(j));        
+            List<HistoryEntity> historyList = historyRepo.findByItemId(itemId);
+            for(int j = 0; j < historyList.size(); j++) {
+                if(historyList.get(j).getUserId() == userId) {
+                    output.add(historyList.get(j));        
                 }
             }
         }
         return output;
     }
     
-    public List<EventEntity> getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws UniqueKeyViolationException { // 일단 이걸로
+    public List<HistoryEntity> getAllHistoryEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws UniqueKeyViolationException { // 일단 이걸로
         int itemId;
         try { 
             itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
         } catch(NotFoundOnDataBaseException e) {
             return new ArrayList<>();
         }
-        return eventRepo.findByItemId(itemId);
+        return historyRepo.findByItemId(itemId);
     }
     
-    public EventEntity getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundOnDataBaseException, UniqueKeyViolationException { // done
+    public HistoryEntity getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws NotFoundOnDataBaseException, UniqueKeyViolationException { // done
         int itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
-        List<EventEntity> eventList = eventRepo.findByItemIdAndNum(itemId, eventNum);
-        if(eventList.size() == 0) {
-            throw new NotFoundOnDataBaseException("RepositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum()");
-        } else if(eventList.size() == 1) {
-            return eventList.get(0);
+        List<HistoryEntity> historyList = historyRepo.findByItemIdAndNum(itemId, historyNum);
+        if(historyList.size() == 0) {
+            throw new NotFoundOnDataBaseException("RepositoryManager.getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum()");
+        } else if(historyList.size() == 1) {
+            return historyList.get(0);
         } else {
-            throw new UniqueKeyViolationException("RepositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum()");
+            throw new UniqueKeyViolationException("RepositoryManager.getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum()");
         }
     }
     
-    public boolean doesEventDuplicate(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws UniqueKeyViolationException { // 일단 이걸로
+    public boolean doesHistoryDuplicate(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws UniqueKeyViolationException { // 일단 이걸로
         int itemId;
         try { 
             itemId = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum).getId();
@@ -498,14 +498,14 @@ public class RepositoryManager {
             return false;
         }
         
-        List<EventEntity> eventList = eventRepo.findByItemIdAndNum(itemId, eventNum);
-        if(eventList.size() != 0) {
+        List<HistoryEntity> historyList = historyRepo.findByItemIdAndNum(itemId, historyNum);
+        if(historyList.size() != 0) {
             return true;
         }
         return false;
     }
     
-    public EventEntity saveEvent(EventEntity event) {
-        return eventRepo.save(event);
+    public HistoryEntity saveHistory(HistoryEntity history) {
+        return historyRepo.save(history);
     }
 }

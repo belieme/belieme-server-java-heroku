@@ -9,7 +9,7 @@ import com.belieme.server.domain.user.*;
 import com.belieme.server.domain.permission.*;
 import com.belieme.server.domain.thing.*;
 import com.belieme.server.domain.item.*;
-import com.belieme.server.domain.event.*;
+import com.belieme.server.domain.history.*;
 
 import com.belieme.server.data.common.*;
 import com.belieme.server.data.university.*;
@@ -19,7 +19,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 public class ApiController {
     private UniversityDao univDao = null;
@@ -29,13 +29,13 @@ public class ApiController {
     private PermissionDao permissionDao = null;
     private ThingDao thingDao = null;
     private ItemDao itemDao = null;
-    private EventDao eventDao = null;
+    private HistoryDao historyDao = null;
     
     protected DataAdapter dataAdapter;
     protected JsonBodyProjector jsonBodyProjector;
     
-    private void setControllers(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        RepositoryManager repoManager = new RepositoryManager(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    private void setControllers(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        RepositoryManager repoManager = new RepositoryManager(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
         if(univDao == null) {
             this.univDao = new UniversityDaoImpl(repoManager);
         }
@@ -57,15 +57,15 @@ public class ApiController {
         if(itemDao == null) {
             this.itemDao = new ItemDaoImpl(repoManager);
         }
-        if(eventDao == null) {
-            this.eventDao = new EventDaoImpl(repoManager);
+        if(historyDao == null) {
+            this.historyDao = new HistoryDaoImpl(repoManager);
         }
         
-        this.dataAdapter = new DataAdapter(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, eventDao);
+        this.dataAdapter = new DataAdapter(univDao, deptDao, majorDao, userDao, permissionDao, thingDao, itemDao, historyDao);
         this.jsonBodyProjector = new JsonBodyProjector(dataAdapter);
     }
     
-    protected ApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        setControllers(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    protected ApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        setControllers(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
     }
 }

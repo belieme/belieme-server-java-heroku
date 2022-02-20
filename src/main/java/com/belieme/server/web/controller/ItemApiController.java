@@ -22,7 +22,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.web.common.*;
 import com.belieme.server.web.exception.*;
@@ -32,8 +32,8 @@ import com.belieme.server.web.jsonbody.*;
 @RequestMapping(path="/univs/{univCode}/depts/{deptCode}/things/{thingCode}/items")
 public class ItemApiController extends ApiController {
     @Autowired
-    public ItemApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, EventRepository eventRepo) {
-        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, eventRepo);
+    public ItemApiController(UniversityRepository univRepo, DepartmentRepository deptRepo, MajorRepository majorRepo, UserRepository userRepo, PermissionRepository permissionRepo, ThingRepository thingRepo, ItemRepository itemRepo, HistoryRepository historyRepo) {
+        super(univRepo, deptRepo, majorRepo, userRepo, permissionRepo, thingRepo, itemRepo, historyRepo);
     }
     @GetMapping("")
     public ResponseEntity<ListResponse> getAllItems(@RequestHeader("user-token") String userToken, @PathVariable String univCode, @PathVariable String deptCode, @PathVariable String thingCode) throws UnauthorizedException, NotFoundException, InternalServerErrorException, ForbiddenException {
@@ -84,7 +84,7 @@ public class ItemApiController extends ApiController {
         newItem.setDeptCode(deptCode);
         newItem.setThingCode(thingCode);
         newItem.setNum(max+1);
-        newItem.setLastEventNum(0); // 초기화?
+        newItem.setLastHistoryNum(0); // 초기화?
         
         ItemDto output = dataAdapter.saveItem(newItem);
         thing = dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(univCode, deptCode, thingCode);

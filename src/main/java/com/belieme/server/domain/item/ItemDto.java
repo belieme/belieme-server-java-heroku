@@ -6,7 +6,7 @@ public class ItemDto {
     private String thingCode;
     private int num;
     
-    private int lastEventNum;
+    private int lastHistoryNum;
 
     public ItemDto() {
     }
@@ -27,8 +27,8 @@ public class ItemDto {
         return num;
     }
 
-    public int getLastEventNum() {
-        return lastEventNum;
+    public int getLastHistoryNum() {
+        return lastHistoryNum;
     }
     
     public void setUnivCode(String univCode) {
@@ -47,7 +47,7 @@ public class ItemDto {
         this.num = num;
     }
     
-    public void setLastEventNum(int lastEventNum) {
-        this.lastEventNum = lastEventNum;
+    public void setLastHistoryNum(int lastHistoryNum) {
+        this.lastHistoryNum = lastHistoryNum;
     }
 }

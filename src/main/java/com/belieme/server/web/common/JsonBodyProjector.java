@@ -10,7 +10,7 @@ import com.belieme.server.web.exception.*;
 import com.belieme.server.domain.exception.*;
 
 import com.belieme.server.domain.department.*;
-import com.belieme.server.domain.event.*;
+import com.belieme.server.domain.history.*;
 import com.belieme.server.domain.item.*;
 import com.belieme.server.domain.major.*;
 import com.belieme.server.domain.thing.*;
@@ -217,18 +217,18 @@ public class JsonBodyProjector {
     }
     
     private ItemStatus getStatus(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {        
-        EventDto lastEvent = getLastEvent(itemDto);
-        if(lastEvent != null) {
-            String lastEventStatus = lastEvent.getStatus();
-            if(lastEventStatus.equals("EXPIRED")||lastEventStatus.equals("RETURNED")||lastEventStatus.equals("FOUND")||lastEventStatus.equals("FOUNDANDRETURNED")) {
+        HistoryDto lastHistory = getLastHistory(itemDto);
+        if(lastHistory != null) {
+            String lastHistoryStatus = lastHistory.getStatus();
+            if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
                 return ItemStatus.USABLE;
             }
-            else if (lastEventStatus.equals("LOST")){
+            else if (lastHistoryStatus.equals("LOST")){
                 return ItemStatus.INACTIVATE;
             } else {
                 return ItemStatus.UNUSABLE;
             }    
-        } else { // lastEventNum이 0일 때
+        } else { // lastHistoryNum이 0일 때
             return ItemStatus.USABLE;
         }
     }
@@ -265,89 +265,89 @@ public class JsonBodyProjector {
             return null;
         }
         
-        EventDto lastEvent = getLastEvent(itemDto);
+        HistoryDto lastHistory = getLastHistory(itemDto);
         
         ItemJsonBody output = new ItemJsonBody();
         
         output.setNum(itemDto.getNum());
-        output.setLastEvent(toEventJsonBodyNestedToItem(lastEvent));
+        output.setLastHistory(toHistoryJsonBodyNestedToItem(lastHistory));
         output.setStatus(getStatus(itemDto).name());
         
         return output;
     }
     
-    private EventDto getLastEvent(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {
-        if(itemDto.getLastEventNum() == 0) {
+    private HistoryDto getLastHistory(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {
+        if(itemDto.getLastHistoryNum() == 0) {
             return null;
         }
         
-        return dataAdapter.findEventByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum()); 
+        return dataAdapter.findHistoryByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastHistoryNum()); 
     }
     
-    private EventJsonBodyNestedToItem toEventJsonBodyNestedToItem(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto == null) {
+    private HistoryJsonBodyNestedToItem toHistoryJsonBodyNestedToItem(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto == null) {
             return null;
         }
         
-        UserDto user = getUser(eventDto);
-        UserDto approveManager = getApproveManager(eventDto);
-        UserDto returnManager = getReturnManager(eventDto);
-        UserDto lostManager = getLostManager(eventDto);
+        UserDto user = getUser(historyDto);
+        UserDto approveManager = getApproveManager(historyDto);
+        UserDto returnManager = getReturnManager(historyDto);
+        UserDto lostManager = getLostManager(historyDto);
         
-        EventJsonBodyNestedToItem output = new EventJsonBodyNestedToItem();
+        HistoryJsonBodyNestedToItem output = new HistoryJsonBodyNestedToItem();
         
-        output.setNum(eventDto.getNum());
-        output.setUser(toUserJsonBodyNestedToEvent(user));
-        output.setApproveManager(toUserJsonBodyNestedToEvent(approveManager));
-        output.setReturnManager(toUserJsonBodyNestedToEvent(returnManager));
-        output.setLostManager(toUserJsonBodyNestedToEvent(lostManager));
-        output.setReserveTimeStamp(eventDto.getReserveTimeStamp());
-        output.setApproveTimeStamp(eventDto.getApproveTimeStamp());
-        output.setCancelTimeStamp(eventDto.getCancelTimeStamp());
-        output.setReturnTimeStamp(eventDto.getReturnTimeStamp());
-        output.setLostTimeStamp(eventDto.getLostTimeStamp());
+        output.setNum(historyDto.getNum());
+        output.setUser(toUserJsonBodyNestedToHistory(user));
+        output.setApproveManager(toUserJsonBodyNestedToHistory(approveManager));
+        output.setReturnManager(toUserJsonBodyNestedToHistory(returnManager));
+        output.setLostManager(toUserJsonBodyNestedToHistory(lostManager));
+        output.setReserveTimeStamp(historyDto.getReserveTimeStamp());
+        output.setApproveTimeStamp(historyDto.getApproveTimeStamp());
+        output.setCancelTimeStamp(historyDto.getCancelTimeStamp());
+        output.setReturnTimeStamp(historyDto.getReturnTimeStamp());
+        output.setLostTimeStamp(historyDto.getLostTimeStamp());
         
         return output;
     }
     
-    private UserDto getUser(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto.getUserStudentId() == null) {
+    private UserDto getUser(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto.getUserStudentId() == null) {
             return null;
         }
         
-        return dataAdapter.findUserByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getUserStudentId());
+        return dataAdapter.findUserByUnivCodeAndStudentId(historyDto.getUnivCode(), historyDto.getUserStudentId());
     }
     
-    private UserDto getApproveManager(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto.getApproveManagerStudentId() == null) {
+    private UserDto getApproveManager(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto.getApproveManagerStudentId() == null) {
             return null;
         }
 
-        return dataAdapter.findUserByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());          
+        return dataAdapter.findUserByUnivCodeAndStudentId(historyDto.getUnivCode(), historyDto.getApproveManagerStudentId());          
     }
     
-    private UserDto getReturnManager(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto.getReturnManagerStudentId() == null) {
+    private UserDto getReturnManager(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto.getReturnManagerStudentId() == null) {
             return null;
         }
         
-        return dataAdapter.findUserByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());
+        return dataAdapter.findUserByUnivCodeAndStudentId(historyDto.getUnivCode(), historyDto.getReturnManagerStudentId());
     }
     
-    private UserDto getLostManager(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto.getLostManagerStudentId() == null) {
+    private UserDto getLostManager(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto.getLostManagerStudentId() == null) {
             return null;
         }
         
-        return dataAdapter.findUserByUnivCodeAndStudentId(eventDto.getUnivCode(), eventDto.getLostManagerStudentId());
+        return dataAdapter.findUserByUnivCodeAndStudentId(historyDto.getUnivCode(), historyDto.getLostManagerStudentId());
     }
     
-    private UserJsonBodyNestedToEvent toUserJsonBodyNestedToEvent(UserDto userDto) {
+    private UserJsonBodyNestedToHistory toUserJsonBodyNestedToHistory(UserDto userDto) {
         if(userDto == null) {
             return null;
         }
         
-        UserJsonBodyNestedToEvent output = new UserJsonBodyNestedToEvent();
+        UserJsonBodyNestedToHistory output = new UserJsonBodyNestedToHistory();
         
         output.setStudentId(userDto.getStudentId());
         output.setName(userDto.getName());
@@ -373,50 +373,50 @@ public class JsonBodyProjector {
         return dataAdapter.findDeptByUnivCodeAndDeptCode(permissionDto.getUnivCode(), permissionDto.getDeptCode());
     }
         
-    public EventJsonBody toEventJsonBody(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        if(eventDto == null) {
+    public HistoryJsonBody toHistoryJsonBody(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        if(historyDto == null) {
             return null;
         }
 
-        ThingDto thing = getThingDto(eventDto);
-        ItemDto item = getItemDto(eventDto);
-        UserDto user = getUser(eventDto);
-        UserDto approveManager = getApproveManager(eventDto);
-        UserDto returnManager = getReturnManager(eventDto);
-        UserDto lostManager = getLostManager(eventDto);
+        ThingDto thing = getThingDto(historyDto);
+        ItemDto item = getItemDto(historyDto);
+        UserDto user = getUser(historyDto);
+        UserDto approveManager = getApproveManager(historyDto);
+        UserDto returnManager = getReturnManager(historyDto);
+        UserDto lostManager = getLostManager(historyDto);
         
-        EventJsonBody output = new EventJsonBody();
+        HistoryJsonBody output = new HistoryJsonBody();
         
-        output.setNum(eventDto.getNum());
-        output.setThing(toThingJsonBodyNestedToEvent(thing));
-        output.setItem(toItemJsonBodyNestedToEvent(item));
-        output.setUser(toUserJsonBodyNestedToEvent(user));
-        output.setApproveManager(toUserJsonBodyNestedToEvent(approveManager));
-        output.setReturnManager(toUserJsonBodyNestedToEvent(returnManager));
-        output.setLostManager(toUserJsonBodyNestedToEvent(lostManager));
-        output.setReserveTimeStamp(eventDto.getReserveTimeStamp());
-        output.setApproveTimeStamp(eventDto.getApproveTimeStamp());
-        output.setCancelTimeStamp(eventDto.getCancelTimeStamp());
-        output.setReturnTimeStamp(eventDto.getReturnTimeStamp());
-        output.setLostTimeStamp(eventDto.getLostTimeStamp());
+        output.setNum(historyDto.getNum());
+        output.setThing(toThingJsonBodyNestedToHistory(thing));
+        output.setItem(toItemJsonBodyNestedToHistory(item));
+        output.setUser(toUserJsonBodyNestedToHistory(user));
+        output.setApproveManager(toUserJsonBodyNestedToHistory(approveManager));
+        output.setReturnManager(toUserJsonBodyNestedToHistory(returnManager));
+        output.setLostManager(toUserJsonBodyNestedToHistory(lostManager));
+        output.setReserveTimeStamp(historyDto.getReserveTimeStamp());
+        output.setApproveTimeStamp(historyDto.getApproveTimeStamp());
+        output.setCancelTimeStamp(historyDto.getCancelTimeStamp());
+        output.setReturnTimeStamp(historyDto.getReturnTimeStamp());
+        output.setLostTimeStamp(historyDto.getLostTimeStamp());
         
         return output;
     }
     
-    private ThingDto getThingDto(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        return dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode());
+    private ThingDto getThingDto(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        return dataAdapter.findThingByUnivCodeAndDeptCodeAndThingCode(historyDto.getUnivCode(), historyDto.getDeptCode(), historyDto.getThingCode());
     }
     
-    private ItemDto getItemDto(EventDto eventDto) throws NotFoundException, InternalServerErrorException {
-        return dataAdapter.findItemByUnivCodeAndDeptCodeAndThingCodeAndItemNum(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
+    private ItemDto getItemDto(HistoryDto historyDto) throws NotFoundException, InternalServerErrorException {
+        return dataAdapter.findItemByUnivCodeAndDeptCodeAndThingCodeAndItemNum(historyDto.getUnivCode(), historyDto.getDeptCode(), historyDto.getThingCode(), historyDto.getItemNum());
     }
     
-    private ThingJsonBodyNestedToEvent toThingJsonBodyNestedToEvent(ThingDto thingDto) {
+    private ThingJsonBodyNestedToHistory toThingJsonBodyNestedToHistory(ThingDto thingDto) {
         if(thingDto == null) {
             return null;
         }
         
-        ThingJsonBodyNestedToEvent output = new ThingJsonBodyNestedToEvent();
+        ThingJsonBodyNestedToHistory output = new ThingJsonBodyNestedToHistory();
         
         output.setCode(thingDto.getCode());
         output.setName(thingDto.getName());
@@ -426,12 +426,12 @@ public class JsonBodyProjector {
         return output;
     }
     
-    private ItemJsonBodyNestedToEvent toItemJsonBodyNestedToEvent(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {
+    private ItemJsonBodyNestedToHistory toItemJsonBodyNestedToHistory(ItemDto itemDto) throws NotFoundException, InternalServerErrorException {
         if(itemDto == null) {
             return null;
         }
         
-        ItemJsonBodyNestedToEvent output = new ItemJsonBodyNestedToEvent();
+        ItemJsonBodyNestedToHistory output = new ItemJsonBodyNestedToHistory();
         
         output.setNum(itemDto.getNum());
         output.setCurrentStatus(getStatus(itemDto).name());

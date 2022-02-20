@@ -1,11 +1,9 @@
-package com.belieme.server.data.event;
+package com.belieme.server.data.history;
 
 import javax.persistence.*;
 
-import java.util.*;
-
 @Entity
-public class EventEntity {
+public class HistoryEntity {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;    
     
@@ -23,7 +21,7 @@ public class EventEntity {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    public EventEntity() {
+    public HistoryEntity() {
     }
     
     public int getId() {

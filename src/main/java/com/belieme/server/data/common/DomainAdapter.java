@@ -11,7 +11,7 @@ import com.belieme.server.data.user.*;
 import com.belieme.server.data.permission.*;
 import com.belieme.server.data.thing.*;
 import com.belieme.server.data.item.*;
-import com.belieme.server.data.event.*;
+import com.belieme.server.data.history.*;
 
 import com.belieme.server.domain.university.*;
 import com.belieme.server.domain.department.*;
@@ -20,7 +20,7 @@ import com.belieme.server.domain.user.*;
 import com.belieme.server.domain.permission.*;
 import com.belieme.server.domain.thing.*;
 import com.belieme.server.domain.item.*;
-import com.belieme.server.domain.event.*;
+import com.belieme.server.domain.history.*;
 
 import com.belieme.server.domain.exception.*;
 import com.belieme.server.data.exception.*;
@@ -335,11 +335,11 @@ public class DomainAdapter {
         
         target.setNum(itemDto.getNum());
         
-        if(itemDto.getLastEventNum() == 0) {
-            target.setLastEventId(0);    
+        if(itemDto.getLastHistoryNum() == 0) {
+            target.setLastHistoryId(0);    
         } else {
-            EventEntity eventEntity = getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNumForSave(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());
-            target.setLastEventId(eventEntity.getId());    
+            HistoryEntity historyEntity = getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNumForSave(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastHistoryNum());
+            target.setLastHistoryId(historyEntity.getId());    
         }
         
         return toItemDto(repositoryManager.saveItem(target));
@@ -355,135 +355,135 @@ public class DomainAdapter {
         }
         target.setNum(itemDto.getNum());
         
-        if(itemDto.getLastEventNum() == 0) {
-            target.setLastEventId(0);    
+        if(itemDto.getLastHistoryNum() == 0) {
+            target.setLastHistoryId(0);    
         } else {
-            EventEntity eventEntity = getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNumForSave(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastEventNum());
-            target.setLastEventId(eventEntity.getId());    
+            HistoryEntity historyEntity = getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNumForSave(itemDto.getUnivCode(), itemDto.getDeptCode(), itemDto.getThingCode(), itemDto.getNum(), itemDto.getLastHistoryNum());
+            target.setLastHistoryId(historyEntity.getId());    
         }
         
         return toItemDto(repositoryManager.saveItem(target));
     }
     
-    public List<EventDto> getEventDtoListByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
-        List<EventEntity> eventEntityList = getEventEntityListByUnivCodeAndDeptCode(univCode, deptCode);
-        return toEventDtoList(eventEntityList);
+    public List<HistoryDto> getHistoryDtoListByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
+        List<HistoryEntity> historyEntityList = getHistoryEntityListByUnivCodeAndDeptCode(univCode, deptCode);
+        return toHistoryDtoList(historyEntityList);
     }
     
-    public List<EventDto> getEventDtoListByUnivCodeAndDeptCodeAndStudentId(String univCode, String deptCode, String studentId) throws InternalDataBaseException {
-        List<EventEntity> eventEntityList = getEventEntityListByUnivCodeAndDeptCodeAndStudentId(univCode, deptCode, studentId);
-        return toEventDtoList(eventEntityList);
+    public List<HistoryDto> getHistoryDtoListByUnivCodeAndDeptCodeAndStudentId(String univCode, String deptCode, String studentId) throws InternalDataBaseException {
+        List<HistoryEntity> historyEntityList = getHistoryEntityListByUnivCodeAndDeptCodeAndStudentId(univCode, deptCode, studentId);
+        return toHistoryDtoList(historyEntityList);
     }
     
-    public List<EventDto> getEventDtoListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
-        List<EventEntity> eventEntityList = getEventEntityListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
-        return toEventDtoList(eventEntityList);
+    public List<HistoryDto> getHistoryDtoListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
+        List<HistoryEntity> historyEntityList = getHistoryEntityListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+        return toHistoryDtoList(historyEntityList);
     }
     
-    public EventDto getEventDtoByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws InternalDataBaseException, NotFoundOnServerException {
-        EventEntity eventEntity = getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
-        return toEventDto(eventEntity);
+    public HistoryDto getHistoryDtoByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws InternalDataBaseException, NotFoundOnServerException {
+        HistoryEntity historyEntity = getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(univCode, deptCode, thingCode, itemNum, historyNum);
+        return toHistoryDto(historyEntity);
     }
     
-    public EventDto saveEventDto(EventDto eventDto) throws InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
-        checkEventDuplication(eventDto);
+    public HistoryDto saveHistoryDto(HistoryDto historyDto) throws InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
+        checkHistoryDuplication(historyDto);
         
-        EventEntity target = new EventEntity();
+        HistoryEntity target = new HistoryEntity();
         
-        ItemEntity itemEntity = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumForSave(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
+        ItemEntity itemEntity = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumForSave(historyDto.getUnivCode(), historyDto.getDeptCode(), historyDto.getThingCode(), historyDto.getItemNum());
         target.setItemId(itemEntity.getId());
         
-        target.setNum(eventDto.getNum());
+        target.setNum(historyDto.getNum());
         
-        if(eventDto.getUserStudentId() == null) {
+        if(historyDto.getUserStudentId() == null) {
             target.setUserId(0);
         } else {
-            UserEntity userEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getUserStudentId());    
+            UserEntity userEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getUserStudentId());    
             target.setUserId(userEntity.getId());
         }
         
-        if(eventDto.getApproveManagerStudentId() == null) {
+        if(historyDto.getApproveManagerStudentId() == null) {
             target.setApproveManagerId(0);
         } else {
-            UserEntity approveManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());
+            UserEntity approveManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getApproveManagerStudentId());
             target.setApproveManagerId(approveManagerEntity.getId());
         }
         
-        if(eventDto.getReturnManagerStudentId() == null) {
+        if(historyDto.getReturnManagerStudentId() == null) {
             target.setReturnManagerId(0);
         } else {
-            UserEntity returnManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());    
+            UserEntity returnManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getReturnManagerStudentId());    
             target.setReturnManagerId(returnManagerEntity.getId());
         }
         
-        if(eventDto.getLostManagerStudentId() == null) {
+        if(historyDto.getLostManagerStudentId() == null) {
             target.setLostManagerId(0);
         } else {
-            UserEntity lostManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getLostManagerStudentId());
+            UserEntity lostManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getLostManagerStudentId());
             target.setLostManagerId(lostManagerEntity.getId());
         }
         
-        target.setReserveTimeStamp(eventDto.getReserveTimeStamp());
-        target.setApproveTimeStamp(eventDto.getApproveTimeStamp());
-        target.setReturnTimeStamp(eventDto.getReturnTimeStamp());
-        target.setCancelTimeStamp(eventDto.getCancelTimeStamp());
-        target.setLostTimeStamp(eventDto.getLostTimeStamp());
+        target.setReserveTimeStamp(historyDto.getReserveTimeStamp());
+        target.setApproveTimeStamp(historyDto.getApproveTimeStamp());
+        target.setReturnTimeStamp(historyDto.getReturnTimeStamp());
+        target.setCancelTimeStamp(historyDto.getCancelTimeStamp());
+        target.setLostTimeStamp(historyDto.getLostTimeStamp());
         
-        EventEntity savedEventEntity = repositoryManager.saveEvent(target);
+        HistoryEntity savedHistoryEntity = repositoryManager.saveHistory(target);
         
-        itemEntity.setLastEventId(savedEventEntity.getId());
+        itemEntity.setLastHistoryId(savedHistoryEntity.getId());
         repositoryManager.saveItem(itemEntity);
         
-        return toEventDto(savedEventEntity);
+        return toHistoryDto(savedHistoryEntity);
     }
     
-    public EventDto updateEventDto(String univCode, String deptCode, String thingCode, int itemNum, int eventNum, EventDto eventDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
-        EventEntity target = getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
+    public HistoryDto updateHistoryDto(String univCode, String deptCode, String thingCode, int itemNum, int historyNum, HistoryDto historyDto) throws NotFoundOnServerException, InternalDataBaseException, CodeDuplicationException, BreakDataBaseRulesException {
+        HistoryEntity target = getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(univCode, deptCode, thingCode, itemNum, historyNum);
         
-        if(!univCode.equalsIgnoreCase(eventDto.getUnivCode()) || !deptCode.equalsIgnoreCase(eventDto.getDeptCode()) || !thingCode.equalsIgnoreCase(eventDto.getThingCode()) || itemNum != eventDto.getItemNum() || eventNum != eventDto.getNum()) {
-            checkEventDuplication(eventDto);
-            ItemEntity itemEntity = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumForSave(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum());
+        if(!univCode.equalsIgnoreCase(historyDto.getUnivCode()) || !deptCode.equalsIgnoreCase(historyDto.getDeptCode()) || !thingCode.equalsIgnoreCase(historyDto.getThingCode()) || itemNum != historyDto.getItemNum() || historyNum != historyDto.getNum()) {
+            checkHistoryDuplication(historyDto);
+            ItemEntity itemEntity = getItemEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumForSave(historyDto.getUnivCode(), historyDto.getDeptCode(), historyDto.getThingCode(), historyDto.getItemNum());
             target.setItemId(itemEntity.getId());
-            target.setNum(eventDto.getNum());
+            target.setNum(historyDto.getNum());
         }
         
-        if(eventDto.getUserStudentId() == null) {
+        if(historyDto.getUserStudentId() == null) {
             target.setUserId(0);
         } else {
-            UserEntity userEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getUserStudentId());    
+            UserEntity userEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getUserStudentId());    
             target.setUserId(userEntity.getId());
         }
         
-        if(eventDto.getApproveManagerStudentId() == null) {
+        if(historyDto.getApproveManagerStudentId() == null) {
             target.setApproveManagerId(0);
         } else {
-            UserEntity approveManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getApproveManagerStudentId());
+            UserEntity approveManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getApproveManagerStudentId());
             target.setApproveManagerId(approveManagerEntity.getId());
         }
         
-        if(eventDto.getReturnManagerStudentId() == null) {
+        if(historyDto.getReturnManagerStudentId() == null) {
             target.setReturnManagerId(0);
         } else {
-            UserEntity returnManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getReturnManagerStudentId());    
+            UserEntity returnManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getReturnManagerStudentId());    
             target.setReturnManagerId(returnManagerEntity.getId());
         }
         
-        if(eventDto.getLostManagerStudentId() == null) {
+        if(historyDto.getLostManagerStudentId() == null) {
             target.setLostManagerId(0);
         } else {
-            UserEntity lostManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(eventDto.getUnivCode(), eventDto.getLostManagerStudentId());
+            UserEntity lostManagerEntity = getUserEntityByUnivCodeAndStudentIdForSave(historyDto.getUnivCode(), historyDto.getLostManagerStudentId());
             target.setLostManagerId(lostManagerEntity.getId());
         }
         
-        target.setReserveTimeStamp(eventDto.getReserveTimeStamp());
-        target.setApproveTimeStamp(eventDto.getApproveTimeStamp());
-        target.setReturnTimeStamp(eventDto.getReturnTimeStamp());
-        target.setCancelTimeStamp(eventDto.getCancelTimeStamp());
-        target.setLostTimeStamp(eventDto.getLostTimeStamp());
+        target.setReserveTimeStamp(historyDto.getReserveTimeStamp());
+        target.setApproveTimeStamp(historyDto.getApproveTimeStamp());
+        target.setReturnTimeStamp(historyDto.getReturnTimeStamp());
+        target.setCancelTimeStamp(historyDto.getCancelTimeStamp());
+        target.setLostTimeStamp(historyDto.getLostTimeStamp());
         
-        EventEntity savedEventEntity = repositoryManager.saveEvent(target);
+        HistoryEntity savedHistoryEntity = repositoryManager.saveHistory(target);
         
-        return toEventDto(savedEventEntity);
+        return toHistoryDto(savedHistoryEntity);
     }
     
     private UniversityDto toUnivDto(UniversityEntity univEntity) {
@@ -958,7 +958,7 @@ public class DomainAdapter {
         UniversityEntity univEntity;
         DepartmentEntity deptEntity;
         ThingEntity thingEntity;
-        EventEntity eventEntity;
+        HistoryEntity historyEntity;
         
         try {
             thingEntity = repositoryManager.getThingEntityById(itemEntity.getThingId());
@@ -981,14 +981,14 @@ public class DomainAdapter {
             throw new InternalDataBaseException("해당 Item은 대응되는 University를 찾을 수 없는 잘못된 Item입니다.");
         }
         
-        if(itemEntity.getLastEventId() == 0) {
-            output.setLastEventNum(0);
+        if(itemEntity.getLastHistoryId() == 0) {
+            output.setLastHistoryNum(0);
         } else {
             try {
-                eventEntity = repositoryManager.getEventEntityById(itemEntity.getLastEventId());
-                output.setLastEventNum(eventEntity.getNum());
+                historyEntity = repositoryManager.getHistoryEntityById(itemEntity.getLastHistoryId());
+                output.setLastHistoryNum(historyEntity.getNum());
             } catch(NotFoundOnDataBaseException e) {
-                throw new InternalDataBaseException("해당 Item은 대응되는 LastEvent를 찾을 수 없는 잘못된 Item입니다.");
+                throw new InternalDataBaseException("해당 Item은 대응되는 LastHistory를 찾을 수 없는 잘못된 Item입니다.");
             }    
         }
            
@@ -1044,8 +1044,8 @@ public class DomainAdapter {
         }
     }
     
-    private EventDto toEventDto(EventEntity eventEntity) throws InternalDataBaseException {
-        EventDto output = new EventDto();
+    private HistoryDto toHistoryDto(HistoryEntity historyEntity) throws InternalDataBaseException {
+        HistoryDto output = new HistoryDto();
         
         ItemEntity itemEntity;
         ThingEntity thingEntity;
@@ -1053,132 +1053,132 @@ public class DomainAdapter {
         UniversityEntity univEntity;
         
         try {
-            itemEntity = repositoryManager.getItemEntityById(eventEntity.getItemId());
+            itemEntity = repositoryManager.getItemEntityById(historyEntity.getItemId());
             output.setItemNum(itemEntity.getNum());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 Item을 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 Item을 찾을 수 없는 잘못된 History입니다.");
         }
         
         try {
             thingEntity = repositoryManager.getThingEntityById(itemEntity.getThingId());
             output.setThingCode(thingEntity.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 Thing을 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 Thing을 찾을 수 없는 잘못된 History입니다.");
         }
         
         try {
             deptEntity = repositoryManager.getDeptEntityById(thingEntity.getDeptId());
             output.setDeptCode(deptEntity.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 Department를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 Department를 찾을 수 없는 잘못된 History입니다.");
         }
         
         try {
             univEntity = repositoryManager.getUnivEntityById(deptEntity.getUnivId());    
             output.setUnivCode(univEntity.getCode());
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 University를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 University를 찾을 수 없는 잘못된 History입니다.");
         }
       
-        output.setNum(eventEntity.getNum());
+        output.setNum(historyEntity.getNum());
         
-        output.setUserStudentId(getUserStudentId(eventEntity));
-        output.setApproveManagerStudentId(getApproveManagerStudentId(eventEntity));
-        output.setReturnManagerStudentId(getReturnManagerStudentId(eventEntity));
-        output.setLostManagerStudentId(getLostManagerStudentId(eventEntity));
+        output.setUserStudentId(getUserStudentId(historyEntity));
+        output.setApproveManagerStudentId(getApproveManagerStudentId(historyEntity));
+        output.setReturnManagerStudentId(getReturnManagerStudentId(historyEntity));
+        output.setLostManagerStudentId(getLostManagerStudentId(historyEntity));
         
-        output.setReserveTimeStamp(eventEntity.getReserveTimeStamp());
-        output.setApproveTimeStamp(eventEntity.getApproveTimeStamp());
-        output.setReturnTimeStamp(eventEntity.getReturnTimeStamp());
-        output.setCancelTimeStamp(eventEntity.getCancelTimeStamp());
-        output.setLostTimeStamp(eventEntity.getLostTimeStamp());
+        output.setReserveTimeStamp(historyEntity.getReserveTimeStamp());
+        output.setApproveTimeStamp(historyEntity.getApproveTimeStamp());
+        output.setReturnTimeStamp(historyEntity.getReturnTimeStamp());
+        output.setCancelTimeStamp(historyEntity.getCancelTimeStamp());
+        output.setLostTimeStamp(historyEntity.getLostTimeStamp());
         
         return output;
     }
     
-    private String getUserStudentId(EventEntity eventEntity) throws InternalDataBaseException {
-        if(eventEntity.getUserId() == 0) {
+    private String getUserStudentId(HistoryEntity historyEntity) throws InternalDataBaseException {
+        if(historyEntity.getUserId() == 0) {
             return null;
         }
         try {
-            UserEntity userEntity = repositoryManager.getUserEntityById(eventEntity.getUserId());
+            UserEntity userEntity = repositoryManager.getUserEntityById(historyEntity.getUserId());
             return userEntity.getStudentId();
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 User를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 User를 찾을 수 없는 잘못된 History입니다.");
         }
     }
     
-    private String getApproveManagerStudentId(EventEntity eventEntity) throws InternalDataBaseException {
-        if(eventEntity.getApproveManagerId() == 0) {
+    private String getApproveManagerStudentId(HistoryEntity historyEntity) throws InternalDataBaseException {
+        if(historyEntity.getApproveManagerId() == 0) {
             return null;
         }
         try {
-            UserEntity approveManagerEntity = repositoryManager.getUserEntityById(eventEntity.getApproveManagerId());
+            UserEntity approveManagerEntity = repositoryManager.getUserEntityById(historyEntity.getApproveManagerId());
             return approveManagerEntity.getStudentId();
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 ApproveManager를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 ApproveManager를 찾을 수 없는 잘못된 History입니다.");
         }
     }
     
-    private String getReturnManagerStudentId(EventEntity eventEntity) throws InternalDataBaseException {
-        if(eventEntity.getReturnManagerId() == 0) {
+    private String getReturnManagerStudentId(HistoryEntity historyEntity) throws InternalDataBaseException {
+        if(historyEntity.getReturnManagerId() == 0) {
             return null;
         }
         try {
-            UserEntity returnManagerEntity = repositoryManager.getUserEntityById(eventEntity.getReturnManagerId());
+            UserEntity returnManagerEntity = repositoryManager.getUserEntityById(historyEntity.getReturnManagerId());
             return returnManagerEntity.getStudentId();
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 ReturnManager를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 ReturnManager를 찾을 수 없는 잘못된 History입니다.");
         }
     }
     
-    private String getLostManagerStudentId(EventEntity eventEntity) throws InternalDataBaseException {
-        if(eventEntity.getLostManagerId() == 0) {
+    private String getLostManagerStudentId(HistoryEntity historyEntity) throws InternalDataBaseException {
+        if(historyEntity.getLostManagerId() == 0) {
             return null;
         }
         try {
-            UserEntity lostManagerEntity = repositoryManager.getUserEntityById(eventEntity.getLostManagerId());
+            UserEntity lostManagerEntity = repositoryManager.getUserEntityById(historyEntity.getLostManagerId());
             return lostManagerEntity.getStudentId();
         } catch(NotFoundOnDataBaseException e) {
-            throw new InternalDataBaseException("해당 Event는 대응되는 LostManager를 찾을 수 없는 잘못된 Event입니다.");
+            throw new InternalDataBaseException("해당 History는 대응되는 LostManager를 찾을 수 없는 잘못된 History입니다.");
         }
     }
     
-    private List<EventDto> toEventDtoList(List<EventEntity> eventEntityList) throws InternalDataBaseException {
-        ArrayList<EventDto> output = new ArrayList<>();
-        for(int i = 0; i < eventEntityList.size(); i++) {
-            output.add(toEventDto(eventEntityList.get(i)));
+    private List<HistoryDto> toHistoryDtoList(List<HistoryEntity> historyEntityList) throws InternalDataBaseException {
+        ArrayList<HistoryDto> output = new ArrayList<>();
+        for(int i = 0; i < historyEntityList.size(); i++) {
+            output.add(toHistoryDto(historyEntityList.get(i)));
         }
         return output;
     }
     
-    private List<EventEntity> getEventEntityListByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
+    private List<HistoryEntity> getHistoryEntityListByUnivCodeAndDeptCode(String univCode, String deptCode) throws InternalDataBaseException {
         try {
-            return repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
+            return repositoryManager.getAllHistoryEntitiesByUnivCodeAndDeptCode(univCode, deptCode);
         } catch(UniqueKeyViolationException e) {
             throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다.");
         }   
     }
     
-    private List<EventEntity> getEventEntityListByUnivCodeAndDeptCodeAndStudentId(String univCode, String deptCode, String studentId) throws InternalDataBaseException {
+    private List<HistoryEntity> getHistoryEntityListByUnivCodeAndDeptCodeAndStudentId(String univCode, String deptCode, String studentId) throws InternalDataBaseException {
         try {
-            return repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndUserStudentId(univCode, deptCode, studentId);
+            return repositoryManager.getAllHistoryEntitiesByUnivCodeAndDeptCodeAndUserStudentId(univCode, deptCode, studentId);
         } catch(UniqueKeyViolationException e) {
             throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다.");
         }   
     }
     
-    private List<EventEntity> getEventEntityListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
+    private List<HistoryEntity> getHistoryEntityListByUnivCodeAndDeptCodeAndThingCodeAndItemNum(String univCode, String deptCode, String thingCode, int itemNum) throws InternalDataBaseException {
         try {
-            return repositoryManager.getAllEventEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
+            return repositoryManager.getAllHistoryEntitiesByUnivCodeAndDeptCodeAndThingCodeAndItemNum(univCode, deptCode, thingCode, itemNum);
         } catch(UniqueKeyViolationException e) {
             throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다.");
         }   
     }
     
-    private EventEntity getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws NotFoundOnServerException, InternalDataBaseException {
+    private HistoryEntity getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws NotFoundOnServerException, InternalDataBaseException {
         try {
-           return repositoryManager.getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
+           return repositoryManager.getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(univCode, deptCode, thingCode, itemNum, historyNum);
         } catch(NotFoundOnDataBaseException e) {
             throw new NotFoundOnServerException("Database안에 고유 키에 해당하는 record가 없습니다.");
         } catch(UniqueKeyViolationException e) {
@@ -1186,23 +1186,23 @@ public class DomainAdapter {
         }
     }
     
-    private EventEntity getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNumForSave(String univCode, String deptCode, String thingCode, int itemNum, int eventNum) throws BreakDataBaseRulesException, InternalDataBaseException {
+    private HistoryEntity getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNumForSave(String univCode, String deptCode, String thingCode, int itemNum, int historyNum) throws BreakDataBaseRulesException, InternalDataBaseException {
         try {
-           return getEventEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndEventNum(univCode, deptCode, thingCode, itemNum, eventNum);
+           return getHistoryEntityByUnivCodeAndDeptCodeAndThingCodeAndItemNumAndHistoryNum(univCode, deptCode, thingCode, itemNum, historyNum);
         } catch(NotFoundOnServerException e) {
             throw new BreakDataBaseRulesException("저장하려는 record가 Database의 규칙을 무시합니다.");
         }
     }
     
-    private void checkEventDuplication(EventDto eventDto) throws CodeDuplicationException, InternalDataBaseException {
-        boolean doesEventDuplicate;        
+    private void checkHistoryDuplication(HistoryDto historyDto) throws CodeDuplicationException, InternalDataBaseException {
+        boolean doesHistoryDuplicate;        
         try {
-            doesEventDuplicate = repositoryManager.doesEventDuplicate(eventDto.getUnivCode(), eventDto.getDeptCode(), eventDto.getThingCode(), eventDto.getItemNum(), eventDto .getNum());    
+            doesHistoryDuplicate = repositoryManager.doesHistoryDuplicate(historyDto.getUnivCode(), historyDto.getDeptCode(), historyDto.getThingCode(), historyDto.getItemNum(), historyDto .getNum());    
         } catch(UniqueKeyViolationException e) {
             throw new InternalDataBaseException("Database안에 고유 키를 공유하는 두 개 이상의 record가 있습니다.");
         }
 
-        if(doesEventDuplicate) {
+        if(doesHistoryDuplicate) {
             throw new CodeDuplicationException("Database안에 이미 같은 키를 고유키로 가지는 record가 있습니다.");
         }
     }

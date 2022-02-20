@@ -2,7 +2,7 @@ package com.belieme.server.web.jsonbody;
 
 public class ItemJsonBodyNestedToThing {
     private int num;
-    private EventJsonBodyNestedToItem lastEvent;
+    private HistoryJsonBodyNestedToItem lastHistory;
     private String status;
     
     public ItemJsonBodyNestedToThing() {
@@ -12,8 +12,8 @@ public class ItemJsonBodyNestedToThing {
         return num;
     }
     
-    public EventJsonBodyNestedToItem getLastEvent() {
-        return lastEvent;
+    public HistoryJsonBodyNestedToItem getLastHistory() {
+        return lastHistory;
     }
     
     public String getStatus() {
@@ -24,8 +24,8 @@ public class ItemJsonBodyNestedToThing {
         this.num = num;
     }
     
-    public void setLastEvent(EventJsonBodyNestedToItem lastEvent) {
-        this.lastEvent = lastEvent;    
+    public void setLastHistory(HistoryJsonBodyNestedToItem lastHistory) {
+        this.lastHistory = lastHistory;    
     }
     
     public void setStatus(String status) {

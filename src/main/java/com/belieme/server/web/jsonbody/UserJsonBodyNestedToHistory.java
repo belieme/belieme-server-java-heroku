@@ -1,6 +1,6 @@
 package com.belieme.server.web.jsonbody;
 
-public class UserJsonBodyNestedToEvent {
+public class UserJsonBodyNestedToHistory {
     private String studentId;
 
     private String name;
@@ -8,7 +8,7 @@ public class UserJsonBodyNestedToEvent {
     private int entranceYear;
     
     
-    public UserJsonBodyNestedToEvent() {
+    public UserJsonBodyNestedToHistory() {
         
     }
     

@@ -1,4 +1,4 @@
-package com.belieme.server.domain.event;
+package com.belieme.server.domain.history;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 // TODO cancel StudentID 만들기 ...(5)
-public class EventDto {
+public class HistoryDto {
     private String univCode;
     private String deptCode;
     private String thingCode;
@@ -24,7 +24,7 @@ public class EventDto {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    public EventDto() {
+    public HistoryDto() {
     }
     
     public String getUnivCode() {

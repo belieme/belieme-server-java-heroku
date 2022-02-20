@@ -1,16 +1,19 @@
 package com.belieme.server.web.jsonbody;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class EventJsonBodyNestedToItem {
+public class HistoryJsonBody {
+    private ThingJsonBodyNestedToHistory thing;
+    private ItemJsonBodyNestedToHistory item;
+
     private int num;
-    private UserJsonBodyNestedToEvent user;
-    private UserJsonBodyNestedToEvent approveManager;
-    private UserJsonBodyNestedToEvent returnManager;
-    private UserJsonBodyNestedToEvent lostManager;
+    
+    private UserJsonBodyNestedToHistory user;
+    private UserJsonBodyNestedToHistory approveManager;
+    private UserJsonBodyNestedToHistory returnManager;
+    private UserJsonBodyNestedToHistory lostManager;
     
     private long reserveTimeStamp;
     private long approveTimeStamp;
@@ -18,26 +21,34 @@ public class EventJsonBodyNestedToItem {
     private long cancelTimeStamp;
     private long lostTimeStamp;
     
-    public EventJsonBodyNestedToItem() {
+    public HistoryJsonBody() {
     }
     
-    public int getNum() {
+    public ItemJsonBodyNestedToHistory getItem() {
+        return item;
+    }
+    
+    public ThingJsonBodyNestedToHistory getThing() {
+        return thing;
+    }
+    
+    public int getNum() { 
         return num;
     }
     
-    public UserJsonBodyNestedToEvent getuser() {
+    public UserJsonBodyNestedToHistory getUser() {
         return user;
     }
     
-    public UserJsonBodyNestedToEvent getApproveManager() {
+    public UserJsonBodyNestedToHistory getApproveManager() {
         return approveManager;
     }
     
-    public UserJsonBodyNestedToEvent getReturnManager() {
+    public UserJsonBodyNestedToHistory getReturnManager() {
         return returnManager;
     }
     
-    public UserJsonBodyNestedToEvent getLostManager() {
+    public UserJsonBodyNestedToHistory getLostManager() {
         return lostManager;
     }
 
@@ -96,38 +107,46 @@ public class EventJsonBodyNestedToItem {
         return sdf.format(date);
     }
     
+    public void setItem(ItemJsonBodyNestedToHistory item) {
+        this.item = item;
+    }
+    
+    public void setThing(ThingJsonBodyNestedToHistory thing) {
+        this.thing = thing;
+    }
+    
     public void setNum(int num) {
         this.num = num;
     }
-    
-    public void setUser(UserJsonBodyNestedToEvent user) {
+
+    public void setUser(UserJsonBodyNestedToHistory user) {
         this.user = user;
     }
     
-    public void setApproveManager(UserJsonBodyNestedToEvent approveManager) {
+    public void setApproveManager(UserJsonBodyNestedToHistory approveManager) {
         this.approveManager = approveManager;
     }
     
-    public void setReturnManager(UserJsonBodyNestedToEvent returnManager) {
+    public void setReturnManager(UserJsonBodyNestedToHistory returnManager) {
         this.returnManager = returnManager;
     }
     
-    public void setLostManager(UserJsonBodyNestedToEvent lostManager) {
+    public void setLostManager(UserJsonBodyNestedToHistory lostManager) {
         this.lostManager = lostManager;
     }
 
     public void setReserveTimeStamp(long reserveTimeStamp) {
         this.reserveTimeStamp = reserveTimeStamp;
     }
-    
+
     public void setApproveTimeStamp(long approveTimeStamp) {
         this.approveTimeStamp = approveTimeStamp;
     }
-    
+
     public void setReturnTimeStamp(long returnTimeStamp) {
         this.returnTimeStamp = returnTimeStamp;
     }
-    
+
     public void setCancelTimeStamp(long cancelTimeStamp) {
         this.cancelTimeStamp = cancelTimeStamp;
     }
