@@ -224,6 +224,7 @@ public class RepositoryManager {
         if(userList.size() == 1) {
             return userList.get(0);
         } else if(userList.size() == 0) {
+            System.out.println("AAA");
             throw new NotFoundOnDataBaseException("RepositoryManager.getUserEntityByToken()");
         } else {
             throw new UniqueKeyViolationException("RepositoryManager.getUserEntityByToken()");
