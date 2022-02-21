@@ -1,9 +1,5 @@
 package com.belieme.server.web.jsonbody;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
 public class HistoryJsonBodyNestedToItem {
     private int num;
     private UserJsonBodyNestedToHistory user;
@@ -24,7 +20,7 @@ public class HistoryJsonBodyNestedToItem {
         return num;
     }
     
-    public UserJsonBodyNestedToHistory getuser() {
+    public UserJsonBodyNestedToHistory getUser() {
         return user;
     }
     
@@ -40,61 +36,26 @@ public class HistoryJsonBodyNestedToItem {
         return lostManager;
     }
 
-    public String getReserveTimeStamp() {
-        if(reserveTimeStamp == 0) {
-            return null;
-        }
-        Date date = new Date(reserveTimeStamp*1000);
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return sdf.format(date);
+    public long getReserveTimeStamp() {
+        return reserveTimeStamp;
     }
 
-    public String getApproveTimeStamp() {
-        if(approveTimeStamp == 0) {
-            return null;
-        }
-        Date date =  new Date(approveTimeStamp*1000);
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return sdf.format(date);
+    public long getApproveTimeStamp() {
+        return approveTimeStamp;
     }
 
-    public String getReturnTimeStamp() {
-        if(returnTimeStamp == 0) {
-            return null;
-        }
-        Date date = new Date(returnTimeStamp*1000);
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return sdf.format(date);
+    public long getReturnTimeStamp() {
+        return returnTimeStamp;
     }
 
-    public String getCancelTimeStamp() {
-        if(cancelTimeStamp == 0) {
-            return null;
-        }
-        Date date = new Date(cancelTimeStamp*1000);
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return sdf.format(date);
+    public long getCancelTimeStamp() {
+        return cancelTimeStamp;
     }
-    
-    public String getLostTimeStamp() {
-        if(lostTimeStamp == 0) {
-            return null;
-        }
-        Date date = new Date(lostTimeStamp*1000);
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return sdf.format(date);
+
+    public long getLostTimeStamp() {
+        return lostTimeStamp;
     }
-    
+
     public void setNum(int num) {
         this.num = num;
     }
