@@ -303,7 +303,7 @@ public class HistoryApiController extends ApiController {
         if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
             return ItemStatus.USABLE;
         }
-        else if (lastHistoryStatus.equals("LOST")){
+        else if (lastHistoryStatus.equals("LOSTBYUSER")||lastHistoryStatus.equals("LOSTBYMANAGER")){
             return ItemStatus.INACTIVATE;
         } else {
             return ItemStatus.UNUSABLE;
@@ -375,7 +375,7 @@ public class HistoryApiController extends ApiController {
     
     
     private void checkIfStatusOfHistoryIsReserved(HistoryDto history) throws MethodNotAllowedException {
-        if(history.getStatus().equals("RESERVED")) {
+        if(history.getStatus().equals("REQUESTED")) {
            return;
         } else {
              throw new MethodNotAllowedException("'예약됨'기록이 아닙니다.");
@@ -391,7 +391,7 @@ public class HistoryApiController extends ApiController {
     }
     
     private void checkIfStatusOfHistoryIsLost(HistoryDto history) throws MethodNotAllowedException {
-        if(history.getStatus().equals("LOST")) {
+        if(history.getStatus().equals("LOSTBYUSER")||history.getStatus().equals("LOSTBYMANAGER")) {
             return;
         } else {
             throw new MethodNotAllowedException("'분실됨'기록이 아닙니다.");
@@ -404,7 +404,7 @@ public class HistoryApiController extends ApiController {
         int currentHistoryCount = 0;
         for(int i = 0; i < historyListByUser.size(); i++) {
             HistoryDto tmp = historyListByUser.get(i);
-            if(tmp.getStatus().equals("RESERVED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED") || tmp.getStatus().equals("LOST")) {
+            if(tmp.getStatus().equals("REQUESTED") || tmp.getStatus().equals("USING") || tmp.getStatus().equals("DELAYED")) {
                 currentHistoryCount++;
                 if(tmp.getThingCode().equalsIgnoreCase(thingCode)) {
                     throw new MethodNotAllowedException("빌리려고 하는 물품종류에 대한 열린 기록이 있습니다.");

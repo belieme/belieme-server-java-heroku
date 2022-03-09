@@ -208,7 +208,7 @@ public class HistoryDto {
             }
             else if(approveTimeStamp != 0) {
                 if(lostTimeStamp != 0) {
-                    return "LOST";
+                    return "LOSTBYUSER";
                 }
                 else if(dueTime() > System.currentTimeMillis()/1000) {
                     return "USING";
@@ -218,7 +218,7 @@ public class HistoryDto {
                 }
             }
             else if(expiredTime() > System.currentTimeMillis()/1000) {
-                return "RESERVED";
+                return "REQUESTED";
             }
             else {
                 return "EXPIRED";
@@ -229,7 +229,7 @@ public class HistoryDto {
                 if(returnTimeStamp != 0) {
                     return "FOUND";
                 } else {
-                    return "LOST";
+                    return "LOSTBYMANAGER";
                 }
             }
             return "ERROR";

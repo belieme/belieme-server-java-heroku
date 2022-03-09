@@ -223,7 +223,7 @@ public class JsonBodyProjector {
             if(lastHistoryStatus.equals("EXPIRED")||lastHistoryStatus.equals("RETURNED")||lastHistoryStatus.equals("FOUND")||lastHistoryStatus.equals("FOUNDANDRETURNED")) {
                 return ItemStatus.USABLE;
             }
-            else if (lastHistoryStatus.equals("LOST")){
+            else if (lastHistoryStatus.equals("LOSTBYUSER")||lastHistoryStatus.equals("LOSTBYMANAGER")){
                 return ItemStatus.INACTIVATE;
             } else {
                 return ItemStatus.UNUSABLE;
@@ -306,6 +306,7 @@ public class JsonBodyProjector {
         output.setCancelTimeStamp(historyDto.getCancelTimeStamp());
         output.setReturnTimeStamp(historyDto.getReturnTimeStamp());
         output.setLostTimeStamp(historyDto.getLostTimeStamp());
+        output.setStatus(historyDto.getStatus());
         
         return output;
     }
@@ -399,6 +400,7 @@ public class JsonBodyProjector {
         output.setCancelTimeStamp(historyDto.getCancelTimeStamp());
         output.setReturnTimeStamp(historyDto.getReturnTimeStamp());
         output.setLostTimeStamp(historyDto.getLostTimeStamp());
+        output.setStatus(historyDto.getStatus());
         
         return output;
     }

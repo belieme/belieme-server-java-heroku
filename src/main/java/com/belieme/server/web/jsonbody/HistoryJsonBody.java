@@ -16,6 +16,8 @@ public class HistoryJsonBody {
     private long returnTimeStamp;
     private long cancelTimeStamp;
     private long lostTimeStamp;
+
+    private String status;
     
     public HistoryJsonBody() {
     }
@@ -68,6 +70,10 @@ public class HistoryJsonBody {
         return lostTimeStamp;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
     public void setItem(ItemJsonBodyNestedToHistory item) {
         this.item = item;
     }
@@ -114,5 +120,9 @@ public class HistoryJsonBody {
     
     public void setLostTimeStamp(long lostTimeStamp) {
         this.lostTimeStamp = lostTimeStamp;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
